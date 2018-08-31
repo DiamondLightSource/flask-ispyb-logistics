@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>{{title}}</title>
+
+    <meta http-equiv='refresh' content='3600'>
+    <script type="text/javascript" src="/static/js/jquery-1.9.1.min.js"></script>
+    <script type="text/javascript" src="/static/js/jquery.mobile-1.4.5.js"></script>
+    <link href="/static/css/jquery.mobile-1.4.5.css" type="text/css" rel="stylesheet" />
+    <link href="/static/css/mobile.css" type="text/css" rel="stylesheet" >
+
+    <script type='text/javascript'>
+    
+    if (!('ActiveXObject' in window)) {
+        console.log('not IE detected')
+        var context = new AudioContext();//,oscillator;
+
+        function playOscillator(startTime, endTime) {
+            context.resume();
+            oscillator = context.createOscillator();
+            oscillator.connect(context.destination);
+            oscillator.frequency.setValueAtTime(600, context.currentTime); // Hz
+            oscillator.start(startTime);
+            oscillator.stop(endTime);
+        }
+
+        function playOscillator2(startTime, endTime) {
+            context.resume();
+            oscillator = context.createOscillator();
+            oscillator.connect(context.destination);
+            oscillator.frequency.setValueAtTime(400, context.currentTime); // Hz
+            oscillator.start(startTime);
+            oscillator.stop(endTime);
+        }
+    }
+    
+    if (!String.prototype.startsWith) {
+        String.prototype.startsWith = function(searchString, position) {
+            position = position || 0;
+            return this.indexOf(searchString, position) === position;
+        };
+    }
+    
+    function _getBarcodes() {
+        // Get dewar barcodes
+        nowSecs = new Date().getTime()/1000;
+        $.ajax({
+            url: '/{{api_prefix}}/dewars/location',
+            type: 'GET',
+            dataType: 'json',
+            success: function(json){
+                for (var key in json) {
+                    for (var inner_key in json[key]) {
+                        $('.'+inner_key+'-'+key).html(json[key][inner_key])
+                    }
+                }
+            }
+        })
+    }
+    
+    function _enableDisableAWB(loc) {
+        if (loc == 'STORES-OUT') {
+            document.getElementById('AWB').disabled = false;
+        }
+        if (loc == 'STORES-IN') {
+            document.getElementById('AWB').disabled = true;
+        }
+    }
+        
+    function _setBarcode() {
+        // Set dewar barcode
+        var loc = document.getElementById('Location').value.toUpperCase();
+        var barcode = document.getElementById('Barcode').value.toUpperCase();
+        var awb = document.getElementById('AWB').value.toUpperCase();
+        if (barcode == '') {
+            _enableDisableAWB(loc)
+            document.getElementById('Barcode').focus();
+            return;
+        }
+        if (loc == '') {
+            document.getElementById('Location').focus();
+            return;
+        }
+        if (barcode == loc) {
+            if (loc == 'STORES-OUT' || loc == 'STORES-IN') {
+                document.getElementById('Barcode').value = '';
+                document.getElementById('Barcode').focus();
+                return;
+            } else {
+                document.getElementById('Location').value = '';
+                document.getElementById('Location').focus();
+                return;
+            }
+        }
+        if (barcode == 'STORES-IN' || barcode == 'STORES-OUT') {
+            document.getElementById('Location').value = barcode;
+            document.getElementById('Barcode').value = '';
+            _enableDisableAWB(barcode)
+            document.getElementById('Barcode').focus();
+            return;
+        }
+        if (loc == 'STORES-OUT' && awb == '') {
+            console.log(document.activeElement.id);
+            if (document.activeElement.id == 'Barcode') {
+                document.getElementById('AWB').focus();
+                return;
+            }
+        }
+        $.ajax({
+            url: '/{{api_prefix}}/dewars/location',
+            type: 'POST',
+            data: {'location': loc, 'barcode':barcode, 'awb':awb},
+            dataType: 'json',
+            success: function(json){
+                console.log(json);
+                if ( json['status'] == 'ok' && !('ActiveXObject' in window)) {
+                    playOscillator(context.currentTime, context.currentTime + 0.2);
+                    if ( json['dewarid'] > 0 ) {
+                        playOscillator(context.currentTime + 0.4, context.currentTime + 0.6);
+                        playOscillator(context.currentTime + 0.8, context.currentTime + 1);
+                    } else {
+                        playOscillator2(context.currentTime + 0.4, context.currentTime + 1);
+                    }
+                }
+            }
+        })
+        setTimeout( _clearForm, 2000);
+    }
+        
+    function _refresh() {
+        _getBarcodes();
+        setTimeout(function(){ _refresh() }, 60000);
+    }
+    
+    function _clearForm() {
+        setTimeout(function(){ _getBarcodes() }, 500);
+        document.getElementById('Barcode').value = '';
+        document.getElementById('AWB').value = '';
+        setTimeout(function(){ document.getElementById('Barcode').focus(); }, 500);
+    }
+    
+    $(document).ready(function() {
+        if ('ActiveXObject' in window) {
+            console.log('IE found')
+            document.getElementById('location_label').textContent = 'Location, eg STORES-IN or STORES-OUT:';
+            document.getElementById('barcode_label').textContent = 'Dewar barcode:';
+            document.getElementById('awb_label').textContent = 'Airway Bill:';
+        }
+        var loc_field = document.getElementById("Location");
+        loc_field.addEventListener("keyup", function(event) {
+            event.preventDefault();
+            if (event.keyCode === 13) {
+                _setBarcode();
+            }
+        });
+        var bar_field = document.getElementById("Barcode");
+        bar_field.addEventListener("keyup", function(event) {
+            event.preventDefault();
+            if (event.keyCode === 13) {
+                _setBarcode();
+            }
+        });
+        var awb_field = document.getElementById("AWB");
+        awb_field.addEventListener("keyup", function(event) {
+            event.preventDefault();
+            if (event.keyCode === 13) {
+                _setBarcode();
+            }
+        });
+    })
+    
+    _refresh()
+
+    </script>
+
+<style type='text/css'>
+    .ui-btn-inline {
+    line-height: 1.0;
+    }
+    
+    .refill {
+    font-size: 20px;
+    font-weight: bold;
+    color: red;
+    }
+
+    input[type=text]:disabled {
+        background: #dddddd;
+    }
+
+    input[type=text]:enabled {
+        background: #ffffff;
+    }
+    
+    table, th, td {
+        border: 1px solid black;
+        border-collapse: collapse;
+    }
+
+</style> 
+        
+</head>
+<body>
+
+<div data-role='page'>
+<div data-role='content'>
+<table border=1 cellpadding=10 width=100%>
+<tr><td width=50%>
+<h1><center>Scan Dewar Barcode</center></h1>
+<form>
+    <span id='location_label'></span><input type='text' id='Location' placeholder='Scan the location, eg either STORES-IN or STORES-OUT' data-clear-btn='true' autofocus>
+    <span id='barcode_label'></span><input type='text' id='Barcode' placeholder='Scan the long barcode from the dewar case' data-clear-btn='true'>
+    <span id='awb_label'></span><input type='text' id='AWB' placeholder='Scan the DHL Airway Bill' data-clear-btn='true'>
+    <div class='ui-grid-a'>
+        <div class='ui-block-a'><input type='button' value='Submit' onclick='_setBarcode(); return false'></div>
+        <div class='ui-block-b'><input type='reset' value='Cancel' onclick='_clearForm(); return false'></div>
+    </div>
+</form>
+</td>
+<td width=25%><center><img width=96 src='/static/img/stores-in.gif'><br /><h3>STORES-IN</h3></center></td>
+<td width=25%><center><img width=96 src='/static/img/stores-out.gif'><br /><h3>STORES-OUT</h3></center></td>
+</tr>
+</table>
+<br />
+<h2><center>History</center></h2>
+
+<table border=0 width=100%><tr><th>Date/Time</th><th>Barcode</th><th>In or Out?</th><th>Destination</th><th>Airway Bill</th></tr>
+
+{% for i in range( max_dewar_history ) %}
+<tr align=center><td width=20%><span class='date-{{loop.index}}'>&nbsp;</span></td><td><span class='barcode-{{loop.index}}'></span></td><td><span class='inout-{{loop.index}}'></span></td><td><span class='destination-{{loop.index}}'></span></td><td><span class='awb-{{loop.index}}'></span></td></tr>
+{% endfor %}
+
+</table>
+
+
+
+</div>
+</div>
+</body>
+</html>

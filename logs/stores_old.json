@@ -1,0 +1,42 @@
+{
+"5": {
+"awb": null, 
+"barcode": "CM19644-1-I03-0022427", 
+"date": "Wed 08 Aug, 11:17:10", 
+"destination": "Zone 6 store", 
+"inout": "STORES-IN"
+}, 
+"10": {}, 
+"1": {
+"awb": "2LGBCB21GA+46000000", 
+"barcode": "MX18548-12-I04-0026043", 
+"date": "Wed 08 Aug, 14:01:24", 
+"destination": "", 
+"inout": "STORES-OUT"
+}, 
+"2": {
+"awb": "2LGBCB21GA+46000000", 
+"barcode": "MX18548-12-I04-0026076", 
+"date": "Wed 08 Aug, 14:01:08", 
+"destination": "", 
+"inout": "STORES-OUT"
+}, 
+"3": {
+"awb": "2LGBCB21GA+46000000", 
+"barcode": "MX18548-12-I04-0026040", 
+"date": "Wed 08 Aug, 14:00:46", 
+"destination": "", 
+"inout": "STORES-OUT"
+}, 
+"4": {
+"awb": "2LGBBN19QG+46000000", 
+"barcode": "MX14891-42-I04-0026055", 
+"date": "Wed 08 Aug, 14:00:05", 
+"destination": "", 
+"inout": "STORES-OUT"
+}, 
+"6": {}, 
+"7": {}, 
+"8": {}, 
+"9": {}
+}

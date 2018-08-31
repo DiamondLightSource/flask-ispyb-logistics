@@ -1,0 +1,72 @@
+[
+{
+"awb": "112233445566", 
+"barcode": "DLS-MX-12345", 
+"date": "Mon 20 Aug, 17:28:22", 
+"destination": "STORES-OUT", 
+"inout": "RACK-A9"
+}, 
+{
+"awb": "112233445566", 
+"barcode": "DLS-MX-12345", 
+"date": "Mon 20 Aug, 17:28:22", 
+"destination": "STORES-OUT", 
+"inout": "RACK-A8"
+}, 
+{
+"awb": "112233445566", 
+"barcode": "DLS-MX-12345", 
+"date": "Mon 20 Aug, 17:28:22", 
+"destination": "STORES-OUT", 
+"inout": "RACK-A7"
+}, 
+{
+"awb": "112233445566", 
+"barcode": "DLS-MX-12345", 
+"date": "Mon 20 Aug, 17:28:22", 
+"destination": "STORES-OUT", 
+"inout": "RACK-A6"
+}, 
+{
+"awb": "112233445566", 
+"barcode": "DLS-MX-12345", 
+"date": "Mon 20 Aug, 17:28:22", 
+"destination": "STORES-OUT", 
+"inout": "RACK-A5"
+}, 
+{
+"awb": "112233445566", 
+"barcode": "DLS-MX-12345", 
+"date": "Mon 20 Aug, 17:28:22", 
+"destination": "STORES-OUT", 
+"inout": "RACK-A4"
+}, 
+{
+"awb": "112233445566", 
+"barcode": "DLS-MX-12345", 
+"date": "Mon 20 Aug, 17:28:22", 
+"destination": "STORES-OUT", 
+"inout": "RACK-A3"
+}, 
+{
+"awb": "112233445566", 
+"barcode": "DLS-MX-12345", 
+"date": "Mon 20 Aug, 17:28:22", 
+"destination": "STORES-OUT", 
+"inout": "RACK-A2"
+}, 
+{
+"awb": "112233445566", 
+"barcode": "DLS-MX-12345", 
+"date": "Mon 20 Aug, 17:28:22", 
+"destination": "STORES-OUT", 
+"inout": "RACK-A1"
+}, 
+{
+"awb": "112233445566", 
+"barcode": "DLS-MX-12345", 
+"date": "Mon 20 Aug, 17:28:22", 
+"destination": "STORES-OUT", 
+"inout": "RACK-A0"
+}
+]

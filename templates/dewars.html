@@ -1,0 +1,324 @@
+    <html>
+
+    <head>
+        <title>{{title}}</title>
+        <meta http-equiv="refresh" content="3600">
+        <script type="text/javascript" src="/static/js/jquery-1.9.1.min.js"></script>
+        <script type="text/javascript" src="/static/js/jquery.mobile-1.4.5.js"></script>
+        <link href="/static/css/jquery.mobile-1.4.5.css" type="text/css" rel="stylesheet" />
+        <link href="/static/css/mobile.css" type="text/css" rel="stylesheet" >
+
+        <script type="text/javascript">
+
+        then = new Date().getTime()-15000;
+        
+        var racks = {{rack_locations | tojson() }};
+
+        // Beamlines in this context means a physical location for the dewar
+        // IO3, USER-COLLECTION, STORES etc
+        var beamlines = {{ beamlines | tojson() }};
+
+        var context = new AudioContext();
+
+        function playOscillator(startTime, endTime, frequency) {
+            context.resume();
+            oscillator = context.createOscillator();
+            oscillator.connect(context.destination);
+            oscillator.frequency.setValueAtTime(frequency, context.currentTime); // Hz
+            oscillator.start(startTime);
+            oscillator.stop(endTime);
+        }
+
+        function _getBarcodes() {
+            // Get dewar barcodes
+            nowSecs = new Date().getTime()/1000;
+            $.ajax({
+                url: '/{{api_prefix}}/dewars/location',
+                type: 'GET',
+                dataType: 'json',
+                success: function(json){
+                    console.log(json);
+                    n=1
+                    sorted_keys = Object.keys(json).sort();
+                    for (var key in sorted_keys) {
+                        rack = sorted_keys[key];
+                        bcode = json[sorted_keys[key]][0];
+                        lastfill = json[sorted_keys[key]][1];
+                        lastfillsecs = Date.parse(lastfill) / 1000
+                        $('.'+rack).html(bcode);
+                        if (rack.startsWith("RACK") && lastfill != 0 && nowSecs - lastfillsecs > 5*24*60*60) {
+                            console.log(rack+" is over 5 days old");
+                            $('.refill'+n).html(rack);
+                            n++;
+                        }
+                    }
+                    for (i = n; i <= 5; i++) {
+                        $('.refill'+n).html('');
+                    }
+                    now = new Date().getTime();
+                    if (now - then > 10000){
+                        $('.color').css({ 'opacity': 0, 'color': 'red', 'font-size': '20px', 'font-weight': 'bold' });
+                    } else {
+                        $('.color').css({ 'opacity': 1, 'color': 'red', 'font-size': '20px', 'font-weight': 'bold' });
+                    }
+                }
+            })
+        }
+            
+        function _setBarcode() {
+            // Set dewar barcode
+            var position = document.getElementById("Location").value.toUpperCase();
+            var barcode = document.getElementById("Barcode").value.toUpperCase();
+            if (barcode == "") {
+                if (racks.indexOf(position) != -1 || beamlines.indexOf(position) != -1 ) {
+                    document.getElementById("Barcode").focus();
+                    return;
+                } else {
+                    document.getElementById("Barcode").value = position;
+                    document.getElementById("Location").value = "";
+                    document.getElementById("Location").focus();
+                    return;
+                }
+            }
+            if (position == "") {
+                if (racks.indexOf(barcode) != -1 || beamlines.indexOf(barcode) != -1 ) {
+                    document.getElementById("Location").value = barcode;
+                    document.getElementById("Barcode").value = "";
+                    document.getElementById("Barcode").focus();
+                    return;
+                } else {
+                    document.getElementById("Location").focus();
+                    return;
+                }
+            }
+            if (barcode == position) {
+                if (racks.indexOf(position) != -1 || beamlines.indexOf(position) != -1 ) {
+                    document.getElementById("Barcode").value = "";
+                    document.getElementById("Barcode").focus();
+                    return;
+                } else {
+                    document.getElementById("Location").value = "";
+                    document.getElementById("Location").focus();
+                    return;
+                }
+            }
+            if ((racks.indexOf(barcode) != -1 || beamlines.indexOf(barcode) != -1 ) && (racks.indexOf(position) != -1 || beamlines.indexOf(position) != -1 )) {
+                document.getElementById("Location").value = barcode;
+                document.getElementById("Barcode").value = "";
+                document.getElementById("Barcode").focus();
+                return;
+            }
+            if (racks.indexOf(position) != -1 && beamlines.indexOf(position) != -1 ) {
+                document.getElementById("Location").value = "";
+                document.getElementById("Location").focus();
+                return;
+            }
+            $.ajax({
+                url: '/{{api_prefix}}/dewars/location',
+                data: {'location':position, 'barcode':barcode},
+                type: 'POST',
+                dataType: 'json',
+                success: function(json){
+                    console.log(json);
+                    if ( json['status'] == 'ok' ) {
+                        let frequency = 600;
+                        playOscillator(context.currentTime, context.currentTime + 0.2, frequency);
+                        if ( json['dewarid'] > 0 ) {
+                            playOscillator(context.currentTime + 0.4, context.currentTime + 0.6, frequency);
+                            playOscillator(context.currentTime + 0.8, context.currentTime + 1, frequency);
+                        } else {
+                            frequency = 400;
+                            playOscillator(context.currentTime + 0.4, context.currentTime + 1, frequency);
+                        }
+                    }
+                }
+            })
+            setTimeout( _clearForm, 2000);
+        }
+            
+        function _clearOne() {
+            // Clear all barcodes
+            position = '{{rack_prefix}}'+$('.clearDewar').html();
+            console.log("clearing "+position);
+            $.ajax({
+                url: '/{{api_prefix}}/dewars/location',
+                data: {'location': position},
+                type: 'DELETE',
+                dataType: 'json',
+                success: function(json){
+                    console.log(json);
+                }
+            })
+            _clearForm();
+        }
+            
+        function _refresh() {
+            _getBarcodes();
+            setTimeout(function(){ _refresh() }, 60000);
+        }
+        
+        function _prepClear(rack) {
+            $('.clearDewar').html(rack);
+        }
+        
+        function _clearForm() {
+            setTimeout(function(){ _getBarcodes() }, 500);
+            document.getElementById("Barcode").value = "";
+            document.getElementById("Location").value = "";
+            setTimeout(function(){ document.getElementById("Barcode").focus(); }, 500);
+        }
+        
+        function _findBarcode() {
+            // Set dewar barcode
+            var FacilityCode = document.getElementById("FacilityCode").value.toUpperCase();
+            $('.color').css({ 'opacity': 0 });
+            $('.dewar1').html('Dewar not found');
+            $('.dewar2').html('');
+            $('.dewar3').html('');
+            $('.dewar4').html('');
+
+            $.ajax({
+                url: '/{{api_prefix}}/dewars/find',
+                type: 'GET',
+                data: {'fc': FacilityCode},
+                dataType: 'json',
+                success: function(json){
+                    console.log(json);
+                    n=1;
+                    for (var key in json) {
+                        dewar_barcode = json[key].toUpperCase();
+                        for (var rack in racks) {
+                            rack_name = racks[rack];
+                            rack_barcode = $('.'+rack_name).html().toUpperCase();
+                            if (rack_barcode == dewar_barcode) {
+                                console.log(rack_name);
+                                $('.dewar'+n).html(rack_name);
+                                n+=1;
+                            }
+                        }
+                    }
+                    if ($('.dewar1').html() == 'Dewar not found'){
+                        console.log("Dewar not found");
+                        for (var rack in racks) {
+                            rack_name = racks[rack];
+                            rack_barcode = $('.'+rack_name).html().toUpperCase();
+                            if (rack_barcode.includes(FacilityCode)) {
+                                $('.dewar'+n).html(rack_name);
+                                n+=1;
+                            }
+                        }
+                    }
+                    if ($('.dewar1').html() == 'Dewar not found'){
+                        console.log("still not found");
+                        for (var beamline in beamlines) {
+                            beamline_name = beamlines[beamline];
+                            beamline_barcode = $('.'+beamline_name).html().toUpperCase();
+                            if (beamline_barcode.includes(FacilityCode)) {
+                                $('.dewar'+n).html(beamline_name);
+                                n+=1;
+                            }
+                        }
+                    }
+                    $('.color').css({ 'opacity': 1, 'color': 'red', 'font-size': '20px', 'font-weight': 'bold' });
+                    _getBarcodes()
+                }
+            })
+            then = new Date().getTime();
+            setTimeout(function(){ document.getElementById("FacilityCode").value = "" }, 2000);
+            document.getElementById("Barcode").focus();
+            setTimeout(function(){ _getBarcodes() }, 500);
+        }
+
+        _refresh()
+
+        </script>
+
+    <style type="text/css">
+        .ui-btn-inline {
+        width: 400px !important;
+        line-height: 1.0;
+        }
+        
+        .refill {
+        font-size: 20px;
+        font-weight: bold;
+        color: red;
+        }
+
+    </style> 
+            
+    </head>
+    <body>
+
+    <div data-role="page">
+    <div data-role="content">
+    <table border=1 cellpadding=10>
+    <tr><td width=33%>
+    <h1><center>Scan Dewar and Rack</center></h1>
+    <form>
+        <input type="text" id="Barcode" placeholder="Scan the long barcode from the dewar case" data-clear-btn="true" autofocus>
+        <input type="text" id="Location" placeholder="Scan the location, eg RACK-A1" data-clear-btn="true">
+        <div class="ui-grid-a">
+            <div class="ui-block-a"><input type="submit" value="Submit" onclick="_setBarcode(); return false"></div>
+            <div class="ui-block-b"><input type="reset" value="Cancel" onclick="_clearForm(); return false"></div>
+        </div>
+    </form>
+    </td>
+    <td width=33%>
+    <h1><center>Find a Dewar</center></h1>
+    <form>
+        <input type="text" id="FacilityCode" placeholder="DLS-MX-####" data-clear-btn="true">
+        <div class="ui-grid-a">
+            <div class="ui-block-a"><input type="submit" value="Submit" onclick="_findBarcode(); return false"></div>
+            <div class="ui-block-b"><input type="reset" value="Cancel" onclick="_clearForm()"></div>
+        </div>
+    </form>
+    <table width=100% border=0>
+    <tr align="center"><td height=25><span class="color dewar1">?</span></td>
+    <td height=25><span class="color dewar3">?</span></td></tr>
+    <tr align="center"><td height=25><span class="color dewar2">?</span></td>
+    <td height=25><span class="color dewar4">?</span></td></tr>
+    </table>
+
+    </td>
+    <td valign="top">
+    <table width=100% border=0><tr><th valign="middle">
+    <h1>Dewars that need refilling:</h1></th></tr>
+    <tr align="center"><td height=25><span class='refill refill1'> </span></td></tr>
+    <tr align="center"><td height=25><span class='refill refill2'> </span></td></tr>
+    <tr align="center"><td height=25><span class='refill refill3'> </span></td></tr>
+    <tr align="center"><td height=25><span class='refill refill4'> </span></td></tr>
+    <tr align="center"><td height=25><span class='refill refill5'> </span></td></tr>
+    <tr align="center"><td>(Scan dewars back into the same position after refilling)</td></tr>
+    </table>
+    </td>
+    </tr>
+    <tr><td colspan=3>
+
+    <!-- Iterate through rack locations 
+
+    <a href='#Clear' data-rel='popup' class='ui-btn ui-btn-inline ui-corner-all' onclick='_prepClear("X1")'>X1) <span class='RACK-X1'></span></a>
+    -->
+    {% for rack in rack_suffixes %}
+    <a href='#Clear' data-rel='popup' class='ui-btn ui-btn-inline ui-corner-all' onclick='_prepClear("{{rack}}")'>{{rack}}) <span class='{{rack_prefix}}-{{rack}}'></span></a>
+
+    {% endfor %}
+
+    {% for beamline in beamlines %}
+    <span class='{{beamline}}' style='display:none'></span>
+    {% endfor %}
+
+        <div data-role="popup" id="Clear" style="max-width:500px;" class="ui-corner-all">
+        <div data-role="content">
+            <h3 class="ui-title">Do you want to remove the dewar in <span class='clearDewar'>this position</span>?</h3>
+            <a href="#" data-role="button" data-rel="back" data-transition="flow" data-theme="b" onclick="_clearOne()">Yes</a>  
+            <a href="#" data-role="button" data-rel="back" onclick="_clearForm()">No, Cancel!</a>    
+        </div>
+    </div>
+
+    </div>
+    </div>
+    </td></tr>
+    </table>
+    </body>
+    </html>

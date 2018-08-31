@@ -1,0 +1,11 @@
+click==6.7
+enum-compat==0.0.2
+enum34==1.1.6
+Flask==1.0.2
+ispyb==4.10.0
+itsdangerous==0.24
+Jinja2==2.10
+MarkupSafe==1.0
+mysql-connector==2.1.6
+pkg-resources==0.0.0
+Werkzeug==0.14.1
