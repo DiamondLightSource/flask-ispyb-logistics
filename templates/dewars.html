@@ -33,7 +33,7 @@
             // Get dewar barcodes
             nowSecs = new Date().getTime()/1000;
             $.ajax({
-                url: '/{{api_prefix}}/dewars/location',
+                url: '/{{api_prefix}}/dewars',
                 type: 'GET',
                 dataType: 'json',
                 success: function(json){
@@ -114,7 +114,7 @@
                 return;
             }
             $.ajax({
-                url: '/{{api_prefix}}/dewars/location',
+                url: '/{{api_prefix}}/dewars',
                 data: {'location':position, 'barcode':barcode},
                 type: 'POST',
                 dataType: 'json',
@@ -141,7 +141,7 @@
             position = '{{rack_prefix}}'+$('.clearDewar').html();
             console.log("clearing "+position);
             $.ajax({
-                url: '/{{api_prefix}}/dewars/location',
+                url: '/{{api_prefix}}/dewars',
                 data: {'location': position},
                 type: 'DELETE',
                 dataType: 'json',

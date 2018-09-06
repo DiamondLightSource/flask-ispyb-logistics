@@ -60,7 +60,7 @@ beamline_locations.extend(['USER-COLLECTION',
 ispyb_api = ISPyBManager(beamlines, beamline_prefix, rack_prefix)
 
 
-@api.route('/dewars')
+@api.route('/')
 def index():
     rack_locations = ['-'.join([rack_prefix, suffix])
                       for suffix in rack_suffixes]
@@ -75,7 +75,7 @@ def index():
                            )
 
 
-@api.route('/dewars/location', methods=["GET", "POST"])
+@api.route('/dewars', methods=["GET", "POST"])
 def location():
     """
     Supports two methods read and write.

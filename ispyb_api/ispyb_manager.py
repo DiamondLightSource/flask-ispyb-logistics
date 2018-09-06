@@ -83,7 +83,7 @@ class ISPyBManager(object):
                     dewars.extend(
                         shipping.retrieve_dewars_for_proposal_code_number(mx, number))
                 except:  # except ispyb.exception.ISPyBNoResultException:
-                    print("ISPyB - no dewars found for proposal {}{}".format(mx, number))
+                    print("ISPyB - no dewars found for proposal {}".format(proposal))
         return dewars
 
     def setLocation(self, barcode, location, awb=None):

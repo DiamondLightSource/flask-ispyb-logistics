@@ -14,7 +14,7 @@ from ispyb_api import ISPyBManager
 remote_ip = '127.0.0.1'
 allowed_ips = ['127.0.0.1']
 
-api = Blueprint('mx', __name__, url_prefix='/mx')
+api = Blueprint('zone6', __name__, url_prefix='/zone6')
 
 jsonfilename = 'logs/dewars.json'
 
@@ -56,26 +56,26 @@ beamline_locations.extend(['USER-COLLECTION',
                            'ZONE-6-STORE',
                            ])
 
-# Abstract our interface to ISPyB - specialised for ebic/mx etc.
+# Abstract our interface to ISPyB - specialised for ebic/zone6 etc.
 ispyb_api = ISPyBManager(beamlines, beamline_prefix, rack_prefix)
 
 
-@api.route('/dewars')
+@api.route('/')
 def index():
     rack_locations = ['-'.join([rack_prefix, suffix])
                       for suffix in rack_suffixes]
 
     return render_template('dewars.html',
-                           title="MX Dewar Management",
+                           title="zone6 Dewar Management",
                            rack_locations=rack_locations,
                            rack_suffixes=rack_suffixes,
                            rack_prefix=rack_prefix,
                            beamlines=beamline_locations,
-                           api_prefix="mx",
+                           api_prefix="zone6",
                            )
 
 
-@api.route('/dewars/location', methods=["GET", "POST"])
+@api.route('/dewars', methods=["GET", "POST"])
 def location():
     result = {}
 
@@ -139,9 +139,9 @@ def _api_write(location, barcode):
 	fail to update ISPyB???
 
 	Writes/Updates a RACK Location with the Dewar barcode and datetime
-	Example "RACK-A1: [""MX18938-I04-1-20180806", "Mon 06 Aug, 2018 10:19:28"]
+	Example "RACK-A1: ["mx18938-I04-1-20180806", "Mon 06 Aug, 2018 10:19:28"]
 
-    Returns a dictionary which will be turned into json by flas jsonify
+    Returns a dictionary which will be turned into json by flask jsonify
 	"""
     result = {}
 
