@@ -8,7 +8,7 @@ from flask import jsonify
 from flask import request
 
 import logs
-from ispyb_api import ISPyBManager
+from ispyb_api import controller
 
 # Remove remote ip when deployed
 remote_ip = '127.0.0.1'
@@ -57,7 +57,7 @@ beamline_locations.extend(['USER-COLLECTION',
                            ])
 
 # Abstract our interface to ISPyB - specialised for ebic/zone6 etc.
-ispyb_api = ISPyBManager(beamlines, beamline_prefix, rack_prefix)
+#ispyb_api = ISPyBManager(beamlines, beamline_prefix, rack_prefix)
 
 
 @api.route('/')
@@ -75,20 +75,19 @@ def index():
                            )
 
 
-@api.route('/dewars', methods=["GET", "POST"])
+@api.route('/dewars', methods=["GET", "POST", "DELETE"])
 def location():
     result = {}
 
     if request.method == "GET":
-        result = logs.readJsonFile(jsonfilename)
+        # Get any dewar with any rack location
+        # There should only be one per location
+        rack_locations = ['-'.join([rack_prefix, suffix])
+                    for suffix in rack_suffixes]
 
-        # The web page makes this request every x minutes.
-        # Hence it will call this within a minute - feels a bit hacky...
-        minute = datetime.time(datetime.now()).minute
+        result = controller.find_dewars_by_location(rack_locations)
 
-        if minute == 0 and remote_ip in allowed_ips:
-            result = ispyb_api.checkDewars(result)
-            logs.writeJsonFile(result)
+        print result
 
     elif request.method == "POST":
         location = request.form['location']
@@ -96,7 +95,15 @@ def location():
 
         print("Update barcode %s to location %s" % (barcode, location))
 
-        result = _api_write(location, barcode)
+        result = controller.set_location(barcode, location)
+
+    elif request.method == "DELETE":
+        location = request.form['location']
+        barcode = request.form['barcode']
+
+        print("Update barcode %s to location %s" % (barcode, location))
+
+        result = controller.set_location(barcode, 'CLEARED FROM {}'.format(location))
     else:
         result = {'location': '',
                   'barcode': '',
@@ -113,7 +120,7 @@ def find():
 
     Should be requested with parameters in the URL ?fc=DLS-MS-1234 request
     """
-    result = []
+    results = [] #  a list really?
 
     facilitycode = request.args.get('fc')
 
@@ -121,67 +128,70 @@ def find():
     if facilitycode is not None:
         print "FIND METHOD: FacilityCode = ", facilitycode
 
-        dewars = ispyb_api.getDewars()
+        dewar = controller.get_dewar_by_facilitycode(facilitycode)
 
-        for dewar in dewars:
-            if dewar['barCode'] is not None and dewar['facilityCode'] is not None and facilitycode in dewar['facilityCode']:
-                result.append(dewar['barCode'])
+        result = {}
+        result[dewar.get('barcode')] = {'storageLocation':dewar.get('storageLocation')}
 
-    # Potentially extend this to search through the json or ispyb records.
-    # Currently the front end does the searching to find where this barcode is located
+        results.append(result)
+    
+        print result
+    else:
+        result = {'status':'fail',
+                  'reason':'invalid facilitycode'}
 
     return jsonify(result)
 
-def _api_write(location, barcode):
-    """
-	Why is the remote ip address check at the bottom?
-	Implies the json file is updated and then if ip address does not match, 
-	fail to update ISPyB???
+# def _api_write(location, barcode):
+#     """
+# 	Why is the remote ip address check at the bottom?
+# 	Implies the json file is updated and then if ip address does not match, 
+# 	fail to update ISPyB???
 
-	Writes/Updates a RACK Location with the Dewar barcode and datetime
-	Example "RACK-A1: ["mx18938-I04-1-20180806", "Mon 06 Aug, 2018 10:19:28"]
+# 	Writes/Updates a RACK Location with the Dewar barcode and datetime
+# 	Example "RACK-A1: ["mx18938-I04-1-20180806", "Mon 06 Aug, 2018 10:19:28"]
 
-    Returns a dictionary which will be turned into json by flask jsonify
-	"""
-    result = {}
+#     Returns a dictionary which will be turned into json by flask jsonify
+# 	"""
+#     result = {}
 
-    if location is not None and barcode is not None:
-        data = logs.readJsonFile(jsonfilename)
+#     if location is not None and barcode is not None:
+#         data = logs.readJsonFile(jsonfilename)
 
-        for key in data.keys():
-            if key.startswith(rack_prefix):
-                if data[key][0] == barcode:
-                    data[key] = ['',0] # Why 0 and not ""?
-            else:
-                if barcode in data[key]:
-                    data[key].remove(barcode)
+#         for key in data.keys():
+#             if key.startswith(rack_prefix):
+#                 if data[key][0] == barcode:
+#                     data[key] = ['',0] # Why 0 and not ""?
+#             else:
+#                 if barcode in data[key]:
+#                     data[key].remove(barcode)
 
-        if location not in data:
-            result = {'location':location,
-                        'barcode':barcode,
-                        'status':'fail',
-                        'reason':'new location'}
-        else:
-            if location.startswith(rack_prefix):
-                data[location] = [barcode, time.strftime('%a %d %b, %Y %H:%M:%S')]
-            else:
-                data[location].append(barcode)
+#         if location not in data:
+#             result = {'location':location,
+#                         'barcode':barcode,
+#                         'status':'fail',
+#                         'reason':'new location'}
+#         else:
+#             if location.startswith(rack_prefix):
+#                 data[location] = [barcode, time.strftime('%a %d %b, %Y %H:%M:%S')]
+#             else:
+#                 data[location].append(barcode)
 
-            logs.writeJsonFile(jsonfilename, data)
+#             logs.writeJsonFile(jsonfilename, data)
 
-            # Assuming that we move the ip authorization out
-            # if remote_ip in allowed_ips:
-            dewarid = ispyb_api.setLocation(barcode, location)
+#             # Assuming that we move the ip authorization out
+#             # if remote_ip in allowed_ips:
+#             dewarid = ispyb_api.setLocation(barcode, location)
 
-            if dewarid is not None:
-                result = {'location':location,
-                          'barcode':barcode,
-                          'status':'ok',
-                          'dewarid':dewarid}
-            else:
-                result = {'location':location,
-                          'barcode':barcode,
-                          'status':'fail',
-                          'reason': 'Did not get valid dewar id from ISPyB'}
-    print result
-    return result
+#             if dewarid is not None:
+#                 result = {'location':location,
+#                           'barcode':barcode,
+#                           'status':'ok',
+#                           'dewarid':dewarid}
+#             else:
+#                 result = {'location':location,
+#                           'barcode':barcode,
+#                           'status':'fail',
+#                           'reason': 'Did not get valid dewar id from ISPyB'}
+#     print result
+#     return result
