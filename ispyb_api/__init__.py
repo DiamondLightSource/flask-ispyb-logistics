@@ -28,7 +28,7 @@ def read_db_config(filename, section='ispyb_mysql_sp'):
         config = ConfigParser()
         config.read(filename)
     
-        db_url = URL(drivername='mysql',
+        db_url = URL(drivername='mysql+pymysql',
                      username=config.get(section, 'user'),
                      password=config.get(section, 'pw'),
                      host=config.get(section, 'host'),
@@ -54,7 +54,7 @@ def init_app(app):
     db_url = read_db_config(config_filename)
     
     if db_url is None:
-        db_url = 'mysql://ispyb:integration@localhost:3306/ispyb'
+        db_url = 'mysql+pymysql://ispyb:integration@localhost:3306/ispyb'
 
         print("Config read failed, falling back to default db connection credentials")
 
