@@ -184,6 +184,13 @@
                 dataType: 'json',
                 success: function(json){
                     console.log(json);
+
+                    // Returned a barcode with storage location
+                    let location = json['storageLocation']
+
+                    $('.dewar1').html(location);
+
+                    /*
                     n=1;
                     for (var key in json) {
                         dewar_barcode = json[key].toUpperCase();
@@ -218,13 +225,22 @@
                                 n+=1;
                             }
                         }
-                    }
+                    }*/
                     $('.color').css({ 'opacity': 1, 'color': 'red', 'font-size': '20px', 'font-weight': 'bold' });
                     _getBarcodes()
+                },
+                error: function(json) {
+                    console.log("ERROR Dewar not found + ", JSON.stringify(json));
+                    $('.dewar1').html('Dewar facilitycode not found');
                 }
             })
             then = new Date().getTime();
-            setTimeout(function(){ document.getElementById("FacilityCode").value = "" }, 2000);
+
+            setTimeout(function(){ 
+                document.getElementById("FacilityCode").value = "";
+                $('.dewar1').html("");
+            }, 2000);
+            
             document.getElementById("Barcode").focus();
             setTimeout(function(){ _getBarcodes() }, 500);
         }

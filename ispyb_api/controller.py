@@ -1,6 +1,7 @@
 from sqlalchemy.orm.exc import NoResultFound
 
-from models import Dewar, Shipping, Proposal
+from models import Dewar, DewarTransportHistory, Shipping, Proposal
+
 import webservice
 
 
@@ -15,8 +16,6 @@ def get_dewar_by_facilitycode(fc):
     This method will find a dewar based on its facilitycode.
     """
     result = None
-
-    print "FIND METHOD: FacilityCode = ", fc
 
     d = Dewar.query.filter_by(FACILITYCODE = fc).first()
 
@@ -56,11 +55,11 @@ def find_dewars_by_location(locations):
     results = {}
 
     try: 
-        dewars = Dewar.query.filter(Dewar.storageLocation.in_(locations)).\
-        values(Dewar.dewarId, Dewar.barCode, Dewar.FACILITYCODE, Dewar.storageLocation)
+        dewars = Dewar.query.join(DewarTransportHistory).filter(Dewar.storageLocation.in_(locations)).filter(Dewar.dewarId == DewarTransportHistory.dewarId).\
+            values(Dewar.barCode, Dewar.storageLocation, Dewar.bltimeStamp, DewarTransportHistory.arrivalDate)
 
         for dewar in dewars:
-            results[dewar.storageLocation] = [dewar.barCode, ""]
+            results[dewar.storageLocation] = [dewar.barCode, dewar.arrivalDate]
 
     except NoResultFound:
         print("Error retrieving dewars")

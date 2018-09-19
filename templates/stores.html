@@ -46,7 +46,7 @@
         // Get dewar barcodes
         nowSecs = new Date().getTime()/1000;
         $.ajax({
-            url: '/{{api_prefix}}/dewars/location',
+            url: '/{{api_prefix}}/dewars',
             type: 'GET',
             dataType: 'json',
             success: function(json){
@@ -108,7 +108,7 @@
             }
         }
         $.ajax({
-            url: '/{{api_prefix}}/dewars/location',
+            url: '/{{api_prefix}}/dewars',
             type: 'POST',
             data: {'location': loc, 'barcode':barcode, 'awb':awb},
             dataType: 'json',

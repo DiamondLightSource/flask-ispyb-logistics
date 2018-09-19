@@ -1,6 +1,3 @@
-# For convenience import the main class here 
-# So we just need to import ispyb_api.ISPyBManager
-#from ispyb_manager import ISPyBManager
 import os
 from ConfigParser import ConfigParser
 from ConfigParser import NoOptionError, NoSectionError
@@ -47,11 +44,11 @@ def init_app(app):
     Initialise the database connection and flask-sqlalchemy
     """
     config_filename = os.environ.get('ISPYB_CONFIG_FILE', 'tests/test.cfg')
-    config_section = os.environ.get('ISPYB_CONFIG_SECTION', 'ispyb_mysql_sp')
+    config_section = os.environ.get('ISPYB_CONFIG_SECTION', 'ispyb_dev')
 
     print("Reading database credentials from {} [{}] ".format(config_filename, config_section))
 
-    db_url = read_db_config(config_filename)
+    db_url = read_db_config(config_filename, config_section)
     
     if db_url is None:
         db_url = 'mysql+pymysql://ispyb:integration@localhost:3306/ispyb'

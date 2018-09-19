@@ -10,13 +10,10 @@ from flask import request
 import logs
 from ispyb_api import controller
 
-# Remove remote ip when deployed
-remote_ip = '127.0.0.1'
+# Modify this list when deployed
 allowed_ips = ['127.0.0.1']
 
 api = Blueprint('zone6', __name__, url_prefix='/zone6')
-
-jsonfilename = 'logs/dewars.json'
 
 rack_prefix = 'RACK'
 
@@ -41,6 +38,9 @@ rack_suffixes = ['A1', 'A2', 'A3', 'A4',
                  'X9', 'X10', 'X11', 'X12',
                  ]
 
+rack_locations = ['-'.join([rack_prefix, suffix])
+                    for suffix in rack_suffixes]
+
 beamlines = ['i03',
              'i04',
              'i04-1',
@@ -56,14 +56,14 @@ beamline_locations.extend(['USER-COLLECTION',
                            'ZONE-6-STORE',
                            ])
 
-# Abstract our interface to ISPyB - specialised for ebic/zone6 etc.
-#ispyb_api = ISPyBManager(beamlines, beamline_prefix, rack_prefix)
-
 
 @api.route('/')
 def index():
-    rack_locations = ['-'.join([rack_prefix, suffix])
-                      for suffix in rack_suffixes]
+    """
+    Main page for dewar management
+    """
+    if request.remote_addr not in allowed_ips:
+        return render_template('403.html', ipaddr=request.remote_addr), 403
 
     return render_template('dewars.html',
                            title="zone6 Dewar Management",
@@ -77,17 +77,18 @@ def index():
 
 @api.route('/dewars', methods=["GET", "POST", "DELETE"])
 def location():
+    """
+    API route for dewar management
+    """
+    if request.remote_addr not in allowed_ips:
+        return render_template('403.html', ipaddr=request.remote_addr), 403
+
     result = {}
 
     if request.method == "GET":
         # Get any dewar with any rack location
         # There should only be one per location
-        rack_locations = ['-'.join([rack_prefix, suffix])
-                    for suffix in rack_suffixes]
-
         result = controller.find_dewars_by_location(rack_locations)
-
-        print result
 
     elif request.method == "POST":
         location = request.form['location']
@@ -102,8 +103,9 @@ def location():
         barcode = request.form['barcode']
 
         print("Update barcode %s to location %s" % (barcode, location))
-
-        result = controller.set_location(barcode, 'CLEARED FROM {}'.format(location))
+        # Should we update the transport history to show its been taken out?
+        #  It would affect the LN2 top up assumption
+        result = controller.set_location(barcode, 'REMOVED FROM {}'.format(location))
     else:
         result = {'location': '',
                   'barcode': '',
@@ -119,79 +121,35 @@ def find():
     Return a list of matching dewars with this facility code
 
     Should be requested with parameters in the URL ?fc=DLS-MS-1234 request
+    We specifically return the status code so the front end can show feedback
     """
-    results = [] #  a list really?
+    if request.remote_addr not in allowed_ips:
+        return render_template('403.html', ipaddr=request.remote_addr), 403
 
+    result = {}
+    status_code = 200
+    
     facilitycode = request.args.get('fc')
 
     # Do we have a valid facility code?
-    if facilitycode is not None:
-        print "FIND METHOD: FacilityCode = ", facilitycode
-
+    if facilitycode:
         dewar = controller.get_dewar_by_facilitycode(facilitycode)
 
-        result = {}
-        result[dewar.get('barcode')] = {'storageLocation':dewar.get('storageLocation')}
+        if dewar:
+            # All good so status code is 200 (default)
+            result['status'] = 'ok'
+            result['facilityCode'] = facilitycode
+            result['barcode'] = dewar.get('barcode')
+            result['storageLocation'] = dewar.get('storageLocation')
+        else:
+            result = {'status':'fail',
+                      'reason':'facilitycode not found'}
+            # controller unable to find dewar
+            status_code = 404
 
-        results.append(result)
-    
-        print result
     else:
         result = {'status':'fail',
                   'reason':'invalid facilitycode'}
+        status_code = 400
 
-    return jsonify(result)
-
-# def _api_write(location, barcode):
-#     """
-# 	Why is the remote ip address check at the bottom?
-# 	Implies the json file is updated and then if ip address does not match, 
-# 	fail to update ISPyB???
-
-# 	Writes/Updates a RACK Location with the Dewar barcode and datetime
-# 	Example "RACK-A1: ["mx18938-I04-1-20180806", "Mon 06 Aug, 2018 10:19:28"]
-
-#     Returns a dictionary which will be turned into json by flask jsonify
-# 	"""
-#     result = {}
-
-#     if location is not None and barcode is not None:
-#         data = logs.readJsonFile(jsonfilename)
-
-#         for key in data.keys():
-#             if key.startswith(rack_prefix):
-#                 if data[key][0] == barcode:
-#                     data[key] = ['',0] # Why 0 and not ""?
-#             else:
-#                 if barcode in data[key]:
-#                     data[key].remove(barcode)
-
-#         if location not in data:
-#             result = {'location':location,
-#                         'barcode':barcode,
-#                         'status':'fail',
-#                         'reason':'new location'}
-#         else:
-#             if location.startswith(rack_prefix):
-#                 data[location] = [barcode, time.strftime('%a %d %b, %Y %H:%M:%S')]
-#             else:
-#                 data[location].append(barcode)
-
-#             logs.writeJsonFile(jsonfilename, data)
-
-#             # Assuming that we move the ip authorization out
-#             # if remote_ip in allowed_ips:
-#             dewarid = ispyb_api.setLocation(barcode, location)
-
-#             if dewarid is not None:
-#                 result = {'location':location,
-#                           'barcode':barcode,
-#                           'status':'ok',
-#                           'dewarid':dewarid}
-#             else:
-#                 result = {'location':location,
-#                           'barcode':barcode,
-#                           'status':'fail',
-#                           'reason': 'Did not get valid dewar id from ISPyB'}
-#     print result
-#     return result
+    return jsonify(result), status_code

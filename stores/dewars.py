@@ -6,20 +6,24 @@ from flask import jsonify
 from flask import request
 
 import logs
-from ispyb_api import ISPyBManager
+from ispyb_api import controller
 
+# Modify this list when deployed
+allowed_ips = ['127.0.0.1']
 
 api = Blueprint('stores', __name__, url_prefix='/stores')
 
 jsonfilename = 'logs/stores.json'
 
-# Create our interface to ISPyB - specialised for ebic/mx etc.
-# For store use we don;t need to specifiy beamlines etc...
-ispyb_api = ISPyBManager()
 
-
-@api.route('/dewars')
+@api.route('/')
 def index():
+    """
+    Main page for dewar management
+    """
+    if request.remote_addr not in allowed_ips:
+        return render_template('403.html', ipaddr=request.remote_addr), 403
+
     return render_template('stores.html',
                            title="Stores Dewar Management",
                            api_prefix="stores",
@@ -27,9 +31,13 @@ def index():
                            )
 
 
-@api.route('/dewars/location', methods=["GET", "POST"])
+@api.route('/dewars', methods=["GET", "POST"])
 def location():
+    if request.remote_addr not in allowed_ips:
+        return render_template('403.html', ipaddr=request.remote_addr), 403
+
     result = {}
+    status_code = 200
 
     if request.method == "GET":
         deque_data = logs.readStoresFile(jsonfilename)
@@ -53,14 +61,15 @@ def location():
                       'barcode': barcode,
                       'awb': awb,
                       'status': 'fail - location and/or barcode not set',
-                      'your_ip': remote_ip}
+                      }
+            status_code = 400
 
-    return jsonify(result)
+    return jsonify(result), status_code
 
 
 def updateDewarLocation(barcode, location, awb=None):
     """
-    Update the records for this dewar.this
+    Update the records for this dewar
 
     If it gets here we have already tested that the barcode and location are ok.
     """
@@ -93,6 +102,15 @@ def updateDewarLocation(barcode, location, awb=None):
 
     logs.writeStoresFile(jsonfilename, data)
 
-    dewarid = ispyb_api.setLocation(barcode, location, awb)
+    result = controller.set_location(barcode, location, awb)
 
-    return {'location': location, 'barcode': barcode, 'awb': awb, 'status': 'ok', 'dewarid': dewarid}
+    if result is not None:
+        result = {'location': location, 'barcode': barcode, 'awb': awb, 'status': 'ok'}
+    else:
+        result = {'location': location,
+                  'barcode': barcode,
+                  'awb': awb,
+                  'status': 'fail - controller did not set location',
+                  } 
+
+    return result
