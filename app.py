@@ -1,4 +1,5 @@
 from flask import Flask
+from flask import render_template
 
 # TODO - move modules into their own packages and tidy naming conventions.
 from dewars.ebic import api as ebic_api
@@ -14,6 +15,10 @@ app.register_blueprint(stores_api)
 
 # Initialise flask sqla
 ispyb_api.init_app(app)
+
+@app.route("/")
+def index():
+    return render_template('index.html')
 
 if __name__ == '__main__':
     app.run(debug=True)
