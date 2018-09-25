@@ -15,6 +15,7 @@ MarkupSafe==1.0
 mysql-connector==2.1.6
 pycparser==2.18
 PyMySQL==0.9.2
+requests==2.19.1
 six==1.11.0
 SQLAlchemy==1.2.11
 Werkzeug==0.14.1
