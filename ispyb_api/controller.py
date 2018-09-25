@@ -1,3 +1,4 @@
+import logging
 from sqlalchemy.orm.exc import NoResultFound
 
 from models import Dewar, DewarTransportHistory, Shipping, Proposal
@@ -22,7 +23,7 @@ def get_dewar_by_facilitycode(fc):
     if d:
         result = {'barcode': d.barCode,  'storageLocation': d.storageLocation}
     else:
-        print("Could not find dewar with FacilityCode {}".format(fc))
+        logging.getLogger('ispyb-logistics').warn("Could not find dewar with FacilityCode {}".format(fc))
 
     return result
 
@@ -43,7 +44,7 @@ def get_dewar_by_barcode(barcode):
         result['facilityCode'] = d.FACILITYCODE
 
     except NoResultFound:
-        print("Error this barcode does not exist in ISPyB")
+        logging.getLogger('ispyb-logistics').error("Error this barcode does not exist in ISPyB")
 
     return result
 
@@ -51,7 +52,7 @@ def find_dewars_by_location(locations):
     """
     This method will find a dewar based on its location.
     """
-    print("find_dewars_by_location {}".format(','.join(locations)))
+    logging.getLogger('ispyb-logistics').debug("find_dewars_by_location {}".format(','.join(locations)))
     results = {}
 
     try: 
@@ -62,7 +63,7 @@ def find_dewars_by_location(locations):
             results[dewar.storageLocation] = [dewar.barCode, dewar.arrivalDate]
 
     except NoResultFound:
-        print("Error retrieving dewars")
+        logging.getLogger('ispyb-logistics').error("Error retrieving dewars")
 
     return results
 

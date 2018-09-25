@@ -1,3 +1,6 @@
+import logging
+import logging.handlers
+
 from flask import Flask
 from flask import render_template
 
@@ -7,6 +10,12 @@ from dewars.zone6 import api as zone6_api
 from stores.dewars import api as stores_api
 
 import ispyb_api 
+
+logger = logging.getLogger('ispyb-logistics')
+handler = logging.handlers.RotatingFileHandler('logs/logistics.log', maxBytes=1000000, backupCount=5)
+handler.setFormatter(logging.Formatter("[%(asctime)s] [%(levelname)s] [%(message)s]"))
+logger.addHandler(handler)
+logger.setLevel(logging.INFO)
 
 app = Flask(__name__)
 app.register_blueprint(ebic_api)
