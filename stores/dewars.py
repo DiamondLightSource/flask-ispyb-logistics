@@ -8,9 +8,6 @@ from flask import request
 import logs
 from ispyb_api import controller
 
-# Modify this list when deployed
-allowed_ips = ['127.0.0.1']
-
 api = Blueprint('stores', __name__, url_prefix='/stores')
 
 jsonfilename = 'logs/stores.json'
@@ -21,9 +18,6 @@ def index():
     """
     Main page for dewar management
     """
-    if request.remote_addr not in allowed_ips:
-        return render_template('403.html', ipaddr=request.remote_addr), 403
-
     return render_template('stores.html',
                            title="Stores Dewar Management",
                            api_prefix="stores",
@@ -33,9 +27,6 @@ def index():
 
 @api.route('/dewars', methods=["GET", "POST"])
 def location():
-    if request.remote_addr not in allowed_ips:
-        return render_template('403.html', ipaddr=request.remote_addr), 403
-
     result = {}
     status_code = 200
 

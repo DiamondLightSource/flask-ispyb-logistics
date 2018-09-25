@@ -13,9 +13,6 @@ from flask import request
 import logs
 from ispyb_api import controller
 
-# Modify this list when deployed
-allowed_ips = ['127.0.0.1']
-
 api = Blueprint('ebic', __name__, url_prefix='/ebic')
 
 rack_prefix = 'EBIC-RACK'
@@ -66,9 +63,6 @@ def index():
     """
     Main page for dewar management
     """
-    if request.remote_addr not in allowed_ips:
-        return render_template('403.html', ipaddr=request.remote_addr), 403
-
     return render_template('dewars.html',
                            title="eBIC Dewar Management",
                            rack_locations=rack_locations,
@@ -84,9 +78,6 @@ def location():
     """
     API route for dewar management
     """
-    if request.remote_addr not in allowed_ips:
-        return render_template('403.html', ipaddr=request.remote_addr), 403
-
     result = {}
 
     if request.method == "GET":
@@ -127,9 +118,6 @@ def find():
     Should be requested with parameters in the URL ?fc=DLS-MS-1234 request
     We specifically return the status code so the front end can show feedback
     """
-    if request.remote_addr not in allowed_ips:
-        return render_template('403.html', ipaddr=request.remote_addr), 403
-
     result = {}
     status_code = 200
     
