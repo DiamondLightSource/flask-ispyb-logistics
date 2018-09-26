@@ -26,7 +26,7 @@ def set_location(barcode, location, awb=None):
         else:
             logging.getLogger('ispyb-logistics').error("Error setting location in ISPyB via SynchWeb {}".format(r.status_code))
     except requests.ConnectionError:
-        logging.getLogger('ispyb-logistics).error("Error trying to post to {}".format(synchweb_url))
-    
+        logging.getLogger('ispyb-logistics').error("Error trying to post to {}".format(synchweb_url))
+
     return result
-   
+
