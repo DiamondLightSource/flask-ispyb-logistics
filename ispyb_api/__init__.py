@@ -8,7 +8,7 @@ from sqlalchemy.engine.url import URL
 db = SQLAlchemy()
 Base = db.Model
 
-def read_db_config(filename, section='ispyb_mysql_sp'):
+def read_db_config(filename, section):
     """
     Try to get db connection info from file
     """
