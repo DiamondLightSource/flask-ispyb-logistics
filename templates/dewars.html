@@ -46,7 +46,7 @@
                         lastfill = json[sorted_keys[key]][1];
                         lastfillsecs = Date.parse(lastfill) / 1000
                         $('.'+rack).html(bcode);
-                        if (rack.startsWith("RACK") && lastfill != 0 && nowSecs - lastfillsecs > 5*24*60*60) {
+                        if (rack.startsWith("{{rack_prefix}}") && lastfill != 0 && nowSecs - lastfillsecs > 5*24*60*60) {
                             console.log(rack+" is over 5 days old");
                             $('.refill'+n).html(rack);
                             n++;

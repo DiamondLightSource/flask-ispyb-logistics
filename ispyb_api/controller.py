@@ -1,6 +1,6 @@
 import logging
-from sqlalchemy.orm.exc import NoResultFound
-
+from sqlalchemy.orm.exc import NoResultFound, MultipleResultsFound
+from sqlalchemy import desc, func
 from models import Dewar, DewarTransportHistory, Shipping, Proposal
 
 import webservice
@@ -8,7 +8,7 @@ import webservice
 
 def set_location(barcode, location, awb=None):
     """
-    Redirect this request to SynchWeb
+    Redirect this request to SynchWeb to trigger e-mail alerts etc
     """
     return webservice.set_location(barcode, location, awb)
 
@@ -18,7 +18,10 @@ def get_dewar_by_facilitycode(fc):
     """
     result = None
 
-    d = Dewar.query.filter_by(FACILITYCODE = fc).first()
+    # Facility codes are reused, so we want the most recent version 
+    # We work that out based on the newest (highest) dewarId
+    # Could also specify that its a dewar on site, at-facility perhaps?
+    d = Dewar.query.filter_by(FACILITYCODE = fc).order_by(desc(Dewar.dewarId)).first()
 
     if d:
         result = {'barcode': d.barCode,  'storageLocation': d.storageLocation}
@@ -33,6 +36,7 @@ def get_dewar_by_barcode(barcode):
 
     It enforces only one result and will throw an error if there is not one.
     """
+    logging.getLogger('ispyb-logistics').debug("get_dewar_by_barcode {}".format(barcode))
     result = {}
 
     try: 
@@ -44,7 +48,9 @@ def get_dewar_by_barcode(barcode):
         result['facilityCode'] = d.FACILITYCODE
 
     except NoResultFound:
-        logging.getLogger('ispyb-logistics').error("Error this barcode does not exist in ISPyB")
+        logging.getLogger('ispyb-logistics').error("Error barcode {} not exist in ISPyB".format(barcode))
+    except MultipleResultsFound:
+        logging.getLogger('ispyb-logistics').error("Error multiple results found for barcode {}".format(barcode))
 
     return result
 
@@ -56,11 +62,23 @@ def find_dewars_by_location(locations):
     results = {}
 
     try: 
-        dewars = Dewar.query.join(DewarTransportHistory).filter(Dewar.storageLocation.in_(locations)).filter(Dewar.dewarId == DewarTransportHistory.dewarId).\
-            values(Dewar.barCode, Dewar.storageLocation, Dewar.bltimeStamp, DewarTransportHistory.arrivalDate)
+        # Query for dewars with transporthistory locations in the list
+        # Use case insensitive search for storageLocation
+        # Get the timestamp and location from the transport history 
+        # Order so we get the most recent first...
+        # The Dewar storageLocation does not always match the transport history
+        dewars = Dewar.query.join(DewarTransportHistory).filter(func.lower(Dewar.storageLocation).in_(locations)).\
+            filter(Dewar.dewarId == DewarTransportHistory.dewarId).\
+            order_by(desc(DewarTransportHistory.arrivalDate)).\
+            values(Dewar.barCode, Dewar.bltimeStamp, Dewar.storageLocation, DewarTransportHistory.arrivalDate)
 
         for dewar in dewars:
-            results[dewar.storageLocation] = [dewar.barCode, dewar.arrivalDate]
+            # If we already have an entry, it means there is a more recent change for a dewar in this location
+            if dewar.storageLocation in results:
+                logging.getLogger('ispyb-logistics').debug('Ignoring older entry for dewar {} location {} at {}'.format(dewar.barCode, dewar.storageLocation, dewar.arrivalDate))
+            else:
+                logging.getLogger('ispyb-logistics').info('Found entry for this dewar {} to {} at {}'.format(dewar.barCode, dewar.storageLocation, dewar.arrivalDate))
+                results[dewar.storageLocation] = [dewar.barCode, dewar.arrivalDate]
 
     except NoResultFound:
         logging.getLogger('ispyb-logistics').error("Error retrieving dewars")
