@@ -2,6 +2,7 @@
 from datetime import datetime
 import time
 import json
+import logging
 
 # Package imports
 from flask import Blueprint
@@ -10,7 +11,6 @@ from flask import jsonify
 from flask import request
 
 # Local imports
-import logs
 from ispyb_api import controller
 
 api = Blueprint('ebic', __name__, url_prefix='/ebic')
@@ -89,18 +89,32 @@ def location():
         location = request.form['location']
         barcode = request.form['barcode']
 
-        print("Update barcode %s to location %s" % (barcode, location))
+        logging.getLogger('ispyb-logistics').debug("Update barcode %s to location %s" % (barcode, location))
 
         result = controller.set_location(barcode, location)
 
     elif request.method == "DELETE":
         location = request.form['location']
-        barcode = request.form['barcode']
 
-        print("Update barcode %s to location %s" % (barcode, location))
-        # Should we update the transport history to show its been taken out?
-        #  It would affect the LN2 top up assumption
-        result = controller.set_location(barcode, 'REMOVED FROM {}'.format(location))
+        # Find the dewar in this location (pass in as a list item)
+        result = controller.find_dewars_by_location([location])
+
+        logging.getLogger('ispyb-logistics').debug("Find dewar by location {} got result: {}".format(location, result))
+
+        if location in result:
+            barcode = result[location][0]
+
+            logging.getLogger('ispyb-logistics').debug("Update barcode %s to location %s" % (barcode, location))
+            # Should we update the transport history to show its been taken out?
+            # It would affect the LN2 top up assumption
+            result = controller.set_location(barcode, 'REMOVED FROM {}'.format(location))
+        else:
+            logging.getLogger('ispyb-logistics').warn('Could not find a dewar in location {}'.format(location))
+
+            result = {'location': location,
+                      'barcode': '',
+                      'status': 'fail',
+                      'reason': 'No dewar at location found'}
     else:
         result = {'location': '',
                   'barcode': '',
