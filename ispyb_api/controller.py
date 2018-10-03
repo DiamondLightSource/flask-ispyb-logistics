@@ -1,16 +1,31 @@
+import re
 import logging
+
 from sqlalchemy.orm.exc import NoResultFound, MultipleResultsFound
 from sqlalchemy import desc, func
-from models import Dewar, DewarTransportHistory, Shipping, Proposal
 
 import webservice
+from models import Dewar, DewarTransportHistory, Shipping, Proposal
 
 
 def set_location(barcode, location, awb=None):
     """
     Redirect this request to SynchWeb to trigger e-mail alerts etc
+
+    This might be a facility code (if the label is unreadable)
+    So first check if this is a facility code, then use the actual barcode
     """
-    return webservice.set_location(barcode, location, awb)
+    # Test if this is actually a facility code
+    if is_facility_code(barcode):
+        dewar = get_dewar_by_facilitycode(barcode)
+        if dewar:
+            actual_barcode = dewar.get('barcode')
+        else:
+            actual_barcode = None
+    else:
+        actual_barcode = barcode
+
+    return webservice.set_location(actual_barcode, location, awb)
 
 def get_dewar_by_facilitycode(fc):
     """
@@ -111,3 +126,23 @@ def find_dewars_by_proposal(proposal_code, proposal_number):
                Shipping.shippingName)
                
     return results
+
+def is_facility_code(code):
+    """
+    Utiliy method to check if the string provided is a facilitycode
+    i.e. matches 'DLS-MX-1234' pattern
+    Note we test for 3chars-2chars-number (case insensitive)
+    """
+    result = False
+
+    expr = re.compile(r'[A-Z]{3}-[A-Z]{2}-\d', re.IGNORECASE)
+    match = expr.match(code)
+    
+    if match:
+        logging.getLogger('ispyb-logistics').debug('{} is a facility code'.format(code))
+        result = True
+    else:
+        logging.getLogger('ispyb-logistics').debug('{} is NOT a facilitycode'.format(code))
+        result = False
+
+    return result
