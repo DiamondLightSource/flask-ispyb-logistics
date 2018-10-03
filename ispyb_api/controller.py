@@ -90,11 +90,12 @@ def find_dewars_by_location(locations):
 
         for dewar in dewars:
             # If we already have an entry, it means there is a more recent change for a dewar in this location
-            if dewar.storageLocation in results:
+            # Note we store the data in upper case - SynchWeb uses lower case while the UI requests data in upper case...
+            if dewar.storageLocation.upper() in results:
                 logging.getLogger('ispyb-logistics').debug('Ignoring older entry for dewar {} location {} at {}'.format(dewar.barCode, dewar.storageLocation, dewar.arrivalDate))
             else:
                 logging.getLogger('ispyb-logistics').info('Found entry for this dewar {} to {} at {}'.format(dewar.barCode, dewar.storageLocation, dewar.arrivalDate))
-                results[dewar.storageLocation] = [dewar.barCode, dewar.arrivalDate]
+                results[dewar.storageLocation.upper()] = [dewar.barCode, dewar.arrivalDate]
 
     except NoResultFound:
         logging.getLogger('ispyb-logistics').error("Error retrieving dewars")
