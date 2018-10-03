@@ -74,6 +74,7 @@ def find_dewars_by_location(locations):
     This method will find a dewar based on its location.
     """
     logging.getLogger('ispyb-logistics').debug("find_dewars_by_location {}".format(','.join(locations)))
+    
     results = {}
 
     try: 
@@ -97,6 +98,11 @@ def find_dewars_by_location(locations):
 
     except NoResultFound:
         logging.getLogger('ispyb-logistics').error("Error retrieving dewars")
+
+    # Now add entries for those locations we did not find (to support the front end logic)
+    for location in locations:
+        if location not in results:
+            results[location] = ["", ""]
 
     return results
 
