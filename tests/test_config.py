@@ -1,11 +1,12 @@
 from ConfigParser import ConfigParser
 from ConfigParser import NoOptionError, NoSectionError
+import sys
 
 def test(filename):
     """
-    Given a filename test that we can get the login data
+    Given a filename test that we can get the credentials
     """
-    section = 'ispyb_mysql_sp'
+    section = 'ispyb_dev'
 
     config = ConfigParser()
     config.read(filename)
@@ -17,7 +18,7 @@ def test(filename):
         port = config.getint(section, 'port')
         db = config.get(section, 'db')
 
-        print("mysql://{}:{}@{}:{}/{}".format(user, password, host, port, db))
+        print("DATABASE URL = mysql+pymysql://{}:{}@{}:{}/{}".format(user, password, host, port, db))
     except NoOptionError:
         print("Error retrieving values from config file {}".format(filename))
     except NoSectionError:
@@ -25,9 +26,11 @@ def test(filename):
 
 
 if __name__ == "__main__":
+    if len(sys.argv) > 1:
+        filename = sys.argv[1]
+    else:
+        filename = 'tests/test.cfg'
     # One that works...
-    test('tests/test.cfg')
-
-    # One that doesnt...
-    test('tests/test_not_exists.cfg')
+    print("Testing read from config file: ", filename)
+    test(filename)
     
