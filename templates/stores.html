@@ -51,12 +51,38 @@
             dataType: 'json',
             success: function(json){
                 for (var key in json) {
-                    for (var inner_key in json[key]) {
-                        $('.'+inner_key+'-'+key).html(json[key][inner_key])
-                    }
+					for (var inner_key in json[key]) {
+						if ( inner_key == 'awb' && _isADHLAWB(json[key][inner_key])) {
+							$('.'+inner_key+'-'+key).html('<a href="http://www.dhl.com/en/express/tracking.html?AWB='+json[key][inner_key]+'" target="_blank">'+json[key][inner_key]+'</a>')
+						} else if ( inner_key == 'awb' && _isAFedexAWB(json[key][inner_key])) {
+							$('.'+inner_key+'-'+key).html('<a href="https://www.fedex.com/apps/fedextrack/?trackingnumber='+json[key][inner_key].substring(0,12)+'" target="_blank">'+json[key][inner_key]+'</a>')
+						} else if ( inner_key == 'sid' ) {
+							$('.'+inner_key+'-'+key).attr('href','https://ispyb.diamond.ac.uk/shipments/sid/'+json[key][inner_key]);
+							$('.'+inner_key+'-'+key).html('&#8599;');
+							$('.'+inner_key+'-'+key).attr('target','_blank');
+						} else {
+							$('.'+inner_key+'-'+key).html(json[key][inner_key])
+						}
+					}
                 }
             }
         })
+    }
+    	
+	function _isADHLAWB(awb) {
+		var re = new RegExp('^[0-9]{10}$');
+		if (re.test(awb)) { return true; }
+		var re = new RegExp('^JJ?D[0-9]{18}$');
+		if (re.test(awb)) { return true; }
+		return false;
+	}
+	
+	function _isAFedexAWB(awb) {
+		var re = new RegExp('^[0-9]{12}$');
+		if (re.test(awb)) { return true; }
+		var re = new RegExp('^[0-9]{16}$');
+		if (re.test(awb)) { return true; }
+		return false;
     }
     
     function _enableDisableAWB(loc) {
@@ -64,15 +90,46 @@
             document.getElementById('AWB').disabled = false;
         }
         if (loc == 'STORES-IN') {
+			document.getElementById('AWB').value = '';
             document.getElementById('AWB').disabled = true;
         }
     }
-        
+    	
+	function _isABarcode(b) {
+		if (b.startsWith('MX') || b.startsWith('NT') || b.startsWith('SW') || b.startsWith('IN') || b.startsWith('NR') || b.startsWith('LB')) {
+			return true;
+		}
+		if (b.startsWith('EM') || b.startsWith('MT') || b.startsWith('SM') || b.startsWith('EE') || b.startsWith('CM')) {
+			return true;
+		}
+		return false;
+	}
+	
+	function _isALocation(b) {
+		if ( b == 'STORES-IN' || b == 'STORES-OUT' ) {
+			return true;
+		}
+		return false;
+	}
+	    
     function _setBarcode() {
         // Set dewar barcode
         var loc = document.getElementById('Location').value.toUpperCase();
         var barcode = document.getElementById('Barcode').value.toUpperCase();
         var awb = document.getElementById('AWB').value.toUpperCase();
+		if ( ! _isALocation(loc) ) {
+			if ( _isABarcode(loc) ) {
+				document.getElementById('Barcode').value = loc;
+				document.getElementById('Location').value = '';
+				document.getElementById('Location').focus();
+				return;
+			} else {
+				document.getElementById('AWB').value = loc;
+				document.getElementById('Location').value = '';
+				document.getElementById('Location').focus();
+				return;
+			}
+		}        
         if (barcode == '') {
             _enableDisableAWB(loc)
             document.getElementById('Barcode').focus();
@@ -82,31 +139,37 @@
             document.getElementById('Location').focus();
             return;
         }
-        if (barcode == loc) {
-            if (loc == 'STORES-OUT' || loc == 'STORES-IN') {
-                document.getElementById('Barcode').value = '';
-                document.getElementById('Barcode').focus();
-                return;
-            } else {
-                document.getElementById('Location').value = '';
-                document.getElementById('Location').focus();
-                return;
-            }
-        }
-        if (barcode == 'STORES-IN' || barcode == 'STORES-OUT') {
-            document.getElementById('Location').value = barcode;
-            document.getElementById('Barcode').value = '';
-            _enableDisableAWB(barcode)
-            document.getElementById('Barcode').focus();
-            return;
-        }
-        if (loc == 'STORES-OUT' && awb == '') {
-            console.log(document.activeElement.id);
-            if (document.activeElement.id == 'Barcode') {
-                document.getElementById('AWB').focus();
-                return;
-            }
-        }
+		if (barcode == loc) {
+			if ( _isALocation(barcode) ) {
+				document.getElementById('Barcode').value = '';
+				document.getElementById('Barcode').focus();
+				return;
+			} else {
+				document.getElementById('Location').value = '';
+				document.getElementById('Location').focus();
+				return;
+		 	}
+		}
+		if ( _isALocation(barcode) ) {
+			document.getElementById('Location').value = barcode;
+			document.getElementById('Barcode').value = '';
+			_enableDisableAWB(barcode)
+			document.getElementById('Barcode').focus();
+			return;
+		}
+		if (loc == 'STORES-OUT' && awb == '') {
+			if ( _isABarcode(barcode) ) {
+				if (document.activeElement.id == 'Barcode' || document.activeElement.id == 'Location' ) {
+					document.getElementById('AWB').focus();
+					return;
+				}
+			} else {
+				document.getElementById('AWB').value = barcode;
+				document.getElementById('Barcode').value = '';
+				document.getElementById('Barcode').focus();
+				return;
+			}
+		}
         $.ajax({
             url: '/{{api_prefix}}/dewars',
             type: 'POST',
@@ -139,35 +202,60 @@
         document.getElementById('AWB').value = '';
         setTimeout(function(){ document.getElementById('Barcode').focus(); }, 500);
     }
+    	
+	function _setFocus() {
+		var loc_field = document.getElementById("Location");
+		var bar_field = document.getElementById("Barcode");
+		var awb_field = document.getElementById("AWB");
+		if (document.activeElement) { var active_id = document.activeElement.id };
+		if (active_id == 'Barcode' || active_id == 'Location' || active_id == 'AWB' || active_id == 'submit') { return };
+		if (loc_field.value == '') {
+			setTimeout(function(){ loc_field.focus(); }, 1000);
+		} else if (bar_field.value == '' || loc_field.value == 'STORES-IN') {
+			setTimeout(function(){ bar_field.focus(); }, 1000);
+		} else {
+			setTimeout(function(){ awb_field.focus(); }, 1000);
+		}
+    }
     
     $(document).ready(function() {
-        if ('ActiveXObject' in window) {
-            console.log('IE found')
-            document.getElementById('location_label').textContent = 'Location, eg STORES-IN or STORES-OUT:';
-            document.getElementById('barcode_label').textContent = 'Dewar barcode:';
-            document.getElementById('awb_label').textContent = 'Airway Bill:';
-        }
-        var loc_field = document.getElementById("Location");
-        loc_field.addEventListener("keyup", function(event) {
-            event.preventDefault();
-            if (event.keyCode === 13) {
-                _setBarcode();
-            }
-        });
-        var bar_field = document.getElementById("Barcode");
-        bar_field.addEventListener("keyup", function(event) {
-            event.preventDefault();
-            if (event.keyCode === 13) {
-                _setBarcode();
-            }
-        });
-        var awb_field = document.getElementById("AWB");
-        awb_field.addEventListener("keyup", function(event) {
-            event.preventDefault();
-            if (event.keyCode === 13) {
-                _setBarcode();
-            }
-        });
+		if ('ActiveXObject' in window) {
+			console.log('IE found')
+			document.getElementById('location_label').textContent = 'Location, eg STORES-IN or STORES-OUT:';
+			document.getElementById('barcode_label').textContent = 'Dewar barcode:';
+			document.getElementById('awb_label').textContent = 'Airway Bill:';
+		}
+		var loc_field = document.getElementById('Location');
+		loc_field.addEventListener('keyup', function(event) {
+			event.preventDefault();
+			if (event.keyCode === 13) {
+			    _setBarcode();
+			}
+		});
+		loc_field.addEventListener('blur', function(event) {
+			setTimeout(function(){ _setFocus() }, 50)
+		});
+		var bar_field = document.getElementById('Barcode');
+		bar_field.addEventListener('keyup', function(event) {
+			event.preventDefault();
+			if (event.keyCode === 13) {
+			    _setBarcode();
+			}
+		});
+		bar_field.addEventListener('blur', function(event) {
+			setTimeout(function(){ _setFocus() }, 50)
+		});
+		var awb_field = document.getElementById('AWB');
+		awb_field.addEventListener('keyup', function(event) {
+			event.preventDefault();
+			if (event.keyCode === 13) {
+			    _setBarcode();
+			}
+		});
+		awb_field.addEventListener('blur', function(event) {
+			setTimeout(function(){ _setFocus() }, 50)
+		});
+		_setFocus();
     })
     
     _refresh()
@@ -175,7 +263,7 @@
     </script>
 
 <style type='text/css'>
-    .ui-btn-inline {
+	.ui-btn-inline {
     line-height: 1.0;
     }
     
@@ -197,6 +285,10 @@
         border: 1px solid black;
         border-collapse: collapse;
     }
+    
+    a[class^='sid'] {
+        text-decoration: none;
+    }
 
 </style> 
         
@@ -209,13 +301,13 @@
 <tr><td width=50%>
 <h1><center>Scan Dewar Barcode</center></h1>
 <form>
-    <span id='location_label'></span><input type='text' id='Location' placeholder='Scan the location, eg either STORES-IN or STORES-OUT' data-clear-btn='true' autofocus>
-    <span id='barcode_label'></span><input type='text' id='Barcode' placeholder='Scan the long barcode from the dewar case' data-clear-btn='true'>
-    <span id='awb_label'></span><input type='text' id='AWB' placeholder='Scan the DHL Airway Bill' data-clear-btn='true'>
-    <div class='ui-grid-a'>
-        <div class='ui-block-a'><input type='button' value='Submit' onclick='_setBarcode(); return false'></div>
-        <div class='ui-block-b'><input type='reset' value='Cancel' onclick='_clearForm(); return false'></div>
-    </div>
+	<span id='location_label'></span><input type='text' id='Location' placeholder='Scan the location, eg either STORES-IN or STORES-OUT' data-clear-btn='true'>
+	<span id='barcode_label'></span><input type='text' id='Barcode' placeholder='Scan the long barcode from the dewar case' data-clear-btn='true'>
+	<span id='awb_label'></span><input type='text' id='AWB' placeholder='Scan the 10 digit DHL Airway Bill' data-clear-btn='true'>
+	<div class='ui-grid-a'>
+		<div class='ui-block-a'><input type='button' value='Submit' onclick='_setBarcode(); return false' id='submit'></div>
+		<div class='ui-block-b'><input type='reset' value='Cancel' onclick='_clearForm(); return false'></div>
+	</div>
 </form>
 </td>
 <td width=25%><center><img width=96 src='/static/img/stores-in.gif'><br /><h3>STORES-IN</h3></center></td>
@@ -228,7 +320,13 @@
 <table border=0 width=100%><tr><th>Date/Time</th><th>Barcode</th><th>In or Out?</th><th>Destination</th><th>Airway Bill</th></tr>
 
 {% for i in range( max_dewar_history ) %}
-<tr align=center><td width=20%><span class='date-{{loop.index}}'>&nbsp;</span></td><td><span class='barcode-{{loop.index}}'></span></td><td><span class='inout-{{loop.index}}'></span></td><td><span class='destination-{{loop.index}}'></span></td><td><span class='awb-{{loop.index}}'></span></td></tr>
+<tr align=center>
+    <td width=20%><span class='date-{{loop.index}}'>&nbsp;</span></td>
+    <td><span class='barcode-{{loop.index}}'></span></td>
+    <td><span class='inout-{{loop.index}}'></span></td>
+    <td><span class='destination-{{loop.index}}'></span></td>
+    <td><span class='awb-{{loop.index}}'></span></td>
+</tr>
 {% endfor %}
 
 </table>
