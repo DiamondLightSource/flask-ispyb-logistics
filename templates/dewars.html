@@ -123,10 +123,9 @@
                     if ( json['status'] == 'ok' ) {
                         let frequency = 600;
                         playOscillator(context.currentTime, context.currentTime + 0.2, frequency);
-                        // Why does this care what dewar id is?
-                        // Need to change this as we don't get the id back from synchweb but we get 
-                        // the dewartransporthistory instead
-                        if ( json['dewarid'] > 0 ) {
+                        // Changed because we don't get the dewar id back from synchweb but we get 
+                        // the DEWARHISTORYID instead
+                        if ( json['DEWARHISTORYID'] > 0 ) {
                             playOscillator(context.currentTime + 0.4, context.currentTime + 0.6, frequency);
                             playOscillator(context.currentTime + 0.8, context.currentTime + 1, frequency);
                         } else {
