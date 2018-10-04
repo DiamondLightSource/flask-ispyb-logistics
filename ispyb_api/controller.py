@@ -85,6 +85,7 @@ def find_dewars_by_location(locations):
         # The Dewar storageLocation does not always match the transport history
         dewars = Dewar.query.join(DewarTransportHistory).filter(func.lower(Dewar.storageLocation).in_(locations)).\
             filter(Dewar.dewarId == DewarTransportHistory.dewarId).\
+            filter(func.lower(Dewar.storageLocation) == func.lower(DewarTransportHistory.storageLocation)).\
             order_by(desc(DewarTransportHistory.arrivalDate)).\
             values(Dewar.barCode, Dewar.bltimeStamp, Dewar.storageLocation, DewarTransportHistory.arrivalDate)
 
