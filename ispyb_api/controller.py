@@ -95,7 +95,7 @@ def find_dewars_by_location(locations):
             if dewar.storageLocation.upper() in results:
                 logging.getLogger('ispyb-logistics').debug('Ignoring older entry for dewar {} location {} at {}'.format(dewar.barCode, dewar.storageLocation, dewar.arrivalDate))
             else:
-                logging.getLogger('ispyb-logistics').info('Found entry for this dewar {} to {} at {}'.format(dewar.barCode, dewar.storageLocation, dewar.arrivalDate))
+                logging.getLogger('ispyb-logistics').info('Found entry for this dewar {} in {} at {}'.format(dewar.barCode, dewar.storageLocation, dewar.arrivalDate))
                 results[dewar.storageLocation.upper()] = [dewar.barCode, dewar.arrivalDate]
 
     except NoResultFound:
