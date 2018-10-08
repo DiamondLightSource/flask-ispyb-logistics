@@ -11,6 +11,7 @@ from flask import jsonify
 from flask import request
 
 # Local imports
+import common
 from ispyb_api import controller
 
 api = Blueprint('ebic', __name__, url_prefix='/ebic')
@@ -79,50 +80,32 @@ def location():
     API route for dewar management
     """
     result = {}
+    status_code = 200
 
     if request.method == "GET":
         # Get any dewar with any rack location
         # There should only be one per location
+        # Simple call so use controller directly
         result = controller.find_dewars_by_location(rack_locations)
 
     elif request.method == "POST":
         location = request.form['location']
         barcode = request.form['barcode']
 
-        logging.getLogger('ispyb-logistics').debug("Update barcode %s to location %s" % (barcode, location))
-
-        result = controller.set_location(barcode, location)
+        result, status_code = common.update_dewar_location(barcode, location)
 
     elif request.method == "DELETE":
         location = request.form['location']
 
-        # Find the dewar in this location (pass in as a list item)
-        result = controller.find_dewars_by_location([location])
-
-        logging.getLogger('ispyb-logistics').debug("Find dewar by location {} got result: {}".format(location, result))
-
-        if location in result:
-            barcode = result[location][0]
-
-            logging.getLogger('ispyb-logistics').debug("Update barcode %s to location %s" % (barcode, location))
-            # Should we update the transport history to show its been taken out?
-            # It would affect the LN2 top up assumption
-            result = controller.set_location(barcode, 'REMOVED FROM {}'.format(location))
-        else:
-            logging.getLogger('ispyb-logistics').warn('Could not find a dewar in location {}'.format(location))
-
-            result = {'location': location,
-                      'barcode': '',
-                      'status': 'fail',
-                      'reason': 'No dewar at location found'}
+        result, status_code = common.remove_from_location(location)
     else:
         result = {'location': '',
                   'barcode': '',
                   'status': 'fail',
                   'reason': 'Method/route not implemented yet'}
+        status_code = 501
 
-    return jsonify(result)
-
+    return jsonify(result), status_code
 
 @api.route('/dewars/find', methods=["GET"])
 def find():
@@ -132,30 +115,8 @@ def find():
     Should be requested with parameters in the URL ?fc=DLS-MS-1234 request
     We specifically return the status code so the front end can show feedback
     """
-    result = {}
-    status_code = 200
-    
     facilitycode = request.args.get('fc')
 
-    # Do we have a valid facility code?
-    if facilitycode:
-        dewar = controller.get_dewar_by_facilitycode(facilitycode)
-
-        if dewar:
-            # All good so status code is 200 (default)
-            result['status'] = 'ok'
-            result['facilityCode'] = facilitycode
-            result['barcode'] = dewar.get('barcode')
-            result['storageLocation'] = dewar.get('storageLocation')
-        else:
-            result = {'status':'fail',
-                      'reason':'facilitycode not found'}
-            # controller unable to find dewar
-            status_code = 404
-
-    else:
-        result = {'status':'fail',
-                  'reason':'invalid facilitycode'}
-        status_code = 400
+    result, status_code = common.find_dewar(facilitycode)
 
     return jsonify(result), status_code
