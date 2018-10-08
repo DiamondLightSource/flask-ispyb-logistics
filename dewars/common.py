@@ -42,19 +42,17 @@ def find_dewar(facilitycode):
     return result, status_code
 
 
-def remove_from_location(location):
+def remove_dewar_from_location(location):
     result = {}
     status_code = 200
 
     # Find the dewar in this location (pass in as a list item)
     result = controller.find_dewars_by_location([location])
 
-    logging.getLogger('ispyb-logistics').debug("Find dewar by location {} got result: {}".format(location, result))
-
     if location in result:
         barcode = result[location][0]
 
-        logging.getLogger('ispyb-logistics').debug("Update barcode %s to location %s" % (barcode, location))
+        logging.getLogger('ispyb-logistics').debug("Remove barcode %s from location %s" % (barcode, location))
         # Should we update the transport history to show its been taken out?
         # It would affect the LN2 top up assumption
         result = controller.set_location(barcode, 'REMOVED FROM {}'.format(location))

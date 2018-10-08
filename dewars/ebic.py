@@ -97,7 +97,7 @@ def location():
     elif request.method == "DELETE":
         location = request.form['location']
 
-        result, status_code = common.remove_from_location(location)
+        result, status_code = common.remove_dewar_from_location(location)
     else:
         result = {'location': '',
                   'barcode': '',
