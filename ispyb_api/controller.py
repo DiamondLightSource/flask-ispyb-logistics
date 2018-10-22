@@ -126,7 +126,7 @@ def find_dewars_by_proposal(proposal_code, proposal_number):
                Dewar.isStorageDewar,
                Dewar.barCode,
                Dewar.firstExperimentId,
-   			   Dewar.type,
+               Dewar.type,
                Dewar.FACILITYCODE,
                Dewar.weight,
                Dewar.deliveryAgent_barcode,
