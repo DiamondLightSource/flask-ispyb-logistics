@@ -18,7 +18,7 @@ def test(filename):
         port = config.getint(section, 'port')
         db = config.get(section, 'db')
 
-        print("DATABASE URL = mysql+pymysql://{}:{}@{}:{}/{}".format(user, password, host, port, db))
+        print("DATABASE URL = mysql+mysqlconnector://{}:{}@{}:{}/{}".format(user, password, host, port, db))
     except NoOptionError:
         print("Error retrieving values from config file {}".format(filename))
     except NoSectionError:

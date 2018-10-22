@@ -51,7 +51,7 @@ def init_app(app):
     db_url = read_db_config(config_filename, config_section)
     
     if db_url is None:
-        db_url = 'mysql+pymysql://ispyb:integration@localhost:3306/ispyb'
+        db_url = 'mysql+mysqlconnector://ispyb:integration@localhost:3306/ispyb'
 
         print("Config read failed, falling back to default db connection credentials")
 
