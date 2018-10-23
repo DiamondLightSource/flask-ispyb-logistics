@@ -44,7 +44,7 @@ def location():
         awb = request.form['awb']
 
         if location and barcode:
-            result = updateDewarLocation(barcode, location, awb)
+            result, status_code = updateDewarLocation(barcode, location, awb)
         else:
             print("Warning barcode and/or location not set, ignoring request.")
 
@@ -66,6 +66,7 @@ def updateDewarLocation(barcode, location, awb=None):
     """
     # if remote_ip not in allowed_ips:
     #     print json.dumps({'location':location,'barcode':barcode,'awb':awb,'status':'fail','your_ip':remote_ip})
+    status_code = 200
 
     if awb:
         awb = awb.replace('+', '_')
@@ -91,17 +92,19 @@ def updateDewarLocation(barcode, location, awb=None):
                      'destination': destination,
                      'awb': awb})
 
-    logs.writeStoresFile(jsonfilename, data)
-
     result = controller.set_location(barcode, location, awb)
 
     if result is not None:
         result = {'location': location, 'barcode': barcode, 'awb': awb, 'status': 'ok'}
+
+        # Now we can update the stores logs if no error!
+        logs.writeStoresFile(jsonfilename, data)
     else:
         result = {'location': location,
                   'barcode': barcode,
                   'awb': awb,
                   'status': 'fail - controller did not set location',
-                  } 
+                  }
+        status_code = 400
 
-    return result
+    return result, status_code
