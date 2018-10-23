@@ -13,6 +13,13 @@ api = Blueprint('stores', __name__, url_prefix='/stores')
 jsonfilename = 'logs/stores.json'
 
 
+"""
+Route for vue.js version
+"""
+@api.route("/vstores")
+def vstores():
+    return render_template('vue-stores.html', api_prefix="stores")
+
 @api.route('/')
 def index():
     """

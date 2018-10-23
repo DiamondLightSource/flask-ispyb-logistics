@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>{{title}}</title>
+    <!-- <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css" integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous"> -->
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bulma/0.7.1/css/bulma.min.css"/>
+
+  <!-- development version, includes helpful console warnings -->
+  <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.18.0/axios.min.js"></script>
+
+</head>
+
+<body class="has-background-white-ter">
+
+  <div class="container-fluid" id="app">
+
+    <!-- First set of columns are the top form elements -->
+    <div class="columns">
+
+      <!-- Form element to set locations -->
+      <div class="column is-one-third solid-border">
+        <h2 class="title has-text-centered">Scan Dewar and Rack</h2>
+
+        <form>
+          <div class="field">
+            <label>Barcode</label>
+              <div class="control">
+                <input type="text" class="input" v-model="barcode" placeholder="Scan the long barcode from the dewar case">        
+              </div>
+          </div>
+
+          <div class="field">
+            <label>Location</label>
+            <div class="control">
+              <input type="text" class="input" v-model="location" placeholder="Scan the location e.g. RACK-A1">        
+            </div>
+          </div>
+
+          <div class="columns">
+            <div class="column">
+                <button type="submit" class="button is-link is-fullwidth" v-on:click="onSetLocation">Submit</button>              
+            </div>
+            <div class="column">
+                <button type="cancel" class="button is-info is-fullwidth"  v-on:click="onClearLocationForm">Cancel</button>
+            </div>
+          </div>        
+        </form>
+
+      </div>
+            
+      <!-- Form element to find a dewar -->
+      <div class="column is-one-third solid-border">
+        <h2 class="title has-text-centered">Find a Dewar</h2>
+        <form>
+          <div class="field">
+            <label>Facility Code</label>
+            <div class="control">
+                <input type="text" class="input" v-model="facilitycode" placeholder="DLS-MX-####">   
+            </div>
+          </div>
+          <div class="columns">
+            <div class="column">
+              <button type="submit" class="button is-link is-fullwidth" v-on:click="onFindDewar">Search</button>            
+            </div>
+            <div class="column">
+              <button type="submit" class="button is-info is-fullwidth" v-on:click="onClearFindForm">Cancel</button>            
+            </div>
+          </div>
+        </form>
+      </div>
+
+      <!-- Display dewars in need of refilling (show up to 5)-->
+      <div class="column is-one-third solid-border">
+        <h2 class="title has-text-centered">Dewars that need refilling</h2>
+        <ul>
+          <li v-for="dewar in dewars.slice(0, 5)">
+            <p class="is-size-4 has-text-centered has-text-danger"><b>[[dewar]]</b></p>
+          </li>
+        </ul>
+        <footer class="footer has-background-white-ter is-paddingless">
+          <div class="content has-text-centered">
+            <p>(Scan dewars back into the same position after refilling)</p>
+          </div>
+        </footer>
+      </div>
+    </div>
+
+    <!-- 
+      Area for messages from back end 
+      Currently two separate conditional renders based on error or warning
+      Could make a single set  
+    -->
+    <div v-if="message" class="columns">
+        <article class="column is-12 message" v-bind:class="[isError ? 'is-danger' : 'is-info']">
+        <div class="message-body subtitle">
+          [[message]]
+        </div>
+      </article>
+    </div>
+    
+    <!-- Display the rack locations, four columns across -->
+    <div class=" solid-border columns is-multiline">
+
+      <div class="column is-3" v-for="dewar, rack in rack_locations" >
+      
+        <div class="box has-background-white-ter" v-on:click="onClearLocation(rack)" v-bind:class="{'has-text-danger': dewar.needsLN2}">
+          <span class="has-text-weight-bold">[[rack]]: </span>
+          <span v-if="dewar.barcode" class="content">[[dewar.barcode]]</span>
+          <span v-else class="content is-invisible">empty</span>
+        </div>
+
+      </div>
+    </div>    
+
+    <!-- This pops up to confirm the clear location action -->
+    <div class="modal" v-bind:class="{ 'is-active' : isRemoveDialogActive }">
+      <div class="modal-background"></div>
+      <div class="modal-card">
+        <header class="modal-card-head">
+          <p class="modal-card-title">Confirm Clear</p>
+        </header>
+        <section class="modal-card-body">
+          <p>Confirm removal of dewar from location [[locationToRemove]]?</p>
+        </section>
+        <footer class="modal-card-foot">
+          <button class="button is-success" v-on:click="onConfirmClear(true)">Confirm</button>
+          <button class="button" v-on:click="onConfirmClear(false)">Cancel</button>
+        </footer>
+      </div>
+    </div>
+
+  </div>
+
+
+  <!-- Single Vue component to manage this page -->
+  <script>
+    // Audio context used for user feedback
+    var context = new AudioContext();
+
+    function playOscillator(startTime, endTime, frequency) {
+        context.resume();
+        oscillator = context.createOscillator();
+        oscillator.connect(context.destination);
+        oscillator.frequency.setValueAtTime(frequency, context.currentTime); // Hz
+        oscillator.start(startTime);
+        oscillator.stop(endTime);
+    }
+    // Provided by Jinja2 template
+    // Used to enforce correct ordering of rack locations
+    var racklist = {{rack_locations | tojson() }}
+    
+    var app = new Vue({
+        el: '#app',
+        // Change default delimters to avoid clash with jinja2
+        delimiters: ["[[","]]"],
+        data: {
+          // Array for dewars that need refilling...        
+          dewars: ["","","",],
+          // Data for rack locations...        
+          rack_locations: {'RACK-A1': {'barcode': '', 'arrivalDate': '', 'needsLN2':''}}, 
+          // Data elements for form input
+          barcode: '',
+          location: '',
+          facilitycode: '',
+          // Toggle the pop up confirmation dialog
+          isRemoveDialogActive: false,
+          locationToRemove: "",
+          // Error message on find dewar, set location etc
+          // isError if actual error, info otherwise
+          message: "",
+          isError: false,
+          isFormOK: true,
+        },
+        // Watcher to reset the message after few seconds...
+        watch: {
+          message(newValue) {
+            // Close after 5 seconds
+            if (newValue) {
+              setTimeout(this.clearMessages, 3000);
+            }
+          },
+        },
+
+        // Lifecycle hook - called when Vue is mounted on the page...
+        mounted() {
+          console.log("Vue component mounted")
+
+          this.getBarcodes()
+        },
+
+        methods: {
+            // Main method that retrieves dewar locations from database
+            getBarcodes() {
+              console.log("get barcodes")
+              let self = this
+
+              axios.get("/{{api_prefix}}/dewars")
+              .then(function(response) {
+                console.log(response.data)
+                let json = response.data
+                let racks = racklist //Object.keys(json);
+                
+                racks.forEach(function(rack) {
+                  let barcode = json[rack][0]
+                  let arrivalDate = json[rack][1]
+                  // Could add facility code here as [2]
+                  let needsLN2 = false
+
+                  // Check here if arrivalData > 5 days    
+                  if (arrivalDate !== "") {
+                    let nowSecs = new Date().getTime()/1000;
+                    let lastFillSeconds = Date.parse(arrivalDate)/1000
+
+                    let deltaTime = nowSecs - lastFillSeconds
+
+                    if (deltaTime > 5*24*3600) {
+                      console.log("Dewar in rack location " + rack + " needs refilling")
+                      needsLN2 = true
+                      self.dewars.push(rack)
+                    } else {
+                      console.log("Last Fill Seconds within 5 days: " + lastFillSeconds)
+                    }  
+                  }
+                  self.rack_locations[rack] = {'barcode': barcode, 'arrivalDate': arrivalDate, 'needsLN2': needsLN2}
+                })
+              })
+              .catch(function(error) {
+                console.log("Error getting initial data")
+                self.message = "Error retrieving initial data"
+                self.isError = true
+              })
+            },
+
+            // Method to update dewar location in database
+            onSetLocation(event) {
+                event.preventDefault()
+
+                if (this.barcode && this.location) {
+                  let self = this
+                  let barcode = this.barcode
+                  let location = this.location
+
+                  let formData = new FormData();
+                  formData.append('barcode', barcode)
+                  formData.append('location', location)
+
+                  axios.post("/{{api_prefix}}/dewars", formData)
+                  .then(function(response) {
+                    let json = response.data
+
+                    let frequency = 600;
+                    playOscillator(context.currentTime, context.currentTime + 0.2, frequency);
+                    // Changed because we don't get the dewar id back from synchweb but we get 
+                    // the DEWARHISTORYID instead
+                    if ( json['DEWARHISTORYID'] > 0 ) {
+                      console.log("HAPPY BEEPS")
+                        playOscillator(context.currentTime + 0.4, context.currentTime + 0.6, frequency);
+                        playOscillator(context.currentTime + 0.8, context.currentTime + 1, frequency);
+                    } else {
+                        console.log("SAD BEEPS")
+                        frequency = 400;
+                        playOscillator(context.currentTime + 0.4, context.currentTime + 1, frequency);
+                    }
+
+                    self.message = "Updating " + barcode + " to " + location
+                    // Request updated locations from DB                  
+                    self.getBarcodes()
+                  })
+                  .catch(function(error) {
+                    self.message = "Error updating " + barcode + " to " + location
+                    self.isError = true
+                    
+                    // Play error jingle
+                    let frequency = 600;
+                    playOscillator(context.currentTime, context.currentTime + 0.2, frequency);
+                    frequency = 400;
+                    playOscillator(context.currentTime + 0.4, context.currentTime + 1, frequency);
+                    console.log("SAD BEEPS")
+
+                  })
+                  // Rest form values
+                  this.barcode = ''
+                  this.location = ''    
+                } else {
+                  this.message = "Issue with form: "
+                  if (this.barcode === "") {
+                    this.message += " no barcode provided..."
+                  }
+                  if (this.location === "") {
+                    this.message += ' no location provided...'
+                  }
+                }                 
+            },
+
+            // Search the database for a dewar with the specified facility code (DLS-MX-1234)
+            onFindDewar(event) {
+              event.preventDefault()
+
+              if (this.facilitycode !== "") {
+                console.log("find dewar " + this.facilitycode)   
+              
+                self = this
+                let facilitycode = this.facilitycode
+
+                axios.get("/{{api_prefix}}/dewars/find", {params: {'fc':facilitycode}})
+                .then(function(response) {
+                  console.log(response)
+                  let json = response.data
+                  let location = json['storageLocation']
+                  self.message = "Dewar " + facilitycode + " is at " + location.toUpperCase()
+                })
+                .catch(function(error) {
+                  console.log("Error updating location ")
+                  self.message = "Dewar " + facilitycode + " not found"
+                  self.isError = true
+                })
+                .finally(function() {
+                  this.facilitycode = ''
+                })
+              } else {
+                this.message = "No facility code provided"
+              }
+            },
+
+            onClearLocationForm(event) {
+              event.preventDefault()          
+              this.barcode = ''
+              this.location = ''
+            },
+
+            onClearFindForm(event) {
+                event.preventDefault()          
+                this.facilitycode = ''
+            },
+
+            // Handler for clear location event (rack location clicked)
+            onClearLocation(location) {
+              this.isRemoveDialogActive = true
+              this.locationToRemove = location
+            },
+
+            onConfirmClear(confirm) {
+              if (confirm === true) {
+                console.log("Remove dewar from location " + this.locationToRemove)    
+                for (item of this.rack_locations) {
+                  if (item.location === this.locationToRemove) {
+                    console.log('found rack location ' + this.locationToRemove)
+                    item.barcode = ""
+                    break;
+                  }
+                }                                    
+              }
+
+              this.locationToRemove = "";
+              this.isRemoveDialogActive = false
+            },
+
+            // Clear all messages in one go 
+            clearMessages() {
+              this.message = ""
+              this.isError = false
+            },
+        },
+      })
+    
+  </script>
+
+  <!-- Borders Top, right, bottom, left-->
+  <style>
+    .container-fluid {
+      padding: 20px;
+    }
+
+    div.solid-border {
+      border-style: solid;
+      border-width: 1px 1px 1px 1px;
+    }
+
+  </style>
+</body>
+
+
+</html>

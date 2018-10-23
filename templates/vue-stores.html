@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Stores ISPyB Dewar Application</title>
+    <!-- <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css" integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous"> -->
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bulma/0.7.1/css/bulma.min.css"/>
+
+  <!-- development version, includes helpful console warnings -->
+  <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.18.0/axios.min.js"></script>
+
+</head>
+
+<body class="has-background-white-ter">
+    <div id="app"> <!-- Container for Vue App-->
+
+        <div class="container-fluid">
+
+            <!-- First set of columns are the top form elements -->
+            <div class="columns">
+
+                <!-- Form element to set locations -->
+                <div class="column is-half solid-border">
+                    <h2 class="title has-text-centered">Scan Dewar and Barcode</h2>
+
+                    <form>
+                        <div class="field">
+                            <label>Location</label>
+                            <div class="control">
+                            <input type="text" class="input" v-model="location" placeholder="Scan the location e.g. STORES-IN or STORES-OUT">        
+                            </div>
+                        </div>
+
+                        <div class="field">
+                            <label>Barcode</label>
+                            <div class="control">
+                                <input type="text" class="input" v-model="barcode" placeholder="Scan the long barcode from the dewar case">        
+                            </div>
+                        </div>
+
+
+                        <div class="field">
+                            <label>Airway Bill</label>
+                            <div class="control">
+                                <input type="text" class="input" v-model="awb" placeholder="Scan the 10 digit DHL Airway Bill">        
+                            </div>
+                        </div>
+                    
+                        <div class="columns">
+                            <div class="column">
+                                <button type="submit" class="button is-link is-fullwidth" v-on:click="onSetLocation">Submit</button>              
+                            </div>
+                            <div class="column">
+                                <button type="cancel" class="button is-info is-fullwidth"  v-on:click="onClearLocationForm">Cancel</button>
+                            </div>
+                        </div>        
+                    </form>
+
+                </div>
+
+
+                <div class="column is-half solid-border"> <!-- STORES LOCATIONS  -->
+                    <h2 class="title has-text-centered">Locations</h2>
+                    <br />
+                    <nav class="level">
+                        <div class="level-item has-text-centered">
+                            <div>
+                                <img width=96 src='/static/img/stores-in.gif'>
+                                <p class="subtitle">STORES-IN</p>                
+                            </div>
+                        </div>
+                        <div class="level-item has-text-centered">
+                            <div>
+                                <img width=96 src='/static/img/stores-out.gif'>
+                                <p class="subtitle">STORES-OUT</p>
+                            </div>
+                        </div>
+                    </nav>   
+                </div> <!-- END STORES LOCATIONS -->
+
+
+            </div> <!-- End of columns -->
+
+            <!-- 
+                Area for messages from back end 
+                Currently conditional render based on error or warning
+            -->
+            <div v-if="message" class="columns">
+                <article class="column is-12 message" v-bind:class="[isError ? 'is-danger' : 'is-info']">
+                    <div class="message-body subtitle">
+                    [[message]]
+                    </div>
+                </article>
+            </div>
+
+        </div> <!-- END container fluid -->
+
+        <!-- Display the stores history -->
+        <div class="container-fluid">
+                <div class="has-text-centered">
+                    <h1 class="title">History</h1>
+                </div>            
+                <br />
+                <table class="table is-bordered is-fullwidth is-striped">
+                    <thead class="center-table">
+                        <th>Date/Time</th><th>Barcode</th><th>In or Out?</th><th>Destination</th><th>Airway Bill</th>
+                    </thead>
+                    <tbody class="center-table">
+                        <tr v-for="dewar in dewars">
+                            <td>[[dewar.date]]</td>
+                            <td>[[dewar.barcode.toUpperCase()]]</td>
+                            <td>[[dewar.inout.toUpperCase()]]</td>
+                            <td>[[dewar.destination]]</td>
+                            <td v-if="isDHL(dewar.awb)">
+                                <a v-bind:href="'http://www.dhl.com/en/express/tracking.html?AWB=' + dewar.awb">[[dewar.awb]]</a>
+                            </td>
+                            <td v-else-if="isFedex(dewar.awb)">
+                                <a v-bind:href="'http://www.fedex.com/apps/fedextrack/?trackingnumber=' + dewar.awb">[[dewar.awb]]</a>
+                            </td>
+                            <td v-else>
+                                [[dewar.awb]]
+                            </td>
+                        </tr>
+                    </tbody>
+                </table> 
+            </div>          
+        </div>        
+
+    </div> <!-- End div id=app-->
+
+  <!-- Single Vue component to manage this page -->
+  <script>
+        var app = new Vue({
+            el: '#app',
+            // Change default delimters to avoid clash with jinja2
+            delimiters: ["[[","]]"],
+            data: {
+              // Array for dewars that need refilling...        
+              dewars: [{'awb':'123455', 'barcode':'cs1235', 'destination':'zone6', 'inout':'stores-in', 'date':'2345'}],
+              // Data elements for form input
+              barcode: '',
+              location: '',
+              awb: '',
+              // Error message on find dewar, set location etc
+              // isError if actual error, info otherwise
+              message: "",
+              isError: false,
+              isFormOK: true,
+            },
+            // Watcher to reset the message after few seconds...
+            watch: {
+              message(newValue) {
+                // Close after 2 seconds
+                if (newValue) {
+                  setTimeout(this.clearMessages, 3000);
+                }
+              },
+            },
+
+            // Lifecycle hook - called when Vue is mounted on the page...
+            mounted() {
+                console.log("Vue App Instance Mounted")
+
+                this.getDewars()
+            },
+
+            methods: {
+                // Main method that retrieves dewar history from database
+                getDewars() {
+                  let self = this
+                  self.dewars = []
+
+                  axios.get("/{{api_prefix}}/dewars")
+                  .then(function(response) {
+                    console.log(response.data)
+                    let json = response.data
+                    let dewars = Object.keys(json);
+                    
+                    dewars.forEach(function(index) {
+                      let dewar = json[index]
+
+                      self.dewars.push(dewar)
+                    })
+                  })
+                  .catch(function(error) {
+                    console.log("Error getting initial data")
+                    self.message = "Error retrieving initial data"
+                    self.isError = true
+                  })
+                },
+
+                // Method to update dewar location in database
+                onSetLocation(event) {
+                    event.preventDefault()
+                    let self = this
+
+                    if (this.barcode && this.location) {
+                        let barcode = this.barcode
+                        let location = this.location
+                        let awb = this.awb // Field is optional
+    
+                        let formData = new FormData();
+                        formData.append('barcode', barcode)
+                        formData.append('location', location)
+                        formData.append('awb', awb)
+    
+                        axios.post("/{{api_prefix}}/dewars", formData)
+                        .then(function(response) {
+                            console.log(response)
+                            self.message = "Updated " + barcode + " to " + location
+                            // Request updated locations from DB                  
+                            self.getDewars()
+                        })
+                        .catch(function(error) {
+                            self.message = "Error updating " + barcode + " to " + location
+                            self.isError = true
+                        })
+                        // Rest form values
+                        this.barcode = ''
+                        this.location = ''    
+                        this.awb = ''    
+                    } else {
+                        this.message = "Issue with form: "
+                        if (this.barcode === "") {
+                            this.message += " no barcode provided..."
+                        }
+                        if (this.location === "") {
+                            this.message += ' no location provided...'
+                        }
+                    }                 
+                },
+
+                // Reset Form fields
+                onClearLocationForm(event) {
+                  event.preventDefault()          
+                  this.barcode = ''
+                  this.location = ''
+                  this.awb = ''
+                },
+
+                // Clear error/info messages in one go 
+                clearMessages() {
+                  this.message = ""
+                  this.isError = false
+                },
+
+                isDHL(awb) {
+                    let pattern1 = /^[0-9]{10}$/
+                    let pattern2 = /^JJ?D[0-9]{18}$/
+
+                    if (pattern1.test(awb) || pattern2.test(awb)) {
+                        return true
+                    } else {
+                        return false
+                    }
+                },
+
+                isFedex(awb) {
+                    let pattern1 = /^[0-9]{12}$/
+                    let pattern2 = /^[0-9]{16}$/
+
+                    if (pattern1.test(awb) || pattern2.test(awb)) {
+                        return true                        
+                    } else {
+                        return false
+                    }
+                },
+            },
+          })
+    
+  </script>
+
+  <!-- Small style changes to override default bulma css -->
+  <style>
+    .container-fluid {
+      padding: 20px;
+    }
+
+    div.solid-border {
+      border-style: solid;
+      border-width: 1px 1px 1px 1px;
+    }
+
+    .center-table th {
+        text-align: center;
+        vertical-align: middle;
+    }
+    
+    .center-table td {
+        text-align: center;
+        vertical-align: middle;
+    }
+
+  </style>
+</body>
+
+
+</html>

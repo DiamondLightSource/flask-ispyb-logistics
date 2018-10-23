@@ -15,7 +15,7 @@ logger = logging.getLogger('ispyb-logistics')
 handler = logging.handlers.RotatingFileHandler('logs/logistics.log', maxBytes=1000000, backupCount=5)
 handler.setFormatter(logging.Formatter("[%(asctime)s] [%(levelname)s] [%(message)s]"))
 logger.addHandler(handler)
-logger.setLevel(logging.INFO)
+logger.setLevel(logging.DEBUG)
 
 app = Flask(__name__)
 app.register_blueprint(ebic_api)
