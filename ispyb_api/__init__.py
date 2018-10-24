@@ -58,5 +58,6 @@ def init_app(app):
     print("Database connection URL: {}".format(db_url))
 
     app.config['SQLALCHEMY_DATABASE_URI'] = db_url
+    app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
     db.init_app(app)
