@@ -25,8 +25,8 @@ def readJsonFile(filename):
             data = json.load(jsonfile)
             return data
     except IOError:
-        print("Error reading json file: %s" % filename)
-        return None
+        print("Error reading json file: %s - using blank list" % filename)
+        return []
 
 
 def writeStoresFile(filename, data):
@@ -37,7 +37,7 @@ def writeStoresFile(filename, data):
     data - a collections.deque representing the dewar list
     """
     if len(data) is not max_stores_dewars:  # Warn for now, could raise as an error?
-        print("Warning: dewar list for stores log file not of correct length (should be %d) " %
+        print("Warning: dewar list for stores log file not of correct length (expected %d) " %
               max_stores_dewars)
 
     json_data = []
@@ -74,7 +74,7 @@ def _test_stores():
                          'date': time.strftime('%a %d %b, %H:%M:%S'),
                          'inout': 'RACK-A%d' % i,
                          'destination': 'STORES-OUT',
-                         'awb': '112233445566'})
+                         'awb': '1234567890'})
 
     writeStoresFile(test_stores_file, data)
 
