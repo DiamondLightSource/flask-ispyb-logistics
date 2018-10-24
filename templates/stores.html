@@ -16,20 +16,11 @@
         console.log('not IE detected')
         var context = new AudioContext();//,oscillator;
 
-        function playOscillator(startTime, endTime) {
+        function playOscillator(startTime, endTime, frequency) {
             context.resume();
             oscillator = context.createOscillator();
             oscillator.connect(context.destination);
-            oscillator.frequency.setValueAtTime(600, context.currentTime); // Hz
-            oscillator.start(startTime);
-            oscillator.stop(endTime);
-        }
-
-        function playOscillator2(startTime, endTime) {
-            context.resume();
-            oscillator = context.createOscillator();
-            oscillator.connect(context.destination);
-            oscillator.frequency.setValueAtTime(400, context.currentTime); // Hz
+            oscillator.frequency.setValueAtTime(frequency, context.currentTime); // Hz
             oscillator.start(startTime);
             oscillator.stop(endTime);
         }
@@ -178,12 +169,14 @@
             success: function(json){
                 console.log(json);
                 if ( json['status'] == 'ok' && !('ActiveXObject' in window)) {
-                    playOscillator(context.currentTime, context.currentTime + 0.2);
-                    if ( json['dewarid'] > 0 ) {
-                        playOscillator(context.currentTime + 0.4, context.currentTime + 0.6);
-                        playOscillator(context.currentTime + 0.8, context.currentTime + 1);
+					let frequency = 600;
+                    playOscillator(context.currentTime, context.currentTime + 0.2, frequency);
+                    if ( json['DEWARHISTORYID'] > 0 ) {
+                        playOscillator(context.currentTime + 0.4, context.currentTime + 0.6, frequency);
+                        playOscillator(context.currentTime + 0.8, context.currentTime + 1, frequency);
                     } else {
-                        playOscillator2(context.currentTime + 0.4, context.currentTime + 1);
+						frequency = 400;
+                        playOscillator(context.currentTime + 0.4, context.currentTime + 1, frequency);
                     }
                 }
             }

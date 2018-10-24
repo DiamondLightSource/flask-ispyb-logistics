@@ -174,11 +174,15 @@
           message: "",
           isError: false,
           isFormOK: true,
+
+          // Timeout handle - used to determine if we need to refresh page
+          refresh: undefined,
+          refreshInterval: 10000, // refresh interval in milliseconds
         },
         // Watcher to reset the message after few seconds...
         watch: {
           message(newValue) {
-            // Close after 5 seconds
+            // Close after 3 seconds
             if (newValue) {
               setTimeout(this.clearMessages, 3000);
             }
@@ -195,15 +199,20 @@
         methods: {
             // Main method that retrieves dewar locations from database
             getBarcodes() {
-              console.log("get barcodes")
               let self = this
               this.dewars = []
+
+              if (self.refresh) {
+                // If we have been triggered by a form post/update,
+                // Cancel the current timeout (avoid double refresh)
+                clearTimeout(self.refresh)
+              }
 
               axios.get("/{{api_prefix}}/dewars")
               .then(function(response) {
                 console.log(response.data)
                 let json = response.data
-                let racks = racklist //Object.keys(json);
+                let racks = racklist //Object.keys(json); racklist is in correct order for rendering
                 
                 racks.forEach(function(rack) {
                   let barcode = json[rack][0]
@@ -222,9 +231,7 @@
                       console.log("Dewar in rack location " + rack + " needs refilling")
                       needsLN2 = true
                       self.dewars.push(rack)
-                    } else {
-                      console.log("Last Fill Seconds within 5 days: " + lastFillSeconds)
-                    }  
+                    }
                   }
                   self.rack_locations[rack] = {'barcode': barcode, 'arrivalDate': arrivalDate, 'needsLN2': needsLN2}
                 })
@@ -234,6 +241,8 @@
                 self.message = "Error retrieving initial data"
                 self.isError = true
               })
+              // Now setup the next update
+              self.refresh = setTimeout(self.getBarcodes, self.refreshInterval)
             },
 
             // Method to update dewar location in database
@@ -244,6 +253,15 @@
                   let self = this
                   let barcode = this.barcode
                   let location = this.location
+
+                  // Is this location in our list?
+                  let hasLocation = this.rack_locations.hasOwnProperty(this.location.toUpperCase())
+                  
+                  if (hasLocation === false) {
+                    this.message = 'Error - location not allowed for this page'
+                    self.isError = true
+                    return
+                  }
 
                   let formData = new FormData();
                   formData.append('barcode', barcode)
@@ -258,7 +276,7 @@
                     // Changed because we don't get the dewar id back from synchweb but we get 
                     // the DEWARHISTORYID instead
                     if ( json['DEWARHISTORYID'] > 0 ) {
-                      console.log("HAPPY BEEPS")
+                        console.log("HAPPY BEEPS")
                         playOscillator(context.currentTime + 0.4, context.currentTime + 0.6, frequency);
                         playOscillator(context.currentTime + 0.8, context.currentTime + 1, frequency);
                     } else {
