@@ -159,7 +159,7 @@
         delimiters: ["[[","]]"],
         data: {
           // Array for dewars that need refilling...        
-          dewars: ["","","",],
+          dewars: [],
           // Data for rack locations...        
           rack_locations: {'RACK-A1': {'barcode': '', 'arrivalDate': '', 'needsLN2':''}}, 
           // Data elements for form input
@@ -197,6 +197,7 @@
             getBarcodes() {
               console.log("get barcodes")
               let self = this
+              this.dewars = []
 
               axios.get("/{{api_prefix}}/dewars")
               .then(function(response) {
