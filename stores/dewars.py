@@ -80,12 +80,14 @@ def updateDewarLocation(barcode, location, awb=None):
 
     destination = ''
 
-    if location == 'STORES-IN':
-        if barcode[0:2] == 'SP' or 'I14' in barcode:
+    barcode_prefix = barcode.upper()[0:2]
+
+    if location.upper() == 'STORES-IN':
+        if barcode_prefix == 'SP' or 'I14' in barcode.upper():
             destination = 'I14'
-        elif barcode[0:2] == 'EM' or any(b in barcode for b in ['M01', 'M02', 'M03', 'M04', 'M05', 'M06', 'M07']):
+        elif barcode_prefix == 'EM' or any(b in barcode.upper() for b in ['M01', 'M02', 'M03', 'M04', 'M05', 'M06', 'M07']):
             destination = 'eBIC'
-        elif barcode[0:2] == 'MX' or any(b in barcode for b in ['I03', 'I04', 'I23', 'I24']):
+        elif barcode_prefix == 'MX' or any(b in barcode.upper() for b in ['I03', 'I04', 'I23', 'I24']):
             destination = 'Zone 6 store'
         else:
             destination = 'Unknown'
