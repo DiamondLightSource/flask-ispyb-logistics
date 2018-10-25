@@ -3,15 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <title>{{title}}</title>
-    <!-- <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css" integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous"> -->
-
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bulma/0.7.1/css/bulma.min.css"/>
-
-  <!-- development version, includes helpful console warnings -->
-  <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
-
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.18.0/axios.min.js"></script>
-
+    <!-- development version, includes helpful console warnings -->
+    <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.18.0/axios.min.js"></script>
 </head>
 
 <body class="has-background-white-ter">
@@ -24,7 +19,6 @@
       <!-- Form element to set locations -->
       <div class="column is-one-third solid-border">
         <h2 class="title has-text-centered">Scan Dewar and Rack</h2>
-
         <form>
           <div class="field">
             <label>Barcode</label>
@@ -49,7 +43,6 @@
             </div>
           </div>        
         </form>
-
       </div>
             
       <!-- Form element to find a dewar -->
@@ -91,8 +84,7 @@
 
     <!-- 
       Area for messages from back end 
-      Currently two separate conditional renders based on error or warning
-      Could make a single set  
+      Currently conditional styling based on error or warning
     -->
     <div v-if="message" class="columns">
         <article class="column is-12 message" v-bind:class="[isError ? 'is-danger' : 'is-info']">
@@ -104,15 +96,12 @@
     
     <!-- Display the rack locations, four columns across -->
     <div class=" solid-border columns is-multiline">
-
-      <div class="column is-3" v-for="dewar, rack in rack_locations" >
-      
+      <div class="column is-3" v-for="dewar, rack in rack_locations">
         <div class="box has-background-white-ter" v-on:click="onClearLocation(rack)" v-bind:class="{'has-text-danger': dewar.needsLN2}">
           <span class="has-text-weight-bold">[[rack]]: </span>
           <span v-if="dewar.barcode" class="content">[[dewar.barcode]]</span>
           <span v-else class="content is-invisible">empty</span>
         </div>
-
       </div>
     </div>    
 
@@ -136,7 +125,7 @@
   </div>
 
 
-  <!-- Single Vue component to manage this page -->
+  <!-- Inline Javascript code -->
   <script>
     // Audio context used for user feedback
     var context = new AudioContext();
@@ -152,7 +141,8 @@
     // Provided by Jinja2 template
     // Used to enforce correct ordering of rack locations
     var racklist = {{rack_locations | tojson() }}
-    
+
+    // Single Vue instance to manage this page
     var app = new Vue({
         el: '#app',
         // Change default delimters to avoid clash with jinja2
@@ -160,8 +150,9 @@
         data: {
           // Array for dewars that need refilling...        
           dewars: [],
-          // Data for rack locations...        
-          rack_locations: {'RACK-A1': {'barcode': '', 'arrivalDate': '', 'needsLN2':''}}, 
+          // Data for rack locations in JSON structure
+          // Data from backend is a list [barcode, arrivalData, facilityCode]
+          rack_locations: {'RACK-A1': {'barcode': '', 'arrivalDate': '', 'needsLN2': false}},
           // Data elements for form input
           barcode: '',
           location: '',
@@ -174,12 +165,11 @@
           message: "",
           isError: false,
           isFormOK: true,
-
           // Timeout handle - used to determine if we need to refresh page
           refresh: undefined,
           refreshInterval: 10000, // refresh interval in milliseconds
         },
-        // Watcher to reset the message after few seconds...
+        // Watcher to reset the error/info messages after few seconds...
         watch: {
           message(newValue) {
             // Close after 3 seconds
@@ -189,7 +179,7 @@
           },
         },
 
-        // Lifecycle hook - called when Vue is mounted on the page...
+        // Lifecycle hook - called when Vue is mounted on the page (trigger first get)...
         mounted() {
           console.log("Vue component mounted")
 
@@ -258,8 +248,10 @@
                   let hasLocation = this.rack_locations.hasOwnProperty(this.location.toUpperCase())
                   
                   if (hasLocation === false) {
-                    this.message = 'Error - location not allowed for this page'
+                    // Something very wrong - clearing a location we should not have
+                    self.message = 'Error - location not allowed for this page'
                     self.isError = true
+                    console.log(self.message)
                     return
                   }
 
@@ -273,8 +265,8 @@
 
                     let frequency = 600;
                     playOscillator(context.currentTime, context.currentTime + 0.2, frequency);
-                    // Changed because we don't get the dewar id back from synchweb but we get 
-                    // the DEWARHISTORYID instead
+                    // Changed because we don't get the dewar id back from synchweb
+                    // We get a DEWARHISTORYID instead
                     if ( json['DEWARHISTORYID'] > 0 ) {
                         console.log("HAPPY BEEPS")
                         playOscillator(context.currentTime + 0.4, context.currentTime + 0.6, frequency);
@@ -327,18 +319,16 @@
 
                 axios.get("/{{api_prefix}}/dewars/find", {params: {'fc':facilitycode}})
                 .then(function(response) {
-                  console.log(response)
                   let json = response.data
                   let location = json['storageLocation']
                   self.message = "Dewar " + facilitycode + " is at " + location.toUpperCase()
                 })
                 .catch(function(error) {
-                  console.log("Error updating location ")
                   self.message = "Dewar " + facilitycode + " not found"
                   self.isError = true
                 })
                 .finally(function() {
-                  this.facilitycode = ''
+                  self.facilitycode = ''
                 })
               } else {
                 this.message = "No facility code provided"
@@ -357,23 +347,41 @@
             },
 
             // Handler for clear location event (rack location clicked)
+            // This will trigger the confirm dialog box to show up
             onClearLocation(location) {
+              // This location will be upper case because we control how it is rendered
               this.isRemoveDialogActive = true
               this.locationToRemove = location
             },
 
+            // User has either confirmed or cancelled
             onConfirmClear(confirm) {
               if (confirm === true) {
-                console.log("Remove dewar from location " + this.locationToRemove)    
-                for (item of this.rack_locations) {
-                  if (item.location === this.locationToRemove) {
-                    console.log('found rack location ' + this.locationToRemove)
-                    item.barcode = ""
-                    break;
-                  }
-                }                                    
-              }
+                // Extra check to ensure this is a valid location
+                let hasLocation = this.rack_locations.hasOwnProperty(this.locationToRemove)
 
+                if (hasLocation) {
+                  // Store variables for use within axios handler functions
+                  let self = this
+                  let barcode = this.rack_locations[this.locationToRemove]['barcode']
+                  let location = this.locationToRemove
+
+                  console.log('Removing dewar from rack location ' + this.locationToRemove + " barcode " + barcode)
+
+                  axios.delete("/{{api_prefix}}/dewars", {params: {'location': this.locationToRemove}})
+                  .then(function(response) {
+                    self.message = "Dewar removed " + barcode + " from location " + self.locationToRemove
+
+                    // Refresh page
+                    self.getBarcodes()
+                  })
+                  .catch(function(error) {
+                    self.message = "Error removing dewar " + barcode + " from location " + self.locationToRemove
+                    self.isError = true
+                  })
+                }
+              }
+              // In any case, reset data that will disable dialog box
               this.locationToRemove = "";
               this.isRemoveDialogActive = false
             },
@@ -388,7 +396,7 @@
     
   </script>
 
-  <!-- Borders Top, right, bottom, left-->
+  <!-- Inline styling - css overrides (Borders Top, right, bottom, left) -->
   <style>
     .container-fluid {
       padding: 20px;
@@ -399,8 +407,10 @@
       border-width: 1px 1px 1px 1px;
     }
 
+    div.box {
+      cursor: pointer;
+    }
   </style>
 </body>
-
 
 </html>
