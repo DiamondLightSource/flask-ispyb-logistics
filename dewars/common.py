@@ -84,3 +84,32 @@ def update_dewar_location(barcode, location):
         status_code = 404
 
     return result, status_code
+
+
+def find_dewars_by_location(locations):
+    results = {}
+    status_code = 200
+
+    logging.getLogger('ispyb-logistics').debug("Find dewars in location {}".format(locations))
+
+    dewars = controller.find_dewars_by_location(locations)
+
+    if dewars is None:
+        results = {'location': locations,
+                  'status': 'fail',
+                  'reason': 'Error retrieving dewars from database'}
+        status_code = 503
+    else:
+        # If no dewars return 404 (and also return a blank list)
+        if len(dewars.keys()) == 0:
+            status_code = 404
+        else:
+            # Now assign the list of dewars to our results dictionary
+            results = dewars
+
+        # Now add entries for those locations we did not find (to support the front end logic)
+        for location in locations:
+            if location not in results:
+                results[location] = ["", "", ""]
+
+    return results, status_code

@@ -71,7 +71,7 @@
         <h2 class="title has-text-centered">Dewars that need refilling</h2>
         <ul>
           <li v-for="dewar in dewars.slice(0, 5)">
-            <p class="is-size-4 has-text-centered has-text-danger"><b>[[dewar]]</b></p>
+            <p class="is-size-5 has-text-centered has-text-danger"><b>[[dewar]]</b></p>
           </li>
         </ul>
         <footer class="footer has-background-white-ter is-paddingless">
@@ -152,7 +152,7 @@
           dewars: [],
           // Data for rack locations in JSON structure
           // Data from backend is a list [barcode, arrivalData, facilityCode]
-          rack_locations: {'RACK-A1': {'barcode': '', 'arrivalDate': '', 'needsLN2': false}},
+          rack_locations: {},
           // Data elements for form input
           barcode: '',
           location: '',
@@ -179,7 +179,17 @@
           },
         },
 
-        // Lifecycle hook - called when Vue is mounted on the page (trigger first get)...
+        // Lifecycle hook - called when Vue instance has been created...
+        created() {
+          // We can initialise any data parameters here...
+          let racks = racklist
+
+          racks.forEach(function(rack) {
+            this.rack_locations[rack] = {'barcode': '', 'arrivalDate':'', 'needsLN2':''}
+          })
+        },
+
+        // Lifecycle hook - called when Vue is mounted on the page (trigger first get request)...
         mounted() {
           console.log("Vue component mounted")
 
@@ -190,7 +200,6 @@
             // Main method that retrieves dewar locations from database
             getBarcodes() {
               let self = this
-              this.dewars = []
 
               if (self.refresh) {
                 // If we have been triggered by a form post/update,
@@ -203,6 +212,8 @@
                 console.log(response.data)
                 let json = response.data
                 let racks = racklist //Object.keys(json); racklist is in correct order for rendering
+                // We need to recalculate the dewars in need of refilling...
+                self.dewars = []
                 
                 racks.forEach(function(rack) {
                   let barcode = json[rack][0]
@@ -228,7 +239,7 @@
               })
               .catch(function(error) {
                 console.log("Error getting initial data")
-                self.message = "Error retrieving initial data"
+                self.message = "Error retrieving dewar location information from database"
                 self.isError = true
               })
               // Now setup the next update

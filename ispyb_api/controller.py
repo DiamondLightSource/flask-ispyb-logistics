@@ -2,6 +2,7 @@ import re
 import logging
 
 from sqlalchemy.orm.exc import NoResultFound, MultipleResultsFound
+from sqlalchemy.exc import DBAPIError
 from sqlalchemy import desc, func
 
 import webservice
@@ -101,11 +102,9 @@ def find_dewars_by_location(locations):
 
     except NoResultFound:
         logging.getLogger('ispyb-logistics').error("Error retrieving dewars")
-
-    # Now add entries for those locations we did not find (to support the front end logic)
-    for location in locations:
-        if location not in results:
-            results[location] = ["", "", ""]
+    except DBAPIError:
+        logging.getLogger('ispyb-logistics').error('Database API Exception - no route to database host?')
+        results = None
 
     return results
 

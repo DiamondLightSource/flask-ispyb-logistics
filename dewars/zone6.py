@@ -12,7 +12,6 @@ from flask import request
 
 # Local imports
 import common
-from ispyb_api import controller
 
 api = Blueprint('zone6', __name__, url_prefix='/zone6')
 
@@ -91,7 +90,7 @@ def location():
         # Get any dewar with any rack location
         # There should only be one per location
         # Simple call so use controller directly
-        result = controller.find_dewars_by_location(rack_locations)
+        result, status_code = common.find_dewars_by_location(rack_locations)
 
     elif request.method == "POST":
         location = request.form['location']
