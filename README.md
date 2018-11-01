@@ -9,7 +9,7 @@ $ pip install -r requirements.txt
 There is an example run script in the ./scripts directory which shows how to configure the app
 
 ### SynchWeb URL (for updating history)
-export SYNCHWEB_HOST=<SynchWeb address: e.g. https://ispyb2.diamond.ac.uk/ >
+export SYNCHWEB_HOST=<SynchWeb address: e.g. https://ispyb.diamond.ac.uk/ >
 
 ### ISPyB Database config
 export ISPYB_CONFIG_FILE=<path to credentials file>
@@ -40,4 +40,4 @@ This will create a './scripts/automodels.py' file
 
 The script output will show if the file differs from ispyb_api/models.py
 
-If it does, copy the ./scripts/automodels.py file across to the ispyb_api/models.py
+If it does, integrate changes or copy the ./scripts/automodels.py file across to the ispyb_api/models.py
