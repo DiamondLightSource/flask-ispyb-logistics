@@ -8,6 +8,10 @@ max_stores_dewars = 10
 def writeJsonFile(filename, data):
     """
     Dump the provided data to a json file
+
+    Arguments:
+        filename: log file to write to (for general use)
+        data: content to dump to file
     """
     try:
         with open(filename, 'w') as jsonfile:
@@ -19,6 +23,9 @@ def writeJsonFile(filename, data):
 def readJsonFile(filename):
     """
     Extract json data from the filename
+
+    Arguments:
+        filename: log file to read from
     """
     try:
         with open(filename, 'r') as jsonfile:
@@ -33,8 +40,9 @@ def writeStoresFile(filename, data):
     """
     Dump the last 10 (max_stores_dewars) dewars processed to a json file
 
-    Parameters:
-    data - a collections.deque representing the dewar list
+    Arguments:
+        filename: log file to write to (for stores app)
+        data: a collections.deque representing the dewar list
     """
     if len(data) is not max_stores_dewars:  # Warn for now, could raise as an error?
         print("Warning: dewar list for stores log file not of correct length (expected %d) " %
@@ -50,7 +58,19 @@ def writeStoresFile(filename, data):
 
 def readStoresFile(filename):
     """
-    Read the dewar list and return a deque collection
+    Read the dewar list and return a deque collection of length "max_stores_dewars"
+
+    Log file entries should be in form:
+    {
+        "awb": "", 
+        "barcode": "", 
+        "date": "", 
+        "destination": "", 
+        "inout": ""
+    }
+
+    Arguments:
+        filename: log file to read from (should contain list of dewar info)
     """
     json_data = readJsonFile(filename)
 
