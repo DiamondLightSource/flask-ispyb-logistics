@@ -88,7 +88,13 @@ def find_dewars_by_location(locations):
             filter(Dewar.dewarId == DewarTransportHistory.dewarId).\
             filter(func.lower(Dewar.storageLocation) == func.lower(DewarTransportHistory.storageLocation)).\
             order_by(desc(DewarTransportHistory.arrivalDate)).\
-            values(Dewar.barCode, Dewar.FACILITYCODE, Dewar.bltimeStamp, Dewar.storageLocation, DewarTransportHistory.arrivalDate)
+            values(Dewar.barCode, 
+                   Dewar.FACILITYCODE, 
+                   Dewar.bltimeStamp, 
+                   Dewar.storageLocation, 
+                   DewarTransportHistory.arrivalDate,
+                   DewarTransportHistory.dewarStatus,
+                   )
 
         for dewar in dewars:
             # If we already have an entry, it means there is a more recent change for a dewar in this location
@@ -98,7 +104,7 @@ def find_dewars_by_location(locations):
             else:
                 logging.getLogger('ispyb-logistics').info('Found entry for this dewar {} in {} at {}'.format(dewar.barCode, dewar.storageLocation, dewar.arrivalDate))
                 # Returning three items per location [barcode, arrivalDate and FacilityCode]
-                results[dewar.storageLocation.upper()] = [dewar.barCode, dewar.arrivalDate, dewar.FACILITYCODE]
+                results[dewar.storageLocation.upper()] = [dewar.barCode, dewar.arrivalDate, dewar.FACILITYCODE, dewar.dewarStatus]
 
     except NoResultFound:
         logging.getLogger('ispyb-logistics').error("Error retrieving dewars")

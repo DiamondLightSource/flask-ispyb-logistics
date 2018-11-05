@@ -101,6 +101,12 @@
           <span class="has-text-weight-bold">[[rack]]: </span>
           <span v-if="dewar.barcode" class="content">[[dewar.barcode]]</span>
           <span v-else class="content is-invisible">empty</span>
+          <!-- Tags -->
+          <div>
+            <span v-if="dewar.facilityCode" class="tag is-info">[[dewar.facilityCode]]</span>
+            <span v-if="dewar.status == 'dispatch-requested'" class="tag is-warning">[[dewar.status]]</span>
+            <span v-if="dewar.needsLN2" class="tag is-danger">needs-refill</span>  
+          </div>
         </div>
       </div>
     </div>    
@@ -183,9 +189,10 @@
         created() {
           // We can initialise any data parameters here...
           let racks = racklist
+          let self = this
 
           racks.forEach(function(rack) {
-            this.rack_locations[rack] = {'barcode': '', 'arrivalDate':'', 'needsLN2':''}
+            self.rack_locations[rack] = {'barcode': '', 'arrivalDate':'', 'needsLN2':'', 'facilityCode': '', 'status': ''}
           })
         },
 
@@ -218,6 +225,8 @@
                 racks.forEach(function(rack) {
                   let barcode = json[rack][0]
                   let arrivalDate = json[rack][1]
+                  let facilityCode = json[rack][2]
+                  let status = json[rack][3]
                   // Could add facility code here as [2]
                   let needsLN2 = false
 
@@ -234,7 +243,7 @@
                       self.dewars.push(rack)
                     }
                   }
-                  self.rack_locations[rack] = {'barcode': barcode, 'arrivalDate': arrivalDate, 'needsLN2': needsLN2}
+                  self.rack_locations[rack] = {'barcode': barcode, 'arrivalDate': arrivalDate, 'needsLN2': needsLN2, 'facilityCode': facilityCode, 'status': status}
                 })
               })
               .catch(function(error) {
