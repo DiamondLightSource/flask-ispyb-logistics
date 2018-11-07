@@ -22,7 +22,7 @@ class BLSession(Base):
     scheduled = Column(Integer)
     nbShifts = Column(Integer)
     comments = Column(String(2000))
-    beamLineOperator = Column(String(45))
+    beamLineOperator = Column(String(255))
     bltimeStamp = Column(DateTime, nullable=False, server_default=text("current_timestamp()"))
     visit_number = Column(Integer, server_default=text("0"))
     usedFlag = Column(Integer)
@@ -169,8 +169,8 @@ class DewarTransportHistory(Base):
     DewarTransportHistoryId = Column(Integer, primary_key=True)
     dewarId = Column(ForeignKey(u'Dewar.dewarId', ondelete=u'CASCADE', onupdate=u'CASCADE'), index=True)
     dewarStatus = Column(String(45), nullable=False)
-    storageLocation = Column(String(45), nullable=False)
-    arrivalDate = Column(DateTime, nullable=False)
+    storageLocation = Column(String(45))
+    arrivalDate = Column(DateTime)
 
     Dewar = relationship(u'Dewar')
 
@@ -209,7 +209,6 @@ class Laboratory(Base):
     url = Column(String(255))
     organization = Column(String(45))
     recordTimeStamp = Column(DateTime, nullable=False, server_default=text("current_timestamp()"))
-    laboratoryPk = Column(Integer)
     postcode = Column(String(15))
 
 
@@ -227,8 +226,8 @@ class Person(Base):
     phoneNumber = Column(String(45))
     login = Column(String(45), unique=True)
     faxNumber = Column(String(45))
-    recordTimeStamp = Column(DateTime, nullable=False, server_default=text("current_timestamp()"))
     cache = Column(Text)
+    recordTimeStamp = Column(DateTime, nullable=False, server_default=text("current_timestamp()"))
     externalId = Column(BINARY(16))
 
     Laboratory = relationship(u'Laboratory')
@@ -242,7 +241,7 @@ class Proposal(Base):
 
     proposalId = Column(Integer, primary_key=True)
     personId = Column(ForeignKey(u'Person.personId', ondelete=u'CASCADE', onupdate=u'CASCADE'), nullable=False, index=True, server_default=text("0"))
-    title = Column(String(200))
+    title = Column(String(255))
     proposalCode = Column(String(45))
     proposalNumber = Column(String(45))
     bltimeStamp = Column(DateTime, nullable=False, server_default=text("current_timestamp()"))
@@ -284,7 +283,7 @@ class Shipping(Base):
     deliveryAgent_pickupConfirmation = Column(String(10))
     deliveryAgent_readyByTime = Column(Time)
     deliveryAgent_callinTime = Column(Time)
-    deliveryAgent_productcode = Column(String(10))
+    deliveryAgent_productCode = Column(String(10))
     deliveryAgent_flightCodePersonId = Column(ForeignKey(u'Person.personId'), index=True)
 
     Person = relationship(u'Person')
