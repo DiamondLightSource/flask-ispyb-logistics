@@ -72,7 +72,7 @@ def get_dewar_by_barcode(barcode):
 
 def find_dewars_by_location(locations):
     """
-    This method will find a dewar based on its location.
+    This method will find the most recent dewar stored in each location.
     """
     logging.getLogger('ispyb-logistics').debug("find_dewars_by_location {}".format(','.join(locations)))
     
@@ -84,7 +84,8 @@ def find_dewars_by_location(locations):
         # Get the timestamp and location from the transport history 
         # Order so we get the most recent first...
         # The Dewar storageLocation does not always match the transport history
-        dewars = Dewar.query.join(DewarTransportHistory).filter(func.lower(Dewar.storageLocation).in_(locations)).\
+        dewars = Dewar.query.join(DewarTransportHistory).\
+            filter(func.lower(Dewar.storageLocation).in_(locations)).\
             filter(Dewar.dewarId == DewarTransportHistory.dewarId).\
             filter(func.lower(Dewar.storageLocation) == func.lower(DewarTransportHistory.storageLocation)).\
             order_by(desc(DewarTransportHistory.arrivalDate)).\
@@ -105,6 +106,57 @@ def find_dewars_by_location(locations):
                 logging.getLogger('ispyb-logistics').info('Found entry for this dewar {} in {} at {}'.format(dewar.barCode, dewar.storageLocation, dewar.arrivalDate))
                 # Returning three items per location [barcode, arrivalDate and FacilityCode]
                 results[dewar.storageLocation.upper()] = [dewar.barCode, dewar.arrivalDate, dewar.FACILITYCODE, dewar.dewarStatus]
+
+    except NoResultFound:
+        logging.getLogger('ispyb-logistics').error("Error retrieving dewars")
+    except DBAPIError:
+        logging.getLogger('ispyb-logistics').error('Database API Exception - no route to database host?')
+        results = None
+
+    return results
+
+def find_dewar_history_for_locations(locations, max_entries=20):
+    """
+    This method will find 'n' entries from the dewar transport history table filtered by location.
+
+    Returns {'1', {'barcode':barcode, 'awb':awb, 'date':arrivalDate...}, }
+    """
+    results = {}
+
+    try:
+        # Query for dewars with transporthistory locations in the list
+        # Use case insensitive search for storageLocation
+        # Get the timestamp and location from the transport history
+        # Order so we get the most recent first...
+        # We don't care if the locations match between dewar and transport history
+        dewars = DewarTransportHistory.query.join(Dewar).join(Shipping).\
+            filter(func.lower(Dewar.storageLocation).in_(locations)).\
+            filter(Dewar.dewarId == DewarTransportHistory.dewarId).\
+            filter(Dewar.shippingId == Shipping.shippingId).\
+            order_by(desc(DewarTransportHistory.arrivalDate)).\
+            limit(max_entries).\
+            values(Dewar.barCode,
+                   Dewar.FACILITYCODE,
+                   Dewar.bltimeStamp,
+                   Dewar.trackingNumberFromSynchrotron,
+                   DewarTransportHistory.storageLocation,
+                   DewarTransportHistory.arrivalDate,
+                   DewarTransportHistory.dewarStatus,
+                   Shipping.shippingId,
+                   )
+
+        for index, dewar in enumerate(dewars):
+            logging.getLogger('ispyb-logistics').info('Found entry {} for this dewar {} in {} at {}'.format(index, dewar.barCode, dewar.storageLocation, dewar.arrivalDate))
+            # Returning three items per location [barcode, arrivalDate and FacilityCode]
+            results[str(index)] = {
+                'barcode':dewar.barCode,
+                'date': dewar.arrivalDate,
+                'inout': dewar.storageLocation, # should really change 'inout' to location
+                'facilitycode': dewar.FACILITYCODE,
+                'status': dewar.dewarStatus,
+                'awb': dewar.trackingNumberFromSynchrotron,
+                'sid': dewar.shippingId,
+                 }
 
     except NoResultFound:
         logging.getLogger('ispyb-logistics').error("Error retrieving dewars")

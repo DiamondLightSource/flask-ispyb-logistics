@@ -1,16 +1,14 @@
 import time
+import logging
 
 from flask import Blueprint
 from flask import render_template
 from flask import jsonify
 from flask import request
 
-import logs
 from ispyb_api import controller
 
 api = Blueprint('stores', __name__, url_prefix='/stores')
-
-jsonfilename = 'logs/stores.json'
 
 
 """
@@ -28,7 +26,7 @@ def index():
     return render_template('stores.html',
                            title="Stores Dewar Management",
                            api_prefix="stores",
-                           max_dewar_history=logs.max_stores_dewars
+                           max_dewar_history=20
                            )
 
 
@@ -38,12 +36,16 @@ def location():
     status_code = 200
 
     if request.method == "GET":
-        deque_data = logs.readStoresFile(jsonfilename)
-
-        # Marshall the data into a serializable json array with 
-        # indexes {1, {}, 2, {}} etc. to match the front end
-        for index, item in enumerate(deque_data, 1):
-            result[str(index)] = item
+        result = controller.find_dewar_history_for_locations(['STORES-IN', 'STORES-OUT'], max_entries=20)
+        # Append the destination to the results
+        # Its not stored in the database so we determine it here based on barcode
+        # Only relevant for incoming dewars though (stores-in)
+        for key in result.keys():
+            dewar = result[key]
+            if dewar['inout'].upper() == "STORES-IN":
+                dewar['destination'] = get_destination_from_barcode(dewar['barcode'])
+            else:
+                dewar['destination'] = ""
 
     elif request.method == "POST":
         location = request.form['location']
@@ -51,9 +53,9 @@ def location():
         awb = request.form['awb']
 
         if location and barcode:
-            result, status_code = updateDewarLocation(barcode, location, awb)
+            result, status_code = update_dewar_location(barcode, location, awb)
         else:
-            print("Warning barcode and/or location not set, ignoring request.")
+            logging.getLogger('ispyb-logistics').warn("Warning barcode and/or location not set, ignoring request.")
 
             result = {'location': location,
                       'barcode': barcode,
@@ -65,49 +67,21 @@ def location():
     return jsonify(result), status_code
 
 
-def updateDewarLocation(barcode, location, awb=None):
+def update_dewar_location(barcode, location, awb=None):
     """
     Update the records for this dewar
 
     If it gets here we have already tested that the barcode and location are ok.
     """
-    # if remote_ip not in allowed_ips:
-    #     print json.dumps({'location':location,'barcode':barcode,'awb':awb,'status':'fail','your_ip':remote_ip})
     status_code = 200
 
     if awb:
         awb = awb.replace('+', '_')
 
-    destination = ''
-
-    barcode_prefix = barcode.upper()[0:2]
-
-    if location.upper() == 'STORES-IN':
-        if barcode_prefix == 'SP' or 'I14' in barcode.upper():
-            destination = 'I14'
-        elif barcode_prefix == 'EM' or any(b in barcode.upper() for b in ['M01', 'M02', 'M03', 'M04', 'M05', 'M06', 'M07']):
-            destination = 'eBIC'
-        elif barcode_prefix == 'MX' or any(b in barcode.upper() for b in ['I03', 'I04', 'I23', 'I24']):
-            destination = 'Zone 6 store'
-        else:
-            destination = 'Unknown'
-
-    # Next part is new and uses a deque to ensure last 10 dewars are processed
-    data = logs.readStoresFile(jsonfilename)
-
-    data.appendleft({'barcode': barcode,
-                     'inout': location,
-                     'date': time.strftime('%a %d %b, %H:%M:%S'),
-                     'destination': destination,
-                     'awb': awb})
-
     result = controller.set_location(barcode, location, awb)
 
     if result is not None:
         result = {'location': location, 'barcode': barcode, 'awb': awb, 'status': 'ok'}
-
-        # Now we can update the stores logs if no error!
-        logs.writeStoresFile(jsonfilename, data)
     else:
         result = {'location': location,
                   'barcode': barcode,
@@ -117,3 +91,27 @@ def updateDewarLocation(barcode, location, awb=None):
         status_code = 400
 
     return result, status_code
+
+def get_destination_from_barcode(barcode):
+    """
+    Given a barcode (prefix) determine the destination.
+
+    Call this method when the location is STORES-IN to help identify where it should go
+    """
+    destination = None
+
+    try:
+        barcode_prefix = barcode.upper()[0:2]
+
+        if barcode_prefix == 'SP' or 'I14' in barcode.upper():
+            destination = 'I14'
+        elif barcode_prefix == 'EM' or any(b in barcode.upper() for b in ['M01', 'M02', 'M03', 'M04', 'M05', 'M06', 'M07']):
+            destination = 'eBIC'
+        elif barcode_prefix == 'MX' or any(b in barcode.upper() for b in ['I03', 'I04', 'I23', 'I24']):
+            destination = 'Zone 6 store'
+        else:
+            destination = 'Unknown'
+    except:
+        logging.getLogger('ispyb-logistics').error('Could not get destination from barcode {}'.format(barcode))
+
+    return destination
