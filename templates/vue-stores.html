@@ -3,14 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <title>Stores ISPyB Dewar Application</title>
-    <!-- <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css" integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous"> -->
+    <link rel="stylesheet" href="/static/css/bulma/0.7.1//bulma.min.css"/>
 
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bulma/0.7.1/css/bulma.min.css"/>
-
-  <!-- development version, includes helpful console warnings -->
-  <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
-
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.18.0/axios.min.js"></script>
+    <script src="/static/js/vue/2.5.17/vue.min.js"></script>
+    <script src="/static/js/axios/0.18.0/axios.min.js"></script>
 
 </head>
 
@@ -40,7 +36,6 @@
                                 <input type="text" class="input" v-model="barcode" placeholder="Scan the long barcode from the dewar case">        
                             </div>
                         </div>
-
 
                         <div class="field">
                             <label>Airway Bill</label>
@@ -120,6 +115,9 @@
                             <td v-else-if="isFedex(dewar.awb)">
                                 <a v-bind:href="'http://www.fedex.com/apps/fedextrack/?trackingnumber=' + dewar.awb">[[dewar.awb]]</a>
                             </td>
+                            <td v-else-if="dewar.sid">
+                                <a v-bind:href="'https://ispyb.diamond.ac.uk/shipments/sid/' + dewar.sid">[[dewar.sid]]</a>
+                            </td>
                             <td v-else>
                                 [[dewar.awb]]
                             </td>
@@ -138,7 +136,7 @@
             // Change default delimters to avoid clash with jinja2
             delimiters: ["[[","]]"],
             data: {
-              // Array for dewars that need refilling...        
+              // Array for dewar history
               dewars: [{'awb':'123455', 'barcode':'cs1235', 'destination':'zone6', 'inout':'stores-in', 'date':'2345'}],
               // Data elements for form input
               barcode: '',

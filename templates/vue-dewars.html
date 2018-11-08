@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <title>{{title}}</title>
     <link rel="stylesheet" href="/static/css/bulma/0.7.1//bulma.min.css"/>
-    <!-- development version, includes helpful console warnings -->
+
     <script src="/static/js/vue/2.5.17/vue.min.js"></script>
     <script src="/static/js/axios/0.18.0/axios.min.js"></script>
 </head>
@@ -173,7 +173,7 @@
           isFormOK: true,
           // Timeout handle - used to determine if we need to refresh page
           refresh: undefined,
-          refreshInterval: 10000, // refresh interval in milliseconds
+          refreshInterval: 60000, // refresh interval in milliseconds
         },
         // Watcher to reset the error/info messages after few seconds...
         watch: {
