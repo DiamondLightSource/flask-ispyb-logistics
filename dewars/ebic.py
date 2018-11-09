@@ -16,28 +16,11 @@ from ispyb_api import controller
 
 api = Blueprint('ebic', __name__, url_prefix='/ebic')
 
-rack_prefix = 'EBIC-RACK'
+# Build list of rack locations e.g. EBIC-IN-[1..10]
+in_racks = ['EBIC-IN-{}'.format(i) for i in range(1,11)]
+out_racks = ['EBIC-OUT-{}'.format(i) for i in range(1,11)]
 
-rack_suffixes = ['A1', 'A2', 'A3', 'A4',
-                 'B1', 'B2', 'B3', 'B4',
-                 'C1', 'C2', 'C3', 'C4',
-                 'D1', 'D2', 'D3', 'D4',
-                 'E1', 'E2', 'E3', 'E4',
-                 'F1', 'F2', 'F3', 'F4',
-                 'G1', 'G2', 'G3', 'G4',
-                 'H1', 'H2', 'H3', 'H4',
-                 'J1', 'J2', 'J3', 'J4',
-                 'K1', 'K2', 'K3', 'K4',
-                 'L1', 'L2', 'L3', 'L4',
-                 'M1', 'M2', 'M3', 'M4',
-                 'N1', 'N2', 'N3', 'N4',
-                 'P1', 'P2', 'P3', 'P4',
-                 'Q1', 'Q2', 'Q3', 'Q4',
-                 'R1', 'R2', 'R3', 'R4',
-                 ]
-
-rack_locations = ['-'.join([rack_prefix, suffix])
-                    for suffix in rack_suffixes]
+rack_locations = in_racks + out_racks
 
 beamlines = ['m01',
              'm02',
@@ -58,14 +41,13 @@ beamline_locations.extend(['USER-COLLECTION',
                            'ZONE-6-STORE',
                            ])
 
-ebic_locations = ['EBIC-IN-{}'.format(i) for i in range(10,1)]
 
 """
 App to demonstrate use of vuejs
 """
 @api.route('/')
 def vdewars():
-    return render_template('vue-dewars.html', title='Zone6 Dewars', api_prefix='zone6', rack_locations=rack_locations)
+    return render_template('vue-dewars.html', title='eBIC Dewars', api_prefix='ebic', rack_locations=rack_locations)
 
 
 @api.route('/original')
@@ -95,7 +77,7 @@ def location():
         # Get any dewar with any rack location
         # There should only be one per location
         # Simple call so use controller directly
-        result = controller.find_dewars_by_location(rack_locations)
+        result, status_code = common.find_dewars_by_location(rack_locations)
 
     elif request.method == 'POST':
         location = request.form['location']
@@ -114,7 +96,10 @@ def location():
                   'reason': 'Method/route not implemented yet'}
         status_code = 501
 
-    return jsonify(result), status_code
+    response = jsonify(result)
+    response.status_code = status_code
+
+    return response
 
 @api.route('/dewars/find', methods=['GET'])
 def find():
@@ -128,4 +113,7 @@ def find():
 
     result, status_code = common.find_dewar(facilitycode)
 
-    return jsonify(result), status_code
+    response = jsonify(result)
+    response.status_code = status_code
+
+    return response

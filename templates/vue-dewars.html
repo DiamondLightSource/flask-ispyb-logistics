@@ -258,9 +258,14 @@
                 })
               })
               .catch(function(error) {
-                console.log("Error getting initial data")
-                self.message = "Error retrieving dewar location information from database"
-                self.isError = true
+                console.log("Error getting initial data " + error)
+                if (error.response.status === 404) {
+                  // No dewars found - might be true
+                  self.message = "Warning no dewars found in these locations"
+                } else {
+                  self.message = "Error retrieving dewar location information from database"
+                  self.isError = true  
+                }
               })
               // Now setup the next update
               self.refresh = setTimeout(self.getBarcodes, self.refreshInterval)

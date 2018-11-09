@@ -64,7 +64,10 @@ def location():
                       }
             status_code = 400
 
-    return jsonify(result), status_code
+    response = jsonify(result)
+    response.status_code = status_code
+
+    return response
 
 
 def update_dewar_location(barcode, location, awb=None):

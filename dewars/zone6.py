@@ -113,7 +113,10 @@ def location():
                   'reason': 'Method/route not implemented yet'}
         status_code = 501
 
-    return jsonify(result), status_code
+    response = jsonify(result)
+    response.status_code = status_code
+
+    return response
 
 
 @api.route('/dewars/find', methods=['GET'])
@@ -128,4 +131,7 @@ def find():
 
     result, status_code = common.find_dewar(facilitycode)
 
-    return jsonify(result), status_code
+    response = jsonify(result)
+    response.status_code = status_code
+
+    return response
