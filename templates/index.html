@@ -1,37 +1,44 @@
 <html DOCTYPE="html">
     <head>
         <title>ISPyB Logistics</title>
-        <link href="/static/css/jquery.mobile-1.4.5.css" type="text/css" rel="stylesheet" />
-        <link href="/static/css/mobile.css" type="text/css" rel="stylesheet" >
+        <link rel="stylesheet" href="/static/css/bulma/0.7.1//bulma.min.css"/>
     </head>
     <body>
-        <div>
-            <h1>ISPyB Logistics Apps</h1>
-
-            <h3 class="ui-bar ui-bar-a ui-corner-all">Zone 6</h3>
-            <div class="ui-body ui-body-a ui-corner-all">
-                <p>Dewar Management Application for use within Zone 6</p>
-                <a href="/zone6/">Zone 6</a>
+        <div class="container">
+            <p class="title has-text-centered">
+                ISPyB Logistics Applications
+            </p>
+                <div class="tile is-ancestor has">
+                    <div class="tile is-vertical is-parent has-text-centered">
+                        <a href="/stores/vstores" class="tile notification is-child is-success">
+                            <p class="title">Stores Dewar Management</p>
+                            <p class="content">To handle dewars coming into or out of the facility</p>
+                        </a>
+                        <a href="/stores/" class="tile is-child notification is-primary">
+                            <p class="title">Original Stores Management</p>
+                        </a>
+                    </div>
+                    <div class="tile is-vertical is-parent has-text-centered">
+                        <a href="/zone6/vdewars" class="tile is-child notification is-success">
+                            <p class="title">Zone 6 Dewar Management</p>
+                            <p class="content">To handle dewars to and from beamlines</p>
+                        </a>
+                        <a href="/zone6/" class="tile is-child notification is-primary">
+                            <p class="title">Original Zone 6 Dewar Management</p>
+                        </a>
+                    </div>
+                    <div class="tile is-vertical is-parent has-text-centered">
+                            <a  href="/ebic/vdewars" class="tile is-child notification is-success">
+                                <p class="title">EBIC Dewar Management</p>
+                                <p class="content">To handle dewars to and from eBIC</p>
+                            </a>
+                            
+                            <a href="/ebic/" class="tile is-child notification is-primary">
+                                <p class="title">Original EBIC Dewar Management</p>
+                            </a>
+                        </div>
+                    </div>            
             </div>
-            <div class="ui-body ui-body-a ui-corner-all">
-                <p>New Dewar Management Application for use within Zone 6</p>
-                <a href="/zone6/vdewars">Zone 6</a>
-            </div>
-            <h3 class="ui-bar ui-bar-a ui-corner-all">Stores</h3>
-            <div class="ui-body ui-body-a ui-corner-all">
-                <p>Dewar Management Application for use within Stores</p>
-                <a href="/stores/">Stores</a>
-            </div>
-            <div class="ui-body ui-body-a ui-corner-all">
-                <p>New Dewar Management Application for use within Stores</p>
-                <a href="/stores/vstores">Stores</a>
-            </div>
-            <h3 class="ui-bar ui-bar-a ui-corner-all">eBIC</h3>
-            <div class="ui-body ui-body-a ui-corner-all">
-                <p>Dewar Management Application for use within eBIC</p>
-                <a href="/ebic/">eBIC</a>
-            </div>
-        </div>
-        <div><p>Any issues or questions, please contact Scientific Software <a href="mailto:scientificsoftware@diamond.ac.uk?Subject=ISPyBLogistics">here</a></p></div>
+        <div><footer class="footer">Any issues or questions, please contact Scientific Software <a href="mailto:scientificsoftware@diamond.ac.uk?Subject=ISPyBLogistics">here</a></footer></div>
     </body>
 </html>

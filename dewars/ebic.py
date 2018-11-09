@@ -58,6 +58,12 @@ beamline_locations.extend(['USER-COLLECTION',
                            'ZONE-6-STORE',
                            ])
 
+"""
+App to demonstrate use of vuejs
+"""
+@api.route("/vdewars")
+def vdewars():
+    return render_template('vue-dewars.html', title="EBIC Dewars", api_prefix="ebic", rack_locations=rack_locations)
 
 @api.route('/')
 def index():
