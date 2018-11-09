@@ -14,9 +14,9 @@ api = Blueprint('stores', __name__, url_prefix='/stores')
 """
 Route for vue.js version
 """
-@api.route("/vstores")
+@api.route('/vstores')
 def vstores():
-    return render_template('vue-stores.html', api_prefix="stores")
+    return render_template('vue-stores.html', api_prefix='stores')
 
 @api.route('/')
 def index():
@@ -24,30 +24,30 @@ def index():
     Main page for dewar management
     """
     return render_template('stores.html',
-                           title="Stores Dewar Management",
-                           api_prefix="stores",
+                           title='Stores Dewar Management',
+                           api_prefix='stores',
                            max_dewar_history=20
                            )
 
 
-@api.route('/dewars', methods=["GET", "POST"])
+@api.route('/dewars', methods=['GET', 'POST'])
 def location():
     result = {}
     status_code = 200
 
-    if request.method == "GET":
+    if request.method == 'GET':
         result = controller.find_dewar_history_for_locations(['STORES-IN', 'STORES-OUT'], max_entries=20)
         # Append the destination to the results
         # Its not stored in the database so we determine it here based on barcode
         # Only relevant for incoming dewars though (stores-in)
         for key in result.keys():
             dewar = result[key]
-            if dewar['inout'].upper() == "STORES-IN":
+            if dewar['inout'].upper() == 'STORES-IN':
                 dewar['destination'] = get_destination_from_barcode(dewar['barcode'])
             else:
-                dewar['destination'] = ""
+                dewar['destination'] = ''
 
-    elif request.method == "POST":
+    elif request.method == 'POST':
         location = request.form['location']
         barcode = request.form['barcode']
         awb = request.form['awb']
@@ -55,7 +55,7 @@ def location():
         if location and barcode:
             result, status_code = update_dewar_location(barcode, location, awb)
         else:
-            logging.getLogger('ispyb-logistics').warn("Warning barcode and/or location not set, ignoring request.")
+            logging.getLogger('ispyb-logistics').warn('Warning barcode and/or location not set, ignoring request.')
 
             result = {'location': location,
                       'barcode': barcode,

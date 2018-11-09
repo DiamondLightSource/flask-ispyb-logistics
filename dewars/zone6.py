@@ -59,9 +59,9 @@ beamline_locations.extend(['USER-COLLECTION',
 """
 App to demonstrate use of vuejs
 """
-@api.route("/vdewars")
+@api.route('/vdewars')
 def vdewars():
-    return render_template('vue-dewars.html', title="Zone6 Dewars", api_prefix="zone6", rack_locations=rack_locations)
+    return render_template('vue-dewars.html', title='Zone6 Dewars', api_prefix='zone6', rack_locations=rack_locations)
 
 @api.route('/')
 def index():
@@ -69,16 +69,16 @@ def index():
     Main page for dewar management
     """
     return render_template('dewars.html',
-                           title="zone6 Dewar Management",
+                           title='zone6 Dewar Management',
                            rack_locations=rack_locations,
                            rack_suffixes=rack_suffixes,
                            rack_prefix=rack_prefix,
                            beamlines=beamline_locations,
-                           api_prefix="zone6",
+                           api_prefix='zone6',
                            )
 
 
-@api.route('/dewars', methods=["GET", "POST", "DELETE"])
+@api.route('/dewars', methods=['GET', 'POST', 'DELETE'])
 def location():
     """
     API route for dewar management
@@ -86,19 +86,19 @@ def location():
     result = {}
     status_code = 200
 
-    if request.method == "GET":
+    if request.method == 'GET':
         # Get any dewar with any rack location
         # There should only be one per location
         # Simple call so use controller directly
         result, status_code = common.find_dewars_by_location(rack_locations)
 
-    elif request.method == "POST":
+    elif request.method == 'POST':
         location = request.form['location']
         barcode = request.form['barcode']
 
         result, status_code = common.update_dewar_location(barcode, location)
 
-    elif request.method == "DELETE":
+    elif request.method == 'DELETE':
         try:
             location = request.form['location']
         except KeyError:
@@ -116,7 +116,7 @@ def location():
     return jsonify(result), status_code
 
 
-@api.route('/dewars/find', methods=["GET"])
+@api.route('/dewars/find', methods=['GET'])
 def find():
     """
     Return a list of matching dewars with this facility code
