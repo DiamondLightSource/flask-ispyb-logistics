@@ -5,40 +5,57 @@
     </head>
     <body>
         <div class="container">
-            <p class="title has-text-centered">
-                ISPyB Logistics Applications
-            </p>
-                <div class="tile is-ancestor has">
-                    <div class="tile is-vertical is-parent has-text-centered">
-                        <a href="/stores/vstores" class="tile notification is-child is-success">
-                            <p class="title">Stores Dewar Management</p>
-                            <p class="content">To handle dewars coming into or out of the facility</p>
-                        </a>
-                        <a href="/stores/" class="tile is-child notification is-primary">
-                            <p class="title">Original Stores Management</p>
-                        </a>
+            <!-- Title Section-->
+            <div class="hero">
+                <div class="hero-body has-text-centered">
+                    <div class="container">
+                    <h1 class="title">
+                        ISPyB Logistics Applications
+                    </h1>
+                    <h2 class="subtitle">
+                        These applications help track dewars at specific locations in the facility.
+                    </h2>
                     </div>
-                    <div class="tile is-vertical is-parent has-text-centered">
-                        <a href="/zone6/vdewars" class="tile is-child notification is-success">
-                            <p class="title">Zone 6 Dewar Management</p>
-                            <p class="content">To handle dewars to and from beamlines</p>
-                        </a>
-                        <a href="/zone6/" class="tile is-child notification is-primary">
-                            <p class="title">Original Zone 6 Dewar Management</p>
-                        </a>
-                    </div>
-                    <div class="tile is-vertical is-parent has-text-centered">
-                            <a  href="/ebic/vdewars" class="tile is-child notification is-success">
-                                <p class="title">EBIC Dewar Management</p>
-                                <p class="content">To handle dewars to and from eBIC</p>
-                            </a>
-                            
-                            <a href="/ebic/" class="tile is-child notification is-primary">
-                                <p class="title">Original EBIC Dewar Management</p>
-                            </a>
-                        </div>
-                    </div>            
+                </div>
             </div>
-        <div><footer class="footer">Any issues or questions, please contact Scientific Software <a href="mailto:scientificsoftware@diamond.ac.uk?Subject=ISPyBLogistics">here</a></footer></div>
+
+            <!-- Tiles layout for application links -->
+            <div class="tile is-ancestor has">
+                <div class="tile is-vertical is-parent has-text-centered">
+                    <a href="/stores/vstores" class="tile notification is-child is-success">
+                        <p class="title">Stores Dewar Management</p>
+                        <p class="content">To handle dewars coming into or out of the facility</p>
+                    </a>
+                    <a href="/stores/" class="tile is-child notification is-primary is-disabled">
+                        <p class="title">Original Stores Management</p>
+                    </a>
+                </div>
+
+                <div class="tile is-vertical is-parent has-text-centered">
+                    <a href="/zone6/vdewars" class="tile is-child notification is-success">
+                        <p class="title">Zone 6 Dewar Management</p>
+                        <p class="content">To handle dewars to and from beamlines</p>
+                    </a>
+                    <a href="/zone6/" class="tile is-child notification is-primary">
+                        <p class="title">Original Zone 6 Dewar Management</p>
+                    </a>
+                </div>
+
+                <div class="tile is-vertical is-parent has-text-centered">
+                        <a  href="/ebic/vdewars" class="tile is-child notification is-success">
+                            <p class="title">EBIC Dewar Management</p>
+                            <p class="content">To handle dewars to and from eBIC</p>
+                        </a>
+
+                        <a href="/ebic/" class="tile is-child notification is-primary">
+                            <p class="title">Original EBIC Dewar Management</p>
+                        </a>
+                </div>
+            </div>
+
+            <!-- Footer with link to scisoft -->
+            <footer class="footer has-text-centered">For questions about these applications, please contact Scientific Software <a href="mailto:scientificsoftware@diamond.ac.uk?Subject=ISPyBLogistics">here</a></footer></div>
+
+        </div> <!-- END of main container -->
     </body>
 </html>
