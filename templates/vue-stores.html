@@ -26,14 +26,14 @@
                         <div class="field">
                             <label>Location</label>
                             <div class="control">
-                            <input ref="location" type="text" class="input" v-model="location" placeholder="Scan the location e.g. STORES-IN or STORES-OUT">        
+                            <input ref="location" type="text" class="input" v-model="location" v-on:keydown.enter="onLocationEnter" placeholder="Scan the location e.g. STORES-IN or STORES-OUT">        
                             </div>
                         </div>
 
                         <div class="field">
                             <label>Barcode</label>
                             <div class="control">
-                                <input type="text" class="input" v-model="barcode" placeholder="Scan the long barcode from the dewar case">        
+                                <input ref="barcode" type="text" class="input" v-model="barcode" v-on:keydown.enter="onBarcodeEnter" placeholder="Scan the long barcode from the dewar case">        
                             </div>
                         </div>
 
@@ -41,7 +41,7 @@
                         <div v-show="location.toUpperCase() != 'STORES-IN'" class="field">
                             <label>Airway Bill</label>
                             <div class="control">
-                                <input type="text" class="input" v-model="awb" placeholder="Scan the 10 digit DHL Airway Bill">        
+                                <input ref="awb" type="text" class="input" v-model="awb" v-on:keydown.enter="onAwbEnter" placeholder="Scan the 10 digit DHL Airway Bill">        
                             </div>
                         </div>
                     
@@ -250,6 +250,8 @@
                             self.message = "Error updating " + barcode + " to " + location
                             self.isError = true
                         })
+                        // Set focus to barcode (likely to want to reuse location)
+                        this.$refs.barcode.focus()
                         // Rest form values (Keep location element as is)
                         this.barcode = ''
                         this.awb = ''    
@@ -299,6 +301,21 @@
                         return false
                     }
                 },
+                // Prevent form submission and move focus to next form element
+                onLocationEnter(event) {
+                    event.preventDefault()
+                    this.$refs.barcode.focus()
+                },
+
+                // Prevent form submission and move focus to next form element
+                onBarcodeEnter(event) {
+                    event.preventDefault()
+                    this.$refs.awb.focus()
+                },
+                // Prevent form submission
+                onAwbEnter(event) {
+                    event.preventDefault()
+                }
             },
           })
     

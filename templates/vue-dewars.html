@@ -23,14 +23,14 @@
           <div class="field">
             <label>Barcode or FacilityCode</label>
               <div class="control">
-                <input ref="location" type="text" class="input" v-model="barcode" placeholder="Scan the long barcode from the dewar case">        
+                <input ref="barcode" type="text" class="input" v-model="barcode" v-on:keydown.enter="onBarcodeEnter" placeholder="Scan the long barcode from the dewar case">        
               </div>
           </div>
 
           <div class="field">
             <label>Location</label>
             <div class="control">
-              <input type="text" class="input" v-model="location" placeholder="Scan the location e.g. RACK-A1">        
+              <input ref="location" type="text" class="input" v-model="location" v-on:keydown.enter="onLocationEnter" placeholder="Scan the location e.g. RACK-A1">        
             </div>
           </div>
 
@@ -212,7 +212,7 @@
           console.log("Vue component mounted")
 
           // When page is loaded set focus to the input location element
-          this.$refs.location.focus();
+          this.$refs.barcode.focus();
 
           this.getBarcodes()
         },
@@ -432,7 +432,17 @@
               this.isError = false
               this.searchResult = ""
             },
-        },
+
+            // Prevent form submission and move focus to next input element
+            onBarcodeEnter(event) {
+              event.preventDefault()
+              this.$refs.location.focus()
+            },
+            // Prevent form submission
+            onLocationEnter(event) {
+              event.preventDefault()
+            }
+      },
       })
     
   </script>
