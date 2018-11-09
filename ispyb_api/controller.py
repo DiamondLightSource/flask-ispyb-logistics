@@ -130,7 +130,7 @@ def find_dewar_history_for_locations(locations, max_entries=20):
         # Order so we get the most recent first...
         # We don't care if the locations match between dewar and transport history
         dewars = DewarTransportHistory.query.join(Dewar).join(Shipping).\
-            filter(func.lower(Dewar.storageLocation).in_(locations)).\
+            filter(func.lower(DewarTransportHistory.storageLocation).in_(locations)).\
             filter(Dewar.dewarId == DewarTransportHistory.dewarId).\
             filter(Dewar.shippingId == Shipping.shippingId).\
             order_by(desc(DewarTransportHistory.arrivalDate)).\
