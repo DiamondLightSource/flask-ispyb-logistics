@@ -14,11 +14,11 @@ api = Blueprint('stores', __name__, url_prefix='/stores')
 """
 Route for vue.js version
 """
-@api.route('/vstores')
+@api.route('/')
 def vstores():
     return render_template('vue-stores.html', api_prefix='stores')
 
-@api.route('/')
+@api.route('/original')
 def index():
     """
     Main page for dewar management

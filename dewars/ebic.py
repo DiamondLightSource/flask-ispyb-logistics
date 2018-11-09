@@ -63,12 +63,12 @@ ebic_locations = ['EBIC-IN-{}'.format(i) for i in range(10,1)]
 """
 App to demonstrate use of vuejs
 """
-@api.route('/vdewars')
+@api.route('/')
 def vdewars():
     return render_template('vue-dewars.html', title='Zone6 Dewars', api_prefix='zone6', rack_locations=rack_locations)
 
 
-@api.route('/')
+@api.route('/original')
 def index():
     """
     Main page for dewar management
