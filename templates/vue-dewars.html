@@ -63,6 +63,9 @@
               <button type="submit" class="button is-info is-fullwidth" v-on:click="onClearFindForm">Cancel</button>            
             </div>
           </div>
+          <div v-if="searchResult" class="field has-text-centered">
+              <p class="subtitle has-text-danger"><b>[[searchResult]]</b></p>
+          </div>
         </form>
       </div>
 
@@ -171,6 +174,8 @@
           message: "",
           isError: false,
           isFormOK: true,
+          // Value to store results of facility code search
+          searchResult: "",
           // Timeout handle - used to determine if we need to refresh page
           refresh: undefined,
           refreshInterval: 60000, // refresh interval in milliseconds
@@ -178,6 +183,12 @@
         // Watcher to reset the error/info messages after few seconds...
         watch: {
           message(newValue) {
+            // Close after 3 seconds
+            if (newValue) {
+              setTimeout(this.clearMessages, 3000);
+            }
+          },
+          searchResult(newValue) {
             // Close after 3 seconds
             if (newValue) {
               setTimeout(this.clearMessages, 3000);
@@ -341,16 +352,17 @@
                 .then(function(response) {
                   let json = response.data
                   let location = json['storageLocation']
-                  self.message = "Dewar " + facilitycode + " is at " + location.toUpperCase()
+                  self.searchResult = location.toUpperCase()
                 })
                 .catch(function(error) {
-                  self.message = "Dewar " + facilitycode + " not found"
-                  self.isError = true
+                  self.searchResult = "Not Found"
                 })
                 .finally(function() {
-                  self.facilitycode = ''
+                  // Clear up after query - could reset facility code input here?
+                  //self.facilitycode = ''
                 })
               } else {
+                // This provides feedback message in main error/info area
                 this.message = "No facility code provided"
               }
             },
@@ -410,6 +422,7 @@
             clearMessages() {
               this.message = ""
               this.isError = false
+              this.searchResult = ""
             },
         },
       })
