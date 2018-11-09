@@ -23,7 +23,7 @@
           <div class="field">
             <label>Barcode or FacilityCode</label>
               <div class="control">
-                <input type="text" class="input" v-model="barcode" placeholder="Scan the long barcode from the dewar case">        
+                <input ref="location" type="text" class="input" v-model="barcode" placeholder="Scan the long barcode from the dewar case">        
               </div>
           </div>
 
@@ -210,6 +210,9 @@
         // Lifecycle hook - called when Vue is mounted on the page (trigger first get request)...
         mounted() {
           console.log("Vue component mounted")
+
+          // When page is loaded set focus to the input location element
+          this.$refs.location.focus();
 
           this.getBarcodes()
         },

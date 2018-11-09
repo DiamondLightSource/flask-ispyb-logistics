@@ -26,7 +26,7 @@
                         <div class="field">
                             <label>Location</label>
                             <div class="control">
-                            <input type="text" class="input" v-model="location" placeholder="Scan the location e.g. STORES-IN or STORES-OUT">        
+                            <input ref="location" type="text" class="input" v-model="location" placeholder="Scan the location e.g. STORES-IN or STORES-OUT">        
                             </div>
                         </div>
 
@@ -37,7 +37,8 @@
                             </div>
                         </div>
 
-                        <div class="field">
+                        <!-- If location is STORES-IN do not show AWB field...-->
+                        <div v-show="location.toUpperCase() != 'STORES-IN'" class="field">
                             <label>Airway Bill</label>
                             <div class="control">
                                 <input type="text" class="input" v-model="awb" placeholder="Scan the 10 digit DHL Airway Bill">        
@@ -156,11 +157,29 @@
                   setTimeout(this.clearMessages, 3000);
                 }
               },
+              // Watch the barcode and AWB values - if they are accidentally set to STORES-IN/OUT
+              // catch that event and reset the location field
+              barcode(newValue) {
+                  if (newValue.toUpperCase() === "STORES-IN" || newValue.toUpperCase() == "STORES-OUT") {
+                      this.location = newValue;
+                      this.barcode = ''
+                  }
+              },
+
+              awb(newValue) {
+                if (newValue.toUpperCase() === "STORES-IN" || newValue.toUpperCase() == "STORES-OUT") {
+                    this.location = newValue;
+                    this.awb = ''
+                }
             },
+          },
 
             // Lifecycle hook - called when Vue is mounted on the page...
             mounted() {
                 console.log("Vue App Instance Mounted")
+
+                // When page is loaded set focus to the input location element
+                this.$refs.location.focus();
 
                 this.getDewars()
             },
@@ -209,6 +228,21 @@
                         .then(function(response) {
                             console.log(response)
                             self.message = "Updated " + barcode + " to " + location
+                            
+                            let frequency = 600;
+                            playOscillator(context.currentTime, context.currentTime + 0.2, frequency);
+                            // Changed because we don't get the dewar id back from synchweb
+                            // We get a DEWARHISTORYID instead
+                            if ( json['DEWARHISTORYID'] > 0 ) {
+                                console.log("HAPPY BEEPS")
+                                playOscillator(context.currentTime + 0.4, context.currentTime + 0.6, frequency);
+                                playOscillator(context.currentTime + 0.8, context.currentTime + 1, frequency);
+                            } else {
+                                console.log("SAD BEEPS")
+                                frequency = 400;
+                                playOscillator(context.currentTime + 0.4, context.currentTime + 1, frequency);
+                            }
+
                             // Request updated locations from DB                  
                             self.getDewars()
                         })
@@ -216,9 +250,8 @@
                             self.message = "Error updating " + barcode + " to " + location
                             self.isError = true
                         })
-                        // Rest form values
+                        // Rest form values (Keep location element as is)
                         this.barcode = ''
-                        this.location = ''    
                         this.awb = ''    
                     } else {
                         this.message = "Issue with form: "

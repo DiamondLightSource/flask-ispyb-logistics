@@ -83,9 +83,7 @@ def update_dewar_location(barcode, location, awb=None):
 
     result = controller.set_location(barcode, location, awb)
 
-    if result is not None:
-        result = {'location': location, 'barcode': barcode, 'awb': awb, 'status': 'ok'}
-    else:
+    if result is None:
         result = {'location': location,
                   'barcode': barcode,
                   'awb': awb,

@@ -68,13 +68,13 @@ def remove_dewar_from_location(location):
     return result, status_code
 
 
-def update_dewar_location(barcode, location):
+def update_dewar_location(barcode, location, awb=None):
     result = {}
     status_code = 200
 
     logging.getLogger('ispyb-logistics').debug("Update barcode %s to location %s" % (barcode, location))
 
-    result = controller.set_location(barcode, location)
+    result = controller.set_location(barcode, location, awb)
 
     if result is None:
         result = {'location': location,
