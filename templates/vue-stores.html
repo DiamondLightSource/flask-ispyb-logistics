@@ -268,10 +268,12 @@
 
                 // Reset Form fields
                 onClearLocationForm(event) {
-                  event.preventDefault()          
-                  this.barcode = ''
-                  this.location = ''
-                  this.awb = ''
+                    event.preventDefault()          
+                    this.barcode = ''
+                    this.location = ''
+                    this.awb = ''
+                    // When form is cleared, set focus to the input location element
+                    this.$refs.location.focus();
                 },
 
                 // Clear error/info messages in one go 

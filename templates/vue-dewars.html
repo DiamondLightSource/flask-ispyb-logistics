@@ -379,6 +379,8 @@
               event.preventDefault()          
               this.barcode = ''
               this.location = ''
+              // When form is cleared, set focus to the input location element
+              this.$refs.barcode.focus();
             },
 
             onClearFindForm(event) {
