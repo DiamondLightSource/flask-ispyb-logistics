@@ -7,6 +7,11 @@
 
     <script src="/static/js/vue/2.5.17/vue.min.js"></script>
     <script src="/static/js/axios/0.18.0/axios.min.js"></script>
+    <script src="/static/js/howler/2.0.15/howler.js"></script>
+
+    <!-- Promise Polyfill for IE11 and axios -->
+    <script src="/static/js/es6-promise/es6-promise.min.js"></script>
+    <script src="/static/js/es6-promise/es6-promise.auto.min.js"></script> 
 
 </head>
 
@@ -132,13 +137,23 @@
 
   <!-- Single Vue component to manage this page -->
   <script>
+        var sounds = {}
+
+        sounds.success = new Howl({
+            src: ['/static/audio/success.mp3', '/static/audio/success.wav']
+        });
+
+        sounds.fail = new Howl({
+            src: ['/static/audio/fail.mp3', '/static/audio/fail.wav']
+        });
+
         var app = new Vue({
             el: '#app',
             // Change default delimters to avoid clash with jinja2
             delimiters: ["[[","]]"],
             data: {
               // Array for dewar history
-              dewars: [{'awb':'123455', 'barcode':'cs1235', 'destination':'zone6', 'inout':'stores-in', 'date':'2345'}],
+              dewars: [],
               // Data elements for form input
               barcode: '',
               location: '',
@@ -151,7 +166,7 @@
             },
             // Watcher to reset the message after few seconds...
             watch: {
-              message(newValue) {
+              message: function(newValue) {
                 // Close after 2 seconds
                 if (newValue) {
                   setTimeout(this.clearMessages, 3000);
@@ -159,15 +174,15 @@
               },
               // Watch the barcode and AWB values - if they are accidentally set to STORES-IN/OUT
               // catch that event and reset the location field
-              barcode(newValue) {
+              barcode: function(newValue) {
                   if (newValue.toUpperCase() === "STORES-IN" || newValue.toUpperCase() == "STORES-OUT") {
                       this.location = newValue;
                       this.barcode = ''
                   }
               },
 
-              awb(newValue) {
-                if (newValue.toUpperCase() === "STORES-IN" || newValue.toUpperCase() == "STORES-OUT") {
+              awb: function(newValue) {
+                if (newValue.toUpperCase() === "STORES-IN" || newValue.toUpperCase() === "STORES-OUT") {
                     this.location = newValue;
                     this.awb = ''
                 }
@@ -175,7 +190,7 @@
           },
 
             // Lifecycle hook - called when Vue is mounted on the page...
-            mounted() {
+            mounted: function() {
                 console.log("Vue App Instance Mounted")
 
                 // When page is loaded set focus to the input location element
@@ -186,7 +201,7 @@
 
             methods: {
                 // Main method that retrieves dewar history from database
-                getDewars() {
+                getDewars: function() {
                   let self = this
                   self.dewars = []
 
@@ -210,7 +225,8 @@
                 },
 
                 // Method to update dewar location in database
-                onSetLocation(event) {
+                onSetLocation: function(event) {
+                    console.log("onSetLocatoion")
                     event.preventDefault()
                     let self = this
 
@@ -227,26 +243,23 @@
                         axios.post("/{{api_prefix}}/dewars", formData)
                         .then(function(response) {
                             console.log(response)
-                            self.message = "Updated " + barcode + " to " + location
-                            
-                            let frequency = 600;
-                            playOscillator(context.currentTime, context.currentTime + 0.2, frequency);
+                            let json = response.data
                             // Changed because we don't get the dewar id back from synchweb
                             // We get a DEWARHISTORYID instead
                             if ( json['DEWARHISTORYID'] > 0 ) {
-                                console.log("HAPPY BEEPS")
-                                playOscillator(context.currentTime + 0.4, context.currentTime + 0.6, frequency);
-                                playOscillator(context.currentTime + 0.8, context.currentTime + 1, frequency);
+                                self.message = "Updated " + barcode + " to " + location
+                                self.playSuccess()
                             } else {
-                                console.log("SAD BEEPS")
-                                frequency = 400;
-                                playOscillator(context.currentTime + 0.4, context.currentTime + 1, frequency);
+                                self.message = "Error - no dewar history id returned"
+                                self.isError = true
+                                self.playFail();
                             }
 
                             // Request updated locations from DB                  
                             self.getDewars()
                         })
                         .catch(function(error) {
+                            console.log(error)
                             self.message = "Error updating " + barcode + " to " + location
                             self.isError = true
                         })
@@ -267,7 +280,7 @@
                 },
 
                 // Reset Form fields
-                onClearLocationForm(event) {
+                onClearLocationForm: function(event) {
                     event.preventDefault()          
                     this.barcode = ''
                     this.location = ''
@@ -277,12 +290,12 @@
                 },
 
                 // Clear error/info messages in one go 
-                clearMessages() {
+                clearMessages: function() {
                   this.message = ""
                   this.isError = false
                 },
 
-                isDHL(awb) {
+                isDHL: function(awb) {
                     let pattern1 = /^[0-9]{10}$/
                     let pattern2 = /^JJ?D[0-9]{18}$/
 
@@ -293,7 +306,7 @@
                     }
                 },
 
-                isFedex(awb) {
+                isFedex: function(awb) {
                     let pattern1 = /^[0-9]{12}$/
                     let pattern2 = /^[0-9]{16}$/
 
@@ -304,20 +317,38 @@
                     }
                 },
                 // Prevent form submission and move focus to next form element
-                onLocationEnter(event) {
+                onLocationEnter: function(event) {
                     event.preventDefault()
                     this.$refs.barcode.focus()
                 },
 
                 // Prevent form submission and move focus to next form element
-                onBarcodeEnter(event) {
+                onBarcodeEnter: function(event) {
                     event.preventDefault()
+                    if (this.location.toUpperCase() === 'STORES-IN') {
+                        // Submit form
+                        this.onSetLocation(event)
+                    }
                     this.$refs.awb.focus()
                 },
-                // Prevent form submission
-                onAwbEnter(event) {
+                // Prevent form submission unless form conditions met
+                onAwbEnter: function(event) {
                     event.preventDefault()
-                }
+                    if (this.barcode && this.location) {
+                        // Submit form
+                        this.onSetLocation(event)
+                    }
+                },
+                // Audio feedback methods
+                playSuccess: function() {
+                    console.log("HAPPY BEEPS")
+                    sounds.success.play()
+                },
+                playFail: function() {
+                    console.log("SAD BEEPS")
+                    sounds.fail.play()
+                },
+
             },
           })
     

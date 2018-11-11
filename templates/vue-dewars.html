@@ -7,6 +7,12 @@
 
     <script src="/static/js/vue/2.5.17/vue.min.js"></script>
     <script src="/static/js/axios/0.18.0/axios.min.js"></script>
+    <script src="/static/js/howler/2.0.15/howler.js"></script>
+
+    <!-- Promise Polyfill for IE11 and axios -->
+    <script src="/static/js/es6-promise/es6-promise.min.js"></script>
+    <script src="/static/js/es6-promise/es6-promise.auto.min.js"></script> 
+
 </head>
 
 <body class="has-background-white-ter">
@@ -136,17 +142,16 @@
 
   <!-- Inline Javascript code -->
   <script>
-    // Audio context used for user feedback
-    var context = new AudioContext();
+    var sounds = {}
 
-    function playOscillator(startTime, endTime, frequency) {
-        context.resume();
-        oscillator = context.createOscillator();
-        oscillator.connect(context.destination);
-        oscillator.frequency.setValueAtTime(frequency, context.currentTime); // Hz
-        oscillator.start(startTime);
-        oscillator.stop(endTime);
-    }
+    sounds.success = new Howl({
+      src: ['/static/audio/success.mp3', '/static/audio/success.wav']
+    });
+
+    sounds.fail = new Howl({
+      src: ['/static/audio/fail.mp3', '/static/audio/fail.wav']
+    });
+
     // Provided by Jinja2 template
     // Used to enforce correct ordering of rack locations
     var racklist = {{rack_locations | tojson() }}
@@ -182,13 +187,13 @@
         },
         // Watcher to reset the error/info messages after few seconds...
         watch: {
-          message(newValue) {
+          message: function(newValue) {
             // Close after 3 seconds
             if (newValue) {
               setTimeout(this.clearMessages, 3000);
             }
           },
-          searchResult(newValue) {
+          searchResult: function(newValue) {
             // Close after 3 seconds
             if (newValue) {
               setTimeout(this.clearMessages, 3000);
@@ -197,7 +202,7 @@
         },
 
         // Lifecycle hook - called when Vue instance has been created...
-        created() {
+        created: function() {
           // We can initialise any data parameters here...
           let racks = racklist
           let self = this
@@ -208,7 +213,7 @@
         },
 
         // Lifecycle hook - called when Vue is mounted on the page (trigger first get request)...
-        mounted() {
+        mounted: function() {
           console.log("Vue component mounted")
 
           // When page is loaded set focus to the input location element
@@ -219,7 +224,7 @@
 
         methods: {
             // Main method that retrieves dewar locations from database
-            getBarcodes() {
+            getBarcodes: function() {
               let self = this
 
               if (self.refresh) {
@@ -275,7 +280,7 @@
             },
 
             // Method to update dewar location in database
-            onSetLocation(event) {
+            onSetLocation: function(event) {
                 event.preventDefault()
 
                 if (this.barcode && this.location) {
@@ -287,10 +292,9 @@
                   let hasLocation = this.rack_locations.hasOwnProperty(this.location.toUpperCase())
                   
                   if (hasLocation === false) {
-                    // Something very wrong - clearing a location we should not have
+                    // Something wrong - not a location we should set
                     self.message = 'Error - location not allowed for this page'
                     self.isError = true
-                    console.log(self.message)
                     return
                   }
 
@@ -302,35 +306,23 @@
                   .then(function(response) {
                     let json = response.data
 
-                    let frequency = 600;
-                    playOscillator(context.currentTime, context.currentTime + 0.2, frequency);
                     // Changed because we don't get the dewar id back from synchweb
                     // We get a DEWARHISTORYID instead
                     if ( json['DEWARHISTORYID'] > 0 ) {
-                        console.log("HAPPY BEEPS")
-                        playOscillator(context.currentTime + 0.4, context.currentTime + 0.6, frequency);
-                        playOscillator(context.currentTime + 0.8, context.currentTime + 1, frequency);
+                        self.message = "Updating " + barcode + " to " + location
+                        self.playSuccess();
                     } else {
-                        console.log("SAD BEEPS")
-                        frequency = 400;
-                        playOscillator(context.currentTime + 0.4, context.currentTime + 1, frequency);
+                        self.message = "Error - no dewar history id returned"
+                        self.isError = true
+                        self.playFail();
                     }
-
-                    self.message = "Updating " + barcode + " to " + location
                     // Request updated locations from DB                  
                     self.getBarcodes()
                   })
                   .catch(function(error) {
                     self.message = "Error updating " + barcode + " to " + location
                     self.isError = true
-                    
-                    // Play error jingle
-                    let frequency = 600;
-                    playOscillator(context.currentTime, context.currentTime + 0.2, frequency);
-                    frequency = 400;
-                    playOscillator(context.currentTime + 0.4, context.currentTime + 1, frequency);
-                    console.log("SAD BEEPS")
-
+                    self.playFail();
                   })
                   // Rest form values
                   this.barcode = ''
@@ -347,7 +339,7 @@
             },
 
             // Search the database for a dewar with the specified facility code (DLS-MX-1234)
-            onFindDewar(event) {
+            onFindDewar: function(event) {
               event.preventDefault()
 
               if (this.facilitycode !== "") {
@@ -375,7 +367,7 @@
               }
             },
 
-            onClearLocationForm(event) {
+            onClearLocationForm: function(event) {
               event.preventDefault()          
               this.barcode = ''
               this.location = ''
@@ -383,21 +375,21 @@
               this.$refs.barcode.focus();
             },
 
-            onClearFindForm(event) {
+            onClearFindForm: function(event) {
                 event.preventDefault()          
                 this.facilitycode = ''
             },
 
             // Handler for clear location event (rack location clicked)
             // This will trigger the confirm dialog box to show up
-            onClearLocation(location) {
+            onClearLocation: function(location) {
               // This location will be upper case because we control how it is rendered
               this.isRemoveDialogActive = true
               this.locationToRemove = location
             },
 
             // User has either confirmed or cancelled
-            onConfirmClear(confirm) {
+            onConfirmClear: function(confirm) {
               if (confirm === true) {
                 // Extra check to ensure this is a valid location
                 let hasLocation = this.rack_locations.hasOwnProperty(this.locationToRemove)
@@ -427,23 +419,33 @@
               this.locationToRemove = "";
               this.isRemoveDialogActive = false
             },
-
             // Clear all messages in one go 
-            clearMessages() {
+            clearMessages: function() {
               this.message = ""
               this.isError = false
               this.searchResult = ""
             },
-
             // Prevent form submission and move focus to next input element
-            onBarcodeEnter(event) {
+            onBarcodeEnter: function(event) {
               event.preventDefault()
               this.$refs.location.focus()
             },
             // Prevent form submission
-            onLocationEnter(event) {
+            onLocationEnter: function(event) {
               event.preventDefault()
-            }
+              if (this.barcode) {
+                this.onSetLocation(event)
+              }
+            },
+            // Audio feedback methods
+            playSuccess: function() {
+              console.log("HAPPY BEEPS")
+              sounds.success.play()
+            },
+            playFail: function() {
+              console.log("SAD BEEPS")
+              sounds.fail.play()
+            },
       },
       })
     
