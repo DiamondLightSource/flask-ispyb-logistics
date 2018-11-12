@@ -113,26 +113,23 @@
                     <tbody class="center-table">
                         <tr v-for="dewar in dewars">
                             <td>[[dewar.date]]</td>
-                            <td>[[dewar.barcode.toUpperCase()]]</td>
+                            <td>[[dewar.barcode.toUpperCase()]] <span v-if="dewar.sid"><a v-bind:href="'https://ispyb.diamond.ac.uk/shipments/sid/' + dewar.sid">&#8599;</a></span></td>
                             <td>[[dewar.inout.toUpperCase()]]</td>
                             <td>[[dewar.destination]]</td>
                             <td v-if="isDHL(dewar.awb)">
                                 <a v-bind:href="'http://www.dhl.com/en/express/tracking.html?AWB=' + dewar.awb">[[dewar.awb]]</a>
                             </td>
                             <td v-else-if="isFedex(dewar.awb)">
-                                <a v-bind:href="'http://www.fedex.com/apps/fedextrack/?trackingnumber=' + dewar.awb">[[dewar.awb]]</a>
-                            </td>
-                            <td v-else-if="dewar.sid">
-                                <a v-bind:href="'https://ispyb.diamond.ac.uk/shipments/sid/' + dewar.sid">[[dewar.sid]]</a>
+                                <a v-bind:href="'http://www.fedex.com/apps/fedextrack/?trackingnumber=' + dewar.awb.substring(0,12)">[[dewar.awb]]</a>
                             </td>
                             <td v-else>
                                 [[dewar.awb]]
                             </td>
                         </tr>
                     </tbody>
-                </table> 
-            </div>          
-        </div>        
+                </table>
+            </div>
+        </div>
 
     </div> <!-- End div id=app-->
 
@@ -176,14 +173,13 @@
               // Watch the barcode and AWB values - if they are accidentally set to STORES-IN/OUT
               // catch that event and reset the location field
               barcode: function(newValue) {
-                  if (newValue.toUpperCase() === "STORES-IN" || newValue.toUpperCase() == "STORES-OUT") {
-                      this.location = newValue;
-                      this.barcode = ''
+                if (this.isValidLocation(newValue)) {
+                    this.location = newValue;
+                    this.barcode = ''
                   }
               },
-
               awb: function(newValue) {
-                if (newValue.toUpperCase() === "STORES-IN" || newValue.toUpperCase() === "STORES-OUT") {
+                if (this.isValidLocation(newValue)) {
                     this.location = newValue;
                     this.awb = ''
                 }
@@ -227,15 +223,20 @@
 
                 // Method to update dewar location in database
                 onSetLocation: function(event) {
-                    console.log("onSetLocatoion")
+                    console.log("onSetLocation")
                     event.preventDefault()
                     let self = this
+                    let validLocation = this.isValidLocation(this.location)
 
-                    if (this.barcode && this.location) {
+                    if (this.barcode && this.location && validLocation) {
                         let barcode = this.barcode
                         let location = this.location
-                        let awb = this.awb // Field is optional
-    
+                        let awb = ''
+                        // Only set Airway bill for Stores out
+                        if (location.toUpperCase() === "STORES-OUT") {
+                            awb = this.awb // Field is optional
+                        }
+
                         let formData = new FormData();
                         formData.append('barcode', barcode)
                         formData.append('location', location)
@@ -255,7 +256,6 @@
                                 self.isError = true
                                 self.playFail();
                             }
-
                             // Request updated locations from DB                  
                             self.getDewars()
                         })
@@ -272,11 +272,14 @@
                         this.awb = ''    
                     } else {
                         this.message = "Issue with form: "
+                        this.isError = true
                         if (this.barcode === "") {
                             this.message += " no barcode provided..."
                         }
                         if (this.location === "") {
                             this.message += ' no location provided...'
+                        } else if (!validLocation) {
+                            this.message += ' location not valid for this application...'                            
                         }
                     }                 
                 },
@@ -296,7 +299,7 @@
                   this.message = ""
                   this.isError = false
                 },
-
+                // Internal validation method - check for DHL Airway Bill
                 isDHL: function(awb) {
                     let pattern1 = /^[0-9]{10}$/
                     let pattern2 = /^JJ?D[0-9]{18}$/
@@ -307,7 +310,7 @@
                         return false
                     }
                 },
-
+                // Internal validation method - check for FedEx Airway Bill
                 isFedex: function(awb) {
                     let pattern1 = /^[0-9]{12}$/
                     let pattern2 = /^[0-9]{16}$/
@@ -318,6 +321,15 @@
                         return false
                     }
                 },
+                // Internal validation method - check for valid location (stores in or out)
+                isValidLocation: function(location) {
+                    if (location.toUpperCase() === "STORES-IN" || location.toUpperCase() === "STORES-OUT") {
+                        return true;
+                    } else {
+                        return false;
+                    }
+                },
+
                 // Prevent form submission and move focus to next form element
                 onLocationEnter: function(event) {
                     event.preventDefault()
