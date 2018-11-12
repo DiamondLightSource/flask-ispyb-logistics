@@ -6,12 +6,13 @@
     <link rel="stylesheet" href="/static/css/bulma/0.7.1//bulma.min.css"/>
 
     <script src="/static/js/vue/2.5.17/vue.min.js"></script>
-    <script src="/static/js/axios/0.18.0/axios.min.js"></script>
-    <script src="/static/js/howler/2.0.15/howler.js"></script>
 
     <!-- Promise Polyfill for IE11 and axios -->
     <script src="/static/js/es6-promise/es6-promise.min.js"></script>
     <script src="/static/js/es6-promise/es6-promise.auto.min.js"></script> 
+
+    <script src="/static/js/axios/0.18.0/axios.min.js"></script>
+    <script src="/static/js/howler/2.0.15/howler.js"></script>
 
 </head>
 
@@ -262,6 +263,7 @@
                             console.log(error)
                             self.message = "Error updating " + barcode + " to " + location
                             self.isError = true
+                            self.playFail();
                         })
                         // Set focus to barcode (likely to want to reuse location)
                         this.$refs.barcode.focus()
@@ -348,7 +350,6 @@
                     console.log("SAD BEEPS")
                     sounds.fail.play()
                 },
-
             },
           })
     
