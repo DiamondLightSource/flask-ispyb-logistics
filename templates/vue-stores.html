@@ -170,21 +170,7 @@
                   setTimeout(this.clearMessages, 3000);
                 }
               },
-              // Watch the barcode and AWB values - if they are accidentally set to STORES-IN/OUT
-              // catch that event and reset the location field
-              barcode: function(newValue) {
-                if (this.isValidLocation(newValue)) {
-                    this.location = newValue;
-                    this.barcode = ''
-                  }
-              },
-              awb: function(newValue) {
-                if (this.isValidLocation(newValue)) {
-                    this.location = newValue;
-                    this.awb = ''
-                }
             },
-          },
 
             // Lifecycle hook - called when Vue is mounted on the page...
             mounted: function() {
@@ -339,18 +325,34 @@
                 // Prevent form submission and move focus to next form element
                 onBarcodeEnter: function(event) {
                     event.preventDefault()
-                    if (this.location.toUpperCase() === 'STORES-IN') {
-                        // Submit form
-                        this.onSetLocation(event)
+
+                    if (this.isValidLocation(this.barcode)) {
+                        // Then user has entered barcode info here accidentally
+                        this.location = this.barcode
+                        this.barcode = ''
+                        this.$refs.barcode.focus()
+                    } else {
+                        if (this.location.toUpperCase() === 'STORES-IN') {
+                            // In this case we submit the form
+                            this.onSetLocation(event)
+                        } else {
+                            this.$refs.awb.focus()
+                        }
                     }
-                    this.$refs.awb.focus()
                 },
                 // Prevent form submission unless form conditions met
                 onAwbEnter: function(event) {
                     event.preventDefault()
-                    if (this.barcode && this.location) {
-                        // Submit form
-                        this.onSetLocation(event)
+
+                    if (this.isValidLocation(this.awb)) {
+                        this.location = this.awb
+                        this.awb = ''
+                        this.$refs.barcode.focus()
+                    } else {
+                        if (this.barcode && this.location) {
+                            // Try to submit form
+                            this.onSetLocation(event)
+                        }
                     }
                 },
                 // Audio feedback methods
