@@ -161,13 +161,15 @@
               message: "",
               isError: false,
               isFormOK: true,
+              clearMessageInterval: 3, // Message interval in seconds
+              refreshInterval: 3600, // Page Refresh interval in seconds (i.e. every hour)
             },
             // Watcher to reset the message after few seconds...
             watch: {
               message: function(newValue) {
                 // Close after 2 seconds
                 if (newValue) {
-                  setTimeout(this.clearMessages, 3000);
+                  setTimeout(this.clearMessages, this.clearMessageInterval * 1000);
                 }
               },
             },
@@ -179,10 +181,26 @@
                 // When page is loaded set focus to the input location element
                 this.$refs.location.focus();
 
+                // Get local storage location
+                let loc = localStorage.getItem('location')
+                if (loc) {
+                    console.log("Setting location from local storage")
+                    this.location = loc
+                    this.$refs.barcode.focus();
+                }
+
                 this.getDewars()
+                // Set page to refresh every 60 minutes
+                setInterval(this.refresh, this.refreshInterval * 1000)
             },
 
             methods: {
+                refresh: function() {
+                    console.log('Refresh')
+                    localStorage.setItem('location', this.location)
+                    location.reload()
+                },
+
                 // Main method that retrieves dewar history from database
                 getDewars: function() {
                   let self = this
