@@ -187,6 +187,9 @@
                     console.log("Setting location from local storage")
                     this.location = loc
                     this.$refs.barcode.focus();
+                    // Now remove it - that way a manual refresh will reset the page and form elements
+                    // We only save the location state if the page auto refreshes
+                    localStorage.removeItem('location')
                 }
 
                 this.getDewars()
