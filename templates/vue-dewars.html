@@ -107,7 +107,7 @@
     <!-- Display the rack locations, four columns across -->
     <div class=" solid-border columns is-multiline">
       <div class="column is-3" v-for="dewar, rack in rack_locations">
-        <div class="box has-background-white-ter" v-on:click="onClearLocation(rack)" v-bind:class="{'has-text-danger': dewar.needsLN2}">
+        <div class="box has-background-white-ter" v-on:click="onClearLocation(rack)" v-bind:class="{'has-text-danger': dewar.needsLN2 && dewar.status !== 'dispatch-requested'}">
           <span class="has-text-weight-bold">[[rack]]: </span>
           <span v-if="dewar.barcode" class="content has-text-weight-bold">[[dewar.barcode]]</span>
           <span v-else class="content is-invisible">empty</span>
@@ -115,7 +115,7 @@
           <div>
             <span v-if="dewar.facilityCode" class="tag is-dark">[[dewar.facilityCode]]</span>
             <span v-if="dewar.status == 'dispatch-requested'" class="tag is-warning">[[dewar.status]]</span>
-            <span v-if="dewar.needsLN2" class="tag is-danger">needs-refill</span>  
+            <span v-else-if="dewar.needsLN2" class="tag is-danger">needs-refill</span>  
           </div>
         </div>
       </div>
