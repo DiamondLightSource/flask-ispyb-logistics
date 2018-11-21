@@ -47,7 +47,7 @@
                         <div v-show="location.toUpperCase() != 'STORES-IN'" class="field">
                             <label>Airway Bill</label>
                             <div class="control">
-                                <input ref="awb" type="text" class="input" v-model="awb" v-on:keydown.enter="onAwbEnter" placeholder="Scan the 10 digit DHL Airway Bill">        
+                                <input ref="awb" type="text" class="input" v-model="awb" v-on:keydown.enter="onAwbEnter" placeholder="Scan the DHL / FedEx Airway Bill">
                             </div>
                         </div>
                     
@@ -116,14 +116,14 @@
                             <td>[[dewar.barcode.toUpperCase()]] <span v-if="dewar.sid"><a v-bind:href="'https://ispyb.diamond.ac.uk/shipments/sid/' + dewar.sid">&#8599;</a></span></td>
                             <td>[[dewar.inout.toUpperCase()]]</td>
                             <td>[[dewar.destination]]</td>
-                            <td v-if="isDHL(dewar.awb)">
-                                <a v-bind:href="'http://www.dhl.com/en/express/tracking.html?AWB=' + dewar.awb">[[dewar.awb]]</a>
+                            <!-- If STORES OUT show links and/or plain AWB-->
+                            <td v-if="dewar.inout.toUpperCase() === 'STORES-OUT'">
+                                <a v-if="isDHL(dewar.awb)" v-bind:href="'http://www.dhl.com/en/express/tracking.html?AWB=' + dewar.awb">[[dewar.awb]]</a>
+                                <a v-else-if="isFedexDatabaseRecord(dewar.awb)" v-bind:href="'http://www.fedex.com/apps/fedextrack/?trackingnumber=' + dewar.awb">[[dewar.awb]]</a>
+                                <span v-else>[[dewar.awb]]</span>
                             </td>
-                            <td v-else-if="isFedex(dewar.awb)">
-                                <a v-bind:href="'http://www.fedex.com/apps/fedextrack/?trackingnumber=' + dewar.awb.substring(0,12)">[[dewar.awb]]</a>
-                            </td>
+                            <!-- Else No value displayed if STORES-IN -->
                             <td v-else>
-                                [[dewar.awb]]
                             </td>
                         </tr>
                     </tbody>
@@ -242,6 +242,11 @@
                         // Only set Airway bill for Stores out
                         if (location.toUpperCase() === "STORES-OUT") {
                             awb = this.awb // Field is optional
+
+                            // If it's a Fedex code we want a 14 digit tracking number
+                            if (this.isFedex(awb)) {
+                                awb = this.getFedexTrackingNumber(awb)
+                            }
                         }
 
                         let formData = new FormData();
@@ -319,14 +324,35 @@
                 },
                 // Internal validation method - check for FedEx Airway Bill
                 isFedex: function(awb) {
-                    let pattern1 = /^[0-9]{12}$/
-                    let pattern2 = /^[0-9]{16}$/
+                    // In future Fedex will only be 34 characters...
+                    let pattern = /^[0-9]{34}$/
 
-                    if (pattern1.test(awb) || pattern2.test(awb)) {
+                    if (pattern.test(awb)) {
                         return true                        
                     } else {
                         return false
                     }
+                },
+                // Validation method - used to determine value saved in ISPyB is Fedex
+                isFedexDatabaseRecord: function(awb) {
+                    // In future we could check against delivery agent
+                    let pattern = /^[0-9]{14}$/
+
+                    if (pattern.test(awb)) {
+                        return true
+                    } else {
+                        return false
+                    }
+                },
+                // Method to return a tracking number for FedEx barcodes
+                // New codes are 34 characters long but only the last 14 digits are the tracking number
+                getFedexTrackingNumber: function(fedex_awb) {
+                    let result = fedex_awb
+
+                    if (fedex_awb.length > 14) {
+                        result = fedex_awb.slice(-14)
+                    }
+                    return result
                 },
                 // Internal validation method - check for valid location (stores in or out)
                 isValidLocation: function(location) {
