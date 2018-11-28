@@ -325,9 +325,11 @@
                 // Internal validation method - check for FedEx Airway Bill
                 isFedex: function(awb) {
                     // In future Fedex will only be 34 characters...
-                    let pattern = /^[0-9]{34}$/
+                    // For now we need to accommodate 16 digits too
+                    let pattern1 = /^[0-9]{16}$/
+                    let pattern2 = /^[0-9]{34}$/
 
-                    if (pattern.test(awb)) {
+                    if (pattern1.test(awb) || pattern2.test(awb)) {
                         return true                        
                     } else {
                         return false
@@ -346,11 +348,16 @@
                 },
                 // Method to return a tracking number for FedEx barcodes
                 // New codes are 34 characters long but only the last 14 digits are the tracking number
+                // Updated to handle legacy case where 16 digit code provided
                 getFedexTrackingNumber: function(fedex_awb) {
                     let result = fedex_awb
 
-                    if (fedex_awb.length > 14) {
+                    if (fedex_awb.length === 16) {
+                        result = '00'+fedex_awb.slice(0,12)
+                    } else if (fedex_awb.length === 34) {
                         result = fedex_awb.slice(-14)
+                    } else {
+                        console.log("Error - invalid fedex tracking code provided")
                     }
                     return result
                 },
