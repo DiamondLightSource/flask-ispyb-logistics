@@ -108,7 +108,7 @@ def get_destination_from_barcode(barcode):
             destination = 'I14'
         elif barcode_prefix == 'EM' or barcode_prefix == 'BI' or any(b in barcode.upper() for b in ['M01', 'M02', 'M03', 'M04', 'M05', 'M06', 'M07']):
             destination = 'eBIC'
-        elif barcode_prefix == 'MX' or any(b in barcode.upper() for b in ['I03', 'I04', 'I23', 'I24']):
+        elif barcode_prefix == 'MX' or any(b in barcode.upper() for b in ['I03', 'I04', 'I19', 'I23', 'I24']):
             destination = 'Zone 6 store'
         else:
             destination = 'Unknown'
