@@ -129,7 +129,9 @@ def find():
     """
     facilitycode = request.args.get('fc')
 
-    result, status_code = common.find_dewar(facilitycode)
+    # We actually accept a dewar barcode or a facility code.
+    # The controller handles both instances...
+    result, status_code = common.find_dewar_history(facilitycode)
 
     response = jsonify(result)
     response.status_code = status_code
