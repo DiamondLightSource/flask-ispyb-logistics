@@ -37,10 +37,11 @@ def get_dewar_by_facilitycode(fc):
     # Facility codes are reused, so we want the most recent version 
     # We work that out based on the newest (highest) dewarId
     # Could also specify that its a dewar on site, at-facility perhaps?
-    d = Dewar.query.filter_by(FACILITYCODE = fc).order_by(desc(Dewar.dewarId)).first()
+    d = Dewar.query.filter(Dewar.FACILITYCODE == fc).order_by(desc(Dewar.dewarId)).first()
 
     if d:
-        result = {'barcode': d.barCode,  'storageLocation': d.storageLocation}
+        result = {'barcode': d.barCode,  'dewarId': d.dewarId, 'storageLocation': d.storageLocation}
+        logging.getLogger('ispyb-logistics').info("Found dewar with FacilityCode {} in location {}".format(fc, d.storageLocation))
     else:
         logging.getLogger('ispyb-logistics').warn("Could not find dewar with FacilityCode {}".format(fc))
 
@@ -64,7 +65,7 @@ def get_dewar_by_barcode(barcode):
         result['facilityCode'] = d.FACILITYCODE
 
     except NoResultFound:
-        logging.getLogger('ispyb-logistics').error("Error barcode {} not exist in ISPyB".format(barcode))
+        logging.getLogger('ispyb-logistics').error("Error barcode {} does not exist in ISPyB".format(barcode))
     except MultipleResultsFound:
         logging.getLogger('ispyb-logistics').error("Error multiple results found for barcode {}".format(barcode))
 
@@ -160,6 +161,59 @@ def find_dewar_history_for_locations(locations, max_entries=20):
 
     except NoResultFound:
         logging.getLogger('ispyb-logistics').error("Error retrieving dewars")
+    except DBAPIError:
+        logging.getLogger('ispyb-logistics').error('Database API Exception - no route to database host?')
+        results = None
+
+    return results
+
+def find_dewar_history_for_dewar(dewarCode, max_entries=3):
+    """
+    This method will find 'n' entries from the dewar transport history table filtered by dewarId.
+
+    Accepts facilityCode or barcode as the dewar Code
+
+    Returns {'dewarId':dewarId, 'barcode': barcode, facilityCode': facilityCode, storageLocations': [location1, location2...] }
+    """
+    results = None
+
+    try:
+        # Query for dewar transporthistory for specific dewarId
+        # Get the timestamp and location from the transport history
+        # Order so we get the most recent first...
+        query = DewarTransportHistory.query.join(Dewar).\
+            filter(Dewar.dewarId == DewarTransportHistory.dewarId)
+
+        if is_facility_code(dewarCode):
+            query = query.filter(Dewar.FACILITYCODE == dewarCode)
+        else:
+            # Try using the passed variable as barcode
+            query = query.filter(Dewar.barCode == dewarCode)
+
+        dewarHistory = query.order_by(desc(DewarTransportHistory.arrivalDate)).\
+            limit(max_entries).\
+            values(Dewar.barCode,
+                   Dewar.dewarId,
+                   Dewar.FACILITYCODE,
+                   DewarTransportHistory.storageLocation,
+                   DewarTransportHistory.arrivalDate,
+                   )
+        # Return is a generator so we need to iterate through results
+        for index, dewar in enumerate(dewarHistory):
+            logging.getLogger('ispyb-logistics').info('Found entry {} for this dewar {} in {}'.format(index, dewar.barCode, dewar.storageLocation))
+
+            if results is None:
+                results = {}
+                results['dewarId'] = Dewar.dewarId
+                results['storageLocations'] = []
+                results['arrivalDates'] = []
+                # Only one barcode/facilitycode, so just grab first one...?
+                results['barCode'] = dewar.barCode
+                results['facilityCode'] = dewar.FACILITYCODE
+            # Content that differs for each entry...
+            results['storageLocations'].append(dewar.storageLocation)
+            results['arrivalDates'].append(dewar.arrivalDate)
+
     except DBAPIError:
         logging.getLogger('ispyb-logistics').error('Database API Exception - no route to database host?')
         results = None
