@@ -129,11 +129,12 @@ def find_dewar_history_for_locations(locations, max_entries=20):
         # Use case insensitive search for storageLocation
         # Get the timestamp and location from the transport history
         # Order so we get the most recent first...
-        # We don't care if the locations match between dewar and transport history
+        # Check if the locations match between dewar and transport history
         dewars = DewarTransportHistory.query.join(Dewar).join(Shipping).\
             filter(func.lower(DewarTransportHistory.storageLocation).in_(locations)).\
             filter(Dewar.dewarId == DewarTransportHistory.dewarId).\
             filter(Dewar.shippingId == Shipping.shippingId).\
+            filter(Dewar.storageLocation == DewarTransportHistory.storageLocation).\
             order_by(desc(DewarTransportHistory.arrivalDate)).\
             limit(max_entries).\
             values(Dewar.barCode,
@@ -148,7 +149,7 @@ def find_dewar_history_for_locations(locations, max_entries=20):
 
         for index, dewar in enumerate(dewars):
             logging.getLogger('ispyb-logistics').info('Found entry {} for this dewar {} in {} at {}'.format(index, dewar.barCode, dewar.storageLocation, dewar.arrivalDate))
-            # Returning three items per location [barcode, arrivalDate and FacilityCode]
+            # Build the return object - format aligns a previous iteration of the app
             results[str(index)] = {
                 'barcode':dewar.barCode,
                 'date': dewar.arrivalDate,
