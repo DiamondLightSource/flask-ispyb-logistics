@@ -1,5 +1,6 @@
 import re
 import logging
+import itertools
 
 from sqlalchemy.orm.exc import NoResultFound, MultipleResultsFound
 from sqlalchemy.exc import DBAPIError
@@ -199,6 +200,9 @@ def find_dewar_history_for_dewar(dewarCode, max_entries=3):
                    DewarTransportHistory.storageLocation,
                    DewarTransportHistory.arrivalDate,
                    )
+        # Temporary store for locations/dates (so we can post-process the results)
+        locations = []
+
         # Return is a generator so we need to iterate through results
         for index, dewar in enumerate(dewarHistory):
             logging.getLogger('ispyb-logistics').info('Found entry {} for this dewar {} in {}'.format(index, dewar.barCode, dewar.storageLocation))
@@ -212,8 +216,12 @@ def find_dewar_history_for_dewar(dewarCode, max_entries=3):
                 results['facilityCode'] = dewar.FACILITYCODE
             # Content that differs for each entry...
             item = {'location': dewar.storageLocation, 'arrivalDate': dewar.arrivalDate}
-            results['storageLocations'].append(item)
+            locations.append(item)
 
+        # Annoyingly we find lots of entries where the locations are the same (i04, i04, i04... for every puck scan)
+        # This method removes all duplicate sequential entries for us...
+        results['storageLocations'] = [g.next() for k,g in itertools.groupby(locations, lambda x: x.get('location'))]
+        
     except DBAPIError:
         logging.getLogger('ispyb-logistics').error('Database API Exception - no route to database host?')
         results = None

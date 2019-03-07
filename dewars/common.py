@@ -50,7 +50,9 @@ def find_dewar_history(dewarcode):
     """
     result = {}
     status_code = 200
-    history_depth = 5
+    # Upped the request to avoid duplicate entries on beamlines
+    # Let the client side display a subset if required
+    history_depth = 50
 
     # Do we have a valid facility code?
     if dewarcode:

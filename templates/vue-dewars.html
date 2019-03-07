@@ -73,7 +73,7 @@
           <div v-if="searchResult" class="field has-text-left">
               <p class="subtitle">Location History</p>
               <ul class="timeline">
-                <li v-for="item in searchResult" class="timeline-container">
+                <li v-for="item in searchResult.slice(0,5)" class="timeline-container">
                   <div class="timeline-content">
                       <p>[[ item.location ]]</p>
                       <p class="tag">[[item.arrivalDate]]</p>
