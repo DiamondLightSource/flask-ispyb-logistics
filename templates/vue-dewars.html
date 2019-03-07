@@ -57,9 +57,9 @@
         <h2 class="title has-text-centered">Find a Dewar</h2>
         <form>
           <div class="field">
-            <label>Facility Code</label>
+            <label>BarCode or FacilityCode</label>
             <div class="control">
-                <input type="text" class="input" v-model="facilitycode" placeholder="DLS-MX-####">   
+                <input type="text" class="input" v-model="facilitycode" placeholder="e.g. DLS-MX-####">
             </div>
           </div>
           <div class="columns">
@@ -70,11 +70,19 @@
               <button type="submit" class="button is-info is-fullwidth" v-on:click="onClearFindForm">Cancel</button>            
             </div>
           </div>
-          <div v-if="searchResult" class="field has-text-centered">
-            <p class="subtitle has-text-danger"><b>Current Location: [[ searchResult.current ]]</b></p>
-            <div v-if="searchResult.history">
-              <p class="subtitle has-text-info"><b>Previous Locations: [[ searchResult.history.join(", ") ]] </b></p>
-            </div>
+          <div v-if="searchResult" class="field has-text-left">
+              <p class="subtitle">Location History</p>
+              <ul class="timeline">
+                <li v-for="item in searchResult" class="timeline-container">
+                  <div class="timeline-content">
+                      <p>[[ item.location ]]</p>
+                      <p class="tag">[[item.arrivalDate]]</p>
+                  </div>
+                </li>
+              </ul>
+          </div>
+          <div v-else-if="searchResultError" class="field has-text-left">
+              <p class="subtitle has-text-danger">[[ searchResultError ]]</p>
           </div>
         </form>
       </div>
@@ -133,7 +141,8 @@
           <span v-if="dewar.barcode" class="content has-text-weight-bold">[[dewar.barcode]]</span>
           <span v-else class="content is-invisible">empty</span>
           <!-- Tags -->
-          <div>
+          <div class="tags has-addons">
+            <span v-if="dewar.arrivalDate" class="tag is-info">[[dewar.arrivalDate.split(' ').slice(0,4).join(" ")]]</span>
             <span v-if="dewar.facilityCode" class="tag is-dark">[[dewar.facilityCode]]</span>
             <span v-if="dewar.status == 'dispatch-requested'" class="tag is-warning">[[dewar.status]]</span>
             <span v-else-if="dewar.needsLN2" class="tag is-danger">needs-refill</span>  
@@ -202,9 +211,10 @@
           isError: false,
           isFormOK: true,
           // Value to store results of facility code search
-          searchResult: "",
+          searchResult: null,
+          searchResultError: null,
           // Timeout handle - used to determine if we need to refresh page
-          refresh: undefined,
+          refresh: null,
           refreshInterval: 60000, // refresh interval in milliseconds
         },
         // Watcher to reset the error/info messages after few seconds...
@@ -221,6 +231,12 @@
               setTimeout(this.clearMessages, 5000);
             }
           },
+          searchResultError: function(newValue) {
+            // Close after 5 seconds
+            if (newValue) {
+              setTimeout(this.clearMessages, 5000);
+            }
+          },
         },
 
         computed: {
@@ -228,7 +244,7 @@
           // If they have dispatch requested set ignore them (they are leaving the facility so don't need LN2)
           refill_dewars: function() {
             const self = this
-            let dewars = Object.keys(this.rack_locations).filter((rack) => {
+            let dewars = Object.keys(this.rack_locations).filter( function(rack) {
               return self.rack_locations[rack].status !== 'dispatch-requested' && self.rack_locations[rack].needsLN2 === true
             })
             return dewars
@@ -237,7 +253,7 @@
           // This is used to display 5 dewars that need to be dispatched
           dispatch_dewars: function() {
             const self = this
-            let dewars = Object.keys(this.rack_locations).filter((rack) => {
+            let dewars = Object.keys(this.rack_locations).filter( function(rack) {
               return self.rack_locations[rack].status === 'dispatch-requested'
             })
             return dewars
@@ -305,7 +321,7 @@
                 })
                 // Re-assign rack_locations property to trigger reactivity
                 // Otherwise Vue has a hard time running computed properties
-                self.rack_locations = Object.assign(rack_data)
+                self.rack_locations = rack_data
               })
               .catch(function(error) {
                 console.log("Error getting initial data " + error)
@@ -393,23 +409,19 @@
                 .then(function(response) {
                   let json = response.data
 
-                  // Changed location to an array to show recent history...
-                  let locations = json['storageLocations']
-                  // Convert to uppercase if we have a value (handle null entries)
-                  locations.map(function(item) {
-                    return item ? item.toUpperCase() : "none"
-                  })
-                  let current = locations[0] ? locations[0] : "none"
+                  // Changed location to an array of objects to show recent history...
+                  // Should be array of {location: 'storageLocation', arrivalDate: 'arrival date'}
+                  let locations = json["storageLocations"]
 
-                  // Convert to uppercase if we have a value (handle null entries)
-                  let history = locations.slice(1).map(function(item) {
-                    return item ? item.toUpperCase() : "none"
+                  // Convert locations to uppercase if we have a value (handle null entries)
+                  locations.forEach(function(item) {
+                    item.location = item.location ? item.location.toUpperCase() : "none"
                   })
-
-                  self.searchResult = {"current": current, "history": history}
+                  self.searchResult = locations
                 })
                 .catch(function(error) {
-                  self.searchResult = {"current": "Not Found"}
+                  self.searchResult = null
+                  self.searchResultError = "Dewar " + facilitycode + " not found"
                 })
                 .finally(function() {
                   // Clear up after query - could reset facility code input here?
@@ -475,7 +487,8 @@
             clearMessages: function() {
               this.message = ""
               this.isError = false
-              this.searchResult = ""
+              this.searchResult = null
+              this.searchResultError = null
             },
             // Prevent form submission and move focus to next input element
             onBarcodeEnter: function(event) {
@@ -527,6 +540,53 @@
     .fade-enter, .fade-leave-to {
       opacity: 0
     }
+    /* Timeline css see https://www.w3schools.com/howto/howto_css_timeline.asp */
+    .timeline {
+      position: relative;
+      margin: 0px auto;
+    }
+    /* This draws the line */
+    .timeline::after {
+      content: "";
+      position: absolute;
+      top: 5px;
+      bottom: 5px;
+      left: 10px;
+      margin-left: 0px;
+      width: 4px;
+      background-color: grey;
+    }
+    /* Position each block of content */
+    .timeline-container {
+      position: relative;
+      margin-left: 40px;
+      padding: 10px;
+    }
+    /* Make the first entry stand out (most recent item) */
+    .timeline-container:first-child {
+      font-weight: bold;
+      color: red;
+    }
+    /* The circles on the timeline */
+    .timeline-container::after {
+      content: '';
+      position: absolute;
+      width: 25px;
+      height: 25px;
+      left: -40px;
+      top: 10px;
+      background-color: white;
+      border: 4px solid grey;
+      border-radius: 50%;
+      z-index: 1;
+    }
+    .timeline-container:first-child::after {
+      background-color: red;
+    }
+    .timeline-content {
+      font-size: 1.2em;
+    }
+
   </style>
 </body>
 

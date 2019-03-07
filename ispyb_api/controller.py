@@ -207,13 +207,12 @@ def find_dewar_history_for_dewar(dewarCode, max_entries=3):
                 results = {}
                 results['dewarId'] = Dewar.dewarId
                 results['storageLocations'] = []
-                results['arrivalDates'] = []
                 # Only one barcode/facilitycode, so just grab first one...?
                 results['barCode'] = dewar.barCode
                 results['facilityCode'] = dewar.FACILITYCODE
             # Content that differs for each entry...
-            results['storageLocations'].append(dewar.storageLocation)
-            results['arrivalDates'].append(dewar.arrivalDate)
+            item = {'location': dewar.storageLocation, 'arrivalDate': dewar.arrivalDate}
+            results['storageLocations'].append(item)
 
     except DBAPIError:
         logging.getLogger('ispyb-logistics').error('Database API Exception - no route to database host?')

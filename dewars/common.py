@@ -50,7 +50,7 @@ def find_dewar_history(dewarcode):
     """
     result = {}
     status_code = 200
-    history_depth = 3
+    history_depth = 5
 
     # Do we have a valid facility code?
     if dewarcode:
@@ -62,7 +62,6 @@ def find_dewar_history(dewarcode):
             result['facilityCode'] = dewar.get('facilityCode')
             result['barcode'] = dewar.get('barCode')
             result['storageLocations'] = dewar.get('storageLocations')
-            result['arrivalDates'] = dewar.get('arrivalDates')
         else:
             result = {'status': 'fail',
                       'reason': 'facility/barcode not found'}
