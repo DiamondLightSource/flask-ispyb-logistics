@@ -6,7 +6,8 @@ from flask import render_template
 
 # TODO - move modules into their own packages and tidy naming conventions.
 from dewars.ebic import api as ebic_api
-from dewars.zone6 import api as zone6_api 
+from dewars.zone4 import api as zone4_api
+from dewars.zone6 import api as zone6_api
 from stores.dewars import api as stores_api
 
 import ispyb_api 
@@ -20,6 +21,7 @@ logger.setLevel(logging.DEBUG)
 app = Flask(__name__)
 app.register_blueprint(ebic_api)
 app.register_blueprint(zone6_api)
+app.register_blueprint(zone4_api)
 app.register_blueprint(stores_api)
 
 # Initialise flask sqla
