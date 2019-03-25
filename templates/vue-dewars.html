@@ -351,8 +351,9 @@
                   
                   if (hasLocation === false) {
                     // Something wrong - not a location we should set
-                    self.message = 'Error - location not allowed for this page'
+                    self.message = 'Error - location ' + this.location + ' not allowed for this page'
                     self.isError = true
+                    this.location = ''
                     return
                   }
 
@@ -382,9 +383,11 @@
                     self.isError = true
                     self.playFail();
                   })
-                  // Rest form values
+                  // Reset form values
                   this.barcode = ''
-                  this.location = ''    
+                  this.location = ''
+                  // When submission occurs, set focus to the input barcode element
+                  this.$refs.barcode.focus();
                 } else {
                   this.message = "Issue with form: "
                   if (this.barcode === "") {
@@ -437,7 +440,7 @@
               event.preventDefault()          
               this.barcode = ''
               this.location = ''
-              // When form is cleared, set focus to the input location element
+              // When form is cleared, set focus to the input barcode element
               this.$refs.barcode.focus();
             },
 
