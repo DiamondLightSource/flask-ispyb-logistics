@@ -9,7 +9,7 @@ inflect==1.0.1
 ItsDangerous==1.1.0
 Jinja2==2.10
 MarkupSafe==1.0
-mysql-connector==2.1.6
+mysql-connector==2.1.7
 requests==2.20.0
 sqlacodegen==1.1.6
 SQLAlchemy==1.2.12
