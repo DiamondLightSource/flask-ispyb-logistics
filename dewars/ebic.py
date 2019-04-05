@@ -47,7 +47,11 @@ App to demonstrate use of vuejs
 """
 @api.route('/')
 def vdewars():
-    return render_template('vue-dewars.html', title='eBIC Dewars', api_prefix='ebic', rack_locations=rack_locations)
+    return render_template('vue-dewars.html',
+                            title='eBIC Dewars',
+                            api_prefix='ebic',
+                            rack_locations=rack_locations,
+                            beamline_locations=beamline_locations)
 
 
 @api.route('/original')

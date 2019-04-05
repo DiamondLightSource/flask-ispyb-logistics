@@ -41,27 +41,26 @@ rack_suffixes = ['A1', 'A2', 'A3', 'A4',
 rack_locations = ['-'.join([rack_prefix, suffix])
                     for suffix in rack_suffixes]
 
-beamlines = ['i03',
-             'i04',
-             'i04-1',
-             'i24',
-             ]
-
-beamline_prefix = 'BEAMLINE'
-
-beamline_locations = ['{}-{}'.format(beamline_prefix, x.upper()) for x in beamlines]
-
-beamline_locations.extend(['USER-COLLECTION',
-                           'STORES-OUT',
-                           'ZONE-6-STORE',
-                           ])
+beamline_locations = ['I03',
+                      'I04',
+                      'I04-1',
+                      'I19',
+                      'I24',
+                      'USER-COLLECTION',
+                      'STORES-OUT',
+                      'EBIC'
+                      ]
 
 """
 App to demonstrate use of vuejs
 """
 @api.route('/')
 def vdewars():
-    return render_template('vue-dewars.html', title='Zone6 Dewars', api_prefix='zone6', rack_locations=rack_locations)
+    return render_template('vue-dewars.html',
+                            title='Zone6 Dewars',
+                            api_prefix='zone6',
+                            rack_locations=rack_locations,
+                            beamline_locations=beamline_locations)
 
 @api.route('/original')
 def index():
