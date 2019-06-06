@@ -1,0 +1,160 @@
+
+<!--
+Component that allows user to scan a barcode/facilityCode and update the dewar location
+Emits an event if the updated is successful so the main page can refresh the list
+Also updates the error/info messages held in the stores
+-->
+<template>
+    <section>
+        <h2 class="title has-text-centered">Scan Dewar and Rack</h2>
+        <form>
+            <div class="field">
+                <label>Barcode or FacilityCode</label>
+                <div class="control">
+                    <input ref="barcode" type="text" class="input" v-model="barcode" v-on:keydown.enter="onBarcodeEnter" placeholder="Scan the long barcode from the dewar case">        
+                </div>
+            </div>
+
+            <div class="field">
+                <label>Location</label>
+                <div class="control">
+                    <input ref="location" type="text" class="input" v-model="location" v-on:keydown.enter="onLocationEnter" placeholder="Scan the location e.g. RACK-A1">        
+                </div>
+            </div>
+
+            <div class="columns">
+                <div class="column">
+                    <button type="submit" class="button is-link is-fullwidth" v-on:click="onSetLocation">Submit</button>              
+                </div>
+                <div class="column">
+                    <button type="cancel" class="button is-info is-fullwidth"  v-on:click="onClearLocationForm">Cancel</button>
+                </div>
+            </div>        
+        </form>
+    </section>
+</template>
+
+<script>
+export default {
+    name: 'ScanDewar',
+    props: {
+        msg: String,
+        allowed_locations: Array,
+    },
+    data() {
+        return {
+            barcode: '',
+            location: '',
+        }
+    },
+    // Lifecycle hook - called when Vue is mounted on the page (trigger first get request)...
+    mounted: function() {
+        // When page is loaded set focus to the input location element
+        this.$refs.barcode.focus();
+    },
+    methods: {
+        onClearLocationForm: function() {
+            console.log("on Clear Location Form")
+        },
+        // Prevent form submission and move focus to next input element
+        onBarcodeEnter: function(event) {
+            event.preventDefault()
+            this.$refs.location.focus()
+        },
+        // Prevent form submission
+        onLocationEnter: function(event) {
+            event.preventDefault()
+            if (this.barcode) {
+                this.onSetLocation(event)
+            }
+        },
+
+        // Method to update dewar location in database
+        onSetLocation: function(event) {
+            event.preventDefault()
+
+            if (this.barcode && this.location) {
+                // WE need to search for rack locations plus where the dewar might be sent (beamlines)
+                // let full_locations = beamlines.concat(Object.keys(this.rack_locations))
+                let hasLocation = this.allowed_locations.indexOf(this.location.toUpperCase())
+
+                if (hasLocation < 0) {
+                    // Something wrong - not a location we should set
+                    let message = 'Error - location ' + this.location + ' not allowed for this page'
+                    let isError = true
+                    this.$store.dispatch("updateMessage", {text: message, isError: isError})
+
+                    this.location = ''
+                    this.playFail();
+                    return
+                }
+                let formData = new FormData();
+                formData.append('barcode', this.barcode)
+                formData.append('location', this.location)
+
+                // Store a reference to this for inner callbacks
+                let self = this
+                let barcode = this.barcode
+                let location = this.location
+
+                let url = this.$store.state.apiRoot + "dewars/locations"
+
+                this.$http.post(url, formData)
+                .then(function(response) {
+                    let json = response.data
+                    let message = ""
+                    let isError = false
+
+                    // Changed because we don't get the dewar id back from synchweb
+                    // We get a DEWARHISTORYID instead
+                    if ( json['DEWARHISTORYID'] > 0 ) {
+                        message = "Updating " + barcode + " to " + location
+                        self.playSuccess();
+                        // Inform Main Page so it can force a refresh
+                        self.$emit("dewars-updated")
+                    } else {
+                        if (json['reason']) {
+                            message = json['reason']
+                        } else {
+                            message = "Error - no dewar history id returned"                            
+                        }
+                        isError = true
+                        self.playFail();
+                    }
+                    self.$store.dispatch("updateMessage", {text: message, isError: isError})
+                })
+                .catch(function() {
+                    let message = "Error updating " + barcode + " to " + location
+                    let isError = true
+                    self.$store.dispatch("updateMessage", {text: message, isError: isError})
+                    self.playFail();
+                })
+                // Reset form values
+                this.barcode = ''
+                this.location = ''
+                // When submission occurs, set focus to the input barcode element
+                this.$refs.barcode.focus();
+            } else {
+                // Information warning
+                let message = "Issue with form: "
+                if (this.barcode === "") {
+                    message += " no barcode provided..."
+                }
+                if (this.location === "") {
+                    message += ' no location provided...'
+                }
+                this.$store.dispatch('updateMessage', {text: message, isError: false})
+            }                 
+        },
+        // Audio feedback methods
+        playSuccess: function() {
+            console.log("HAPPY BEEPS")
+            //sounds.success.play()
+        },
+        playFail: function() {
+            console.log("SAD BEEPS")
+            //sounds.fail.play()
+        },
+    }
+}
+</script>
