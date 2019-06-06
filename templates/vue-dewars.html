@@ -185,6 +185,8 @@
 
     // Provided by Jinja2 template
     // Used to enforce correct ordering of rack locations
+    var zone = {{api_zone | tojson() }}
+
     var racklist = {{rack_locations | tojson() }}
 
     var beamlines = {{ beamline_locations | tojson() }};
@@ -271,6 +273,7 @@
           racks.forEach(function(rack) {
             self.rack_locations[rack] = {'barcode': '', 'arrivalDate':'', 'needsLN2':'', 'facilityCode': '', 'status': ''}
           })
+          console.log("Running in Zone " + zone)
         },
 
         // Lifecycle hook - called when Vue is mounted on the page (trigger first get request)...
@@ -295,7 +298,7 @@
                 clearTimeout(self.refresh)
               }
 
-              axios.get("/{{api_prefix}}/dewars")
+              axios.get("/api/dewars/locations/" + zone)
               .then(function(response) {
                 let json = response.data
                 let racks = racklist // We don't use this because Object.keys(json) is undordered: racklist is in correct order for rendering
@@ -366,7 +369,7 @@
                   formData.append('barcode', barcode)
                   formData.append('location', location)
 
-                  axios.post("/{{api_prefix}}/dewars", formData)
+                  axios.post("/api/dewars/locations", formData)
                   .then(function(response) {
                     let json = response.data
 
@@ -413,7 +416,7 @@
                 self = this
                 let facilitycode = this.facilitycode
 
-                axios.get("/{{api_prefix}}/dewars/find", {params: {'fc':facilitycode}})
+                axios.get("/api/dewars/find", {params: {'fc':facilitycode}})
                 .then(function(response) {
                   let json = response.data
 
@@ -474,7 +477,7 @@
                   let barcode = this.rack_locations[this.locationToRemove]['barcode']
                   let location = this.locationToRemove
 
-                  axios.delete("/{{api_prefix}}/dewars", {params: {'location': this.locationToRemove}})
+                  axios.delete("/api/dewars/locations", {params: {'location': this.locationToRemove}})
                   .then(function(response) {
                     self.message = "Dewar removed " + barcode + " from location " + self.locationToRemove
 
