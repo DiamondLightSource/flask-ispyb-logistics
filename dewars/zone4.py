@@ -1,32 +1,19 @@
-# System imports
-from datetime import datetime
-import time
-import json
-import logging
-
-# Package imports
-from flask import Blueprint
-from flask import render_template
-from flask import jsonify
-from flask import request
-
-# Local imports
-import common
-
-api = Blueprint('zone4', __name__, url_prefix='/zone4')
-
+#
+# Configuration for the Zone4 Storage Area
+#
 rack_prefix = 'TRAY'
 
-rack_suffixes = ['1A', '2A', '3A', '4A', '5A', '6A',
-                 '1B', '2B', '3B', '4B', '5B', '6B',
-                 '1C', '2C', '3C', '4C', '5C', '6C',
-                 '1D', '2D', '3D', '4D', '5D', '6D',
-                 '1E', '2E', '3E', '4E', '5E', '6E',
-                 '1F', '2F', '3F', '4F', '5F', '6F',
-                 ]
+num_trays = 17
+positions = ['A', 'B', 'C', 'D', 'E', 'F']
 
-rack_locations = ['-'.join([rack_prefix, suffix])
-                    for suffix in rack_suffixes]
+rack_locations = []
+
+# Build a list of trays numbers (As string)
+trays = ["{:02d}".format(i) for i in range(1,num_trays+1)]
+
+# Build the list of TRAY-01A, TRAY-01B, TRAY-01C...
+for tray in trays:
+  rack_locations.extend(''.join(['TRAY-', tray, pos]) for pos in positions)
 
 beamline_locations = ['I03',
                       'I04',

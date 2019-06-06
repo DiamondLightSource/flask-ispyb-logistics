@@ -3,6 +3,7 @@ import logging.handlers
 
 from flask import Flask
 from flask import render_template
+from flask import send_file
 
 # TODO - move modules into their own packages and tidy naming conventions.
 # from dewars.ebic import api as ebic_api
@@ -21,7 +22,7 @@ handler.setFormatter(logging.Formatter("[%(asctime)s] [%(levelname)s] [%(message
 logger.addHandler(handler)
 logger.setLevel(logging.DEBUG)
 
-app = Flask(__name__)
+app = Flask(__name__, static_folder="client/dist/static", static_url_path='/static')
 # app.register_blueprint(ebic_api)
 # app.register_blueprint(zone6_api)
 # app.register_blueprint(zone4_api)
@@ -33,7 +34,8 @@ ispyb_api.init_app(app)
 
 @app.route("/")
 def index():
-    return render_template('index.html')
+    # return render_template('index.html')
+    return send_file('client/dist/index.html')
 
 @app.route("/zone6/")
 def zone6():
@@ -58,6 +60,7 @@ def ebic():
         title='EBIC',
         rack_locations=locations.get('ebic'),
         beamline_locations=beamlines.get('ebic'))
+
 
 if __name__ == '__main__':
     app.run(debug=True)
