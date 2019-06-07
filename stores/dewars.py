@@ -8,26 +8,26 @@ from flask import request
 
 from ispyb_api import controller
 
-api = Blueprint('stores', __name__, url_prefix='/stores')
+api = Blueprint('stores', __name__, url_prefix='/api/stores')
 
 
 """
 Route for vue.js version
 """
-@api.route('/')
-def vstores():
-    return render_template('vue-stores.html', api_prefix='stores')
+# @api.route('/')
+# def vstores():
+#     return render_template('vue-stores.html', api_prefix='stores')
 
-@api.route('/original')
-def index():
-    """
-    Main page for dewar management
-    """
-    return render_template('stores.html',
-                           title='Stores Dewar Management',
-                           api_prefix='stores',
-                           max_dewar_history=20
-                           )
+# @api.route('/original')
+# def index():
+#     """
+#     Main page for dewar management
+#     """
+#     return render_template('stores.html',
+#                            title='Stores Dewar Management',
+#                            api_prefix='stores',
+#                            max_dewar_history=20
+#                            )
 
 
 @api.route('/dewars', methods=['GET', 'POST'])

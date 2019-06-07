@@ -5,6 +5,7 @@ All methods should return a result and status_code tuple
 The calling method will jsonify the result
 """
 import logging
+from collections import OrderedDict
 from ispyb_api import controller
 
 
@@ -127,7 +128,12 @@ def update_dewar_location(barcode, location, awb=None):
 
 
 def find_dewars_by_location(locations):
-    results = {}
+    # Could use an ordered dict here but jsonify step will break it
+    results = OrderedDict([(location, ["","","",""]) for location in locations])
+    # Initialise here so we can preserve the order
+    # for location in locations:
+    #     results[location] = ["", "", ""]
+
     status_code = 200
 
     logging.getLogger('ispyb-logistics').debug("Find dewars in location {}".format(locations))
@@ -147,10 +153,5 @@ def find_dewars_by_location(locations):
         else:
             # Now assign the list of dewars to our results dictionary
             results = dewars
-
-        # Now add entries for those locations we did not find (to support the front end logic)
-        for location in locations:
-            if location not in results:
-                results[location] = ["", "", ""]
 
     return results, status_code

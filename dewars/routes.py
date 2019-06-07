@@ -9,6 +9,7 @@ from flask import Blueprint
 from flask import render_template
 from flask import jsonify
 from flask import request
+from flask import make_response
 
 # Local imports
 import common
@@ -26,8 +27,7 @@ beamlines = {'zone6': zone6.beamline_locations,
              'ebic': ebic.beamline_locations}
 
 
-api = Blueprint('zone6', __name__, url_prefix='/api')
-
+api = Blueprint('zones', __name__, url_prefix='/api')
 
 @api.route('/beamlines/<zone>', methods=['GET'])
 def get_beamlines(zone='zone6'):
@@ -42,7 +42,7 @@ def get_beamlines(zone='zone6'):
                    'message': 'Zone parameter not valid for this application'}
         status_code = 400
 
-        return __response(result, status_code)
+        return __json_response(result, status_code)
 
     if request.method == 'GET':
         # Get Rack Locations for this zone
@@ -54,7 +54,7 @@ def get_beamlines(zone='zone6'):
                   'reason': 'Method/route not implemented yet'}
         status_code = 501
 
-    return __response(result, status_code)
+    return __json_response(result, status_code)
 
 @api.route('/dewars/locations/<zone>', methods=['GET'])
 def get_location(zone='zone6'):
@@ -69,7 +69,7 @@ def get_location(zone='zone6'):
                    'message': 'Zone parameter not valid for this application'}
         status_code = 400
 
-        return __response(result, status_code)
+        return __json_response(result, status_code)
 
     if request.method == 'GET':
         # Get Rack Locations for this zone
@@ -84,7 +84,7 @@ def get_location(zone='zone6'):
                   'reason': 'Method/route not implemented yet'}
         status_code = 501
 
-    return __response(result, status_code)
+    return __json_response(result, status_code)
 
 @api.route('/dewars/locations', methods=['POST', 'DELETE'])
 def update_location():
@@ -117,8 +117,7 @@ def update_location():
                   'reason': 'Method/route not implemented yet'}
         status_code = 501
 
-
-    return __response(result, status_code)
+    return __json_response(result, status_code)
 
 
 @api.route('/dewars/find', methods=['GET'])
@@ -135,13 +134,17 @@ def find():
     # The controller handles both instances...
     result, status_code = common.find_dewar_history(facilitycode)
 
-    return __response(result, status_code)
+    return __json_response(result, status_code)
 
-def __response(result, code):
+def __json_response(result, code):
     """
-    Convert result (as dictionary) to JSON and return
+    Build and send the response - preseve dict order by using response object
+    jsonify is simpler but does not preserve order
     """
-    response = jsonify(result)
-    response.status_code = code
+    response = make_response()
+
+    response.data=json.dumps(result)
+    response.status_code=code
+    response.mimetype='application/json'
 
     return response

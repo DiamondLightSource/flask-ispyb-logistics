@@ -1,20 +1,6 @@
-# System imports
-from datetime import datetime
-import time
-import json
-import logging
-
-# Package imports
-from flask import Blueprint
-from flask import render_template
-from flask import jsonify
-from flask import request
-
-# Local imports
-import common
-
-api = Blueprint('zone6', __name__, url_prefix='/zone6')
-
+#
+# Configuration for the Zone4 Storage Area
+#
 rack_prefix = 'RACK'
 
 rack_suffixes = ['A1', 'A2', 'A3', 'A4',

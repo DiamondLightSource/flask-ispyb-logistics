@@ -9,7 +9,7 @@ positions = ['A', 'B', 'C', 'D', 'E', 'F']
 rack_locations = []
 
 # Build a list of trays numbers (As string)
-trays = ["{:02d}".format(i) for i in range(1,num_trays+1)]
+trays = ["{}".format(i) for i in range(1,num_trays+1)]
 
 # Build the list of TRAY-01A, TRAY-01B, TRAY-01C...
 for tray in trays:
