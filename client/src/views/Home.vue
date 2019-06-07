@@ -18,39 +18,39 @@
         <!-- Layout for application links -->
         <div class="columns">
             <div class="column is-one-quarter">
-                <router-link to="/stores/">
+                <a href="/stores/">
                     <div class="box notification is-success">
                         <p class="title">Stores Dewar Management</p>
                         <p class="content">To handle dewars coming into or out of the facility</p>
                     </div>
-                </router-link>
+                </a>
             </div>
 
             <div class="column is-one-quarter">
-                <router-link to="/zone6/">
+                <a href="/zone6/">
                     <div class="box notification is-success">
                         <p class="title">Zone 6 Dewar Management</p>
                         <p class="content">To handle dewars to and from beamlines</p>
                     </div>
-                </router-link>
+                </a>
             </div>
 
             <div class="column is-one-quarter">
-                <router-link to="/zone4/">
+                <a href="/zone4/">
                     <div class="box notification is-success">
                         <p class="title">Zone 4 Dewar Management</p>
                         <p class="content">To handle dewars in the WES storage unit</p>
                     </div>
-                </router-link>
+                </a>
             </div>
 
             <div class="column is-one-quarter">
-                <router-link to="/ebic/">
+                <a href="/ebic/">
                     <div class="box notification is-success">
                         <p class="title">eBIC Dewar Management</p>
                         <p class="content">To handle dewars to and from eBIC</p>
                     </div>
-                </router-link>
+                </a>
             </div>
         </div>
       </div>

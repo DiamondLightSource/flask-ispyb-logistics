@@ -140,18 +140,6 @@ export default {
         // When page is loaded set focus to the input location element
         this.$refs.location.focus();
 
-        // // Get local storage location
-        let loc = window.localStorage.getItem('location')
-
-        if (loc) {
-            console.log("Setting location from local storage")
-            this.location = loc
-            this.$refs.barcode.focus();
-            // Now remove it - that way a manual refresh will reset the page and form elements
-            // We only save the location state if the page auto refreshes
-            window.localStorage.removeItem('location')
-        }
-
         this.getDewars()
         // Set page to refresh every 60 minutes
         setInterval(this.refresh, this.refreshInterval * 1000)
@@ -159,9 +147,9 @@ export default {
     methods: {
         refresh: function() {
             console.log('Refresh - saving location in localStorage')
-            window.localStorage.setItem('location', this.location)
-            // Reload the page - window.location
-            window.location.reload()
+            // window.localStorage.setItem('location', this.location)
+            // We don't need to reload the page - just request an update from the server
+            this.getDewars()
         },
 
         // Main method that retrieves dewar history from database
@@ -169,7 +157,9 @@ export default {
           let self = this
           self.dewars = []
 
-          this.$http.get("/api/stores/dewars")
+          let url = this.$store.state.apiRoot + "stores/dewars"
+
+          this.$http.get(url)
           .then(function(response) {
             console.log(response.data)
             let json = response.data
@@ -214,7 +204,9 @@ export default {
                 formData.append('location', location)
                 formData.append('awb', awb)
 
-                this.$http.post("/api/stores/dewars", formData)
+                let url = this.$store.state.apiRoot + "stores/dewars"
+                
+                this.$http.post(url, formData)
                 .then(function(response) {
                     console.log(response)
                     let json = response.data

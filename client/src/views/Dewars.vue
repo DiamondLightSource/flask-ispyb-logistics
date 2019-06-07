@@ -211,10 +211,13 @@ export default {
                 rack_data[rack] = {'barcode':'', 'arrivalDate':'', 'needsLN2': false, 'facilityCode': '', 'status': ''}
               })
               self.rack_locations = rack_data
+            } else if (error.response.status == 503) {
+              message = "ISPyB database service unavailable"
+              console.log("Caught 503 Service unavailable...")
             } else {
               message = "Error retrieving dewar location information from database"
             }
-            this.$store.commit('updateMessage', {text: message, isError: isError})
+            self.$store.commit('updateMessage', {text: message, isError: isError})
           })
           // Now setup the next update
           self.refresh = setTimeout(self.getBarcodes, self.refreshInterval)
