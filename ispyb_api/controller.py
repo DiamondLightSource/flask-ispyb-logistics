@@ -107,7 +107,7 @@ def find_dewars_by_location(locations):
             else:
                 logging.getLogger('ispyb-logistics').info('Found entry for this dewar {} in {} at {}'.format(dewar.barCode, dewar.storageLocation, dewar.arrivalDate))
                 # Returning three items per location [barcode, arrivalDate and FacilityCode]
-                results[dewar.storageLocation.upper()] = [dewar.barCode, dewar.arrivalDate, dewar.FACILITYCODE, dewar.dewarStatus]
+                results[dewar.storageLocation.upper()] = [dewar.barCode, dewar.arrivalDate.isoformat(), dewar.FACILITYCODE, dewar.dewarStatus]
 
     except NoResultFound:
         logging.getLogger('ispyb-logistics').error("Error retrieving dewars")
@@ -153,7 +153,7 @@ def find_dewar_history_for_locations(locations, max_entries=20):
             # Build the return object - format aligns a previous iteration of the app
             results[str(index)] = {
                 'barcode':dewar.barCode,
-                'date': dewar.arrivalDate,
+                'date': dewar.arrivalDate.isoformat(),
                 'inout': dewar.storageLocation, # should really change 'inout' to location
                 'facilitycode': dewar.FACILITYCODE,
                 'status': dewar.dewarStatus,
@@ -215,7 +215,7 @@ def find_dewar_history_for_dewar(dewarCode, max_entries=3):
                 results['barCode'] = dewar.barCode
                 results['facilityCode'] = dewar.FACILITYCODE
             # Content that differs for each entry...
-            item = {'location': dewar.storageLocation, 'arrivalDate': dewar.arrivalDate}
+            item = {'location': dewar.storageLocation, 'arrivalDate': dewar.arrivalDate.isoformat()}
             locations.append(item)
 
         # Annoyingly we find lots of entries where the locations are the same (i04, i04, i04... for every puck scan)

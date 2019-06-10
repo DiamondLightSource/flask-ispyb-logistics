@@ -22,7 +22,8 @@
                 <li v-for="(item, index) in searchResult.slice(0,5)" v-bind:key="index" class="timeline-container">
                   <div class="timeline-content">
                       <p>{{ item.location }}</p>
-                      <p class="tag">{{item.arrivalDate}}</p>
+                      <!-- Arrival Date uses filter defined in this component -->
+                      <p class="tag">{{item.arrivalDate | format_date}}</p>
                   </div>
                 </li>
               </ul>
@@ -53,6 +54,16 @@ export default {
                 setTimeout(this.clearMessages, 10000);
             }
         },
+    },
+    filters: {
+        format_date: function (value) {
+            if (!value) 
+                return ''
+
+            let d = new Date(value)
+        
+            return d.toUTCString()
+        }
     },
     methods: {
         // Search the database for a dewar with the specified facility code (DLS-MX-1234)

@@ -1,5 +1,5 @@
 #
-# Configuration for the Zone4 Storage Area
+# Configuration for the Zone6 Storage Area
 #
 rack_prefix = 'RACK'
 

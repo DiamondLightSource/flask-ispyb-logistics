@@ -136,8 +136,6 @@ def find_dewars_by_location(locations):
 
     status_code = 200
 
-    logging.getLogger('ispyb-logistics').debug("Find dewars in location {}".format(locations))
-
     dewars = controller.find_dewars_by_location(locations)
 
     if dewars is None:
@@ -151,7 +149,8 @@ def find_dewars_by_location(locations):
             logging.getLogger('ispyb-logistics').warn("Did not find any dewars for these locations {}".format(locations))
             status_code = 404
         else:
-            # Now assign the list of dewars to our results dictionary
-            results = dewars
+            # Now update the list of dewars to our results dictionary
+            for key, value in dewars.iteritems():
+                results[key] = value
 
     return results, status_code
