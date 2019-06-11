@@ -64,3 +64,17 @@ export default {
   name: 'home',
 }
 </script>
+
+<style>
+
+div.solid-border {
+  border-style: solid;
+  border-width: 1px 1px 1px 1px;
+}
+
+div.box {
+  cursor: pointer;
+}
+
+
+</style>

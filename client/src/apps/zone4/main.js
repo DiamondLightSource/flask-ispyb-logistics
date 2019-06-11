@@ -1,5 +1,5 @@
 import Vue from 'vue'
-import App from './App.vue'
+import Dewars from '../../views/Dewars.vue'
 import store from '../../store'
 
 import 'bulma/css/bulma.css'
@@ -9,7 +9,10 @@ Vue.config.productionTip = false
 
 Vue.prototype.$http = axios
 
+// Initialise the store with our zone
+store.commit('setZone', 'zone4')
+
 new Vue({
   store,
-  render: h => h(App)
+  render: h => h(Dewars)
 }).$mount('#app')

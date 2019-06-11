@@ -100,7 +100,6 @@ import ClearLocationDialog from '@/components/ClearLocationDialog.vue';
 
 export default {
   name: 'DewarZone',
-  props: ['zone'],
 
   components: {
     FindDewar,
@@ -142,6 +141,10 @@ export default {
       allowed_locations: function() {
         return this.beamlines.concat(Object.keys(this.rack_locations))
       },
+      // Get the zone from the Vuex Store
+      zone: function() {
+        return this.$store.state.zone
+      }
   },
   // Lifecycle hook - called when Vue is mounted on the page (trigger first get request)...
   mounted: function() {
@@ -249,5 +252,15 @@ export default {
 .container-fluid {
   padding: 20px;
 }
+
+div.solid-border {
+  border-style: solid;
+  border-width: 1px 1px 1px 1px;
+}
+
+div.box {
+  cursor: pointer;
+}
+
 
 </style>

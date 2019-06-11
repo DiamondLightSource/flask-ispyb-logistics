@@ -1,5 +1,5 @@
 import Vue from 'vue'
-import App from './App.vue'
+import Stores from '../../views/Stores.vue'
 import store from '../../store'
 
 import 'bulma/css/bulma.css'
@@ -11,5 +11,5 @@ Vue.prototype.$http = axios
 
 new Vue({
   store,
-  render: h => h(App)
+  render: h => h(Stores)
 }).$mount('#app')

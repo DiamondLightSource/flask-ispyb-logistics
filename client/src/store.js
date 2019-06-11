@@ -11,6 +11,9 @@ export default new Vuex.Store({
     location: ''
   },
   mutations: {
+    setZone(state, zone) {
+      state.zone = zone
+    },
     setMessage(state, payload) {
       state.message.text = payload.text
       state.message.isError = payload.isError
