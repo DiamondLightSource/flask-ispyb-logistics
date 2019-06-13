@@ -35,6 +35,8 @@ Also updates the error/info messages held in the stores
 </template>
 
 <script>
+import {Howl} from 'howler'
+
 export default {
     name: 'ScanDewar',
     props: {
@@ -46,6 +48,16 @@ export default {
             barcode: '',
             location: '',
         }
+    },
+    // Initialize the sound library and files
+    created: function() {
+        this.sounds = {}
+        this.sounds.success = new Howl({
+            src: ['/static/audio/success.mp3', '/static/audio/success.wav']
+        });
+        this.sounds.fail = new Howl({
+            src: ['/static/audio/fail.mp3', '/static/audio/fail.wav']
+        });
     },
     // Lifecycle hook - called when Vue is mounted on the page (trigger first get request)...
     mounted: function() {
@@ -109,6 +121,7 @@ export default {
                     // We get a DEWARHISTORYID instead
                     if ( json['DEWARHISTORYID'] > 0 ) {
                         message = "Updating " + barcode + " to " + location
+                        self.isError = false
                         self.playSuccess();
                         // Inform Main Page so it can force a refresh
                         self.$emit("dewars-updated")
@@ -149,11 +162,11 @@ export default {
         // Audio feedback methods
         playSuccess: function() {
             console.log("HAPPY BEEPS")
-            //sounds.success.play()
+            this.sounds.success.play()
         },
         playFail: function() {
             console.log("SAD BEEPS")
-            //sounds.fail.play()
+            this.sounds.fail.play()
         },
     }
 }

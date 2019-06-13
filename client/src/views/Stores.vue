@@ -114,6 +114,8 @@
 </template>
 
 <script>
+import {Howl} from 'howler'
+
 export default {
   name: 'stores',
     data() {
@@ -130,8 +132,18 @@ export default {
         isError: false,
         isFormOK: true,
         clearMessageInterval: 3, // Message interval in seconds
-        refreshInterval: 30 // 3600, // Page Refresh interval in seconds (i.e. every hour)
+        refreshInterval: 3600, // Page Refresh interval in seconds (i.e. every hour)
       }
+    },
+    // Initialize the sound library and files
+    created: function() {
+        this.sounds = {}
+        this.sounds.success = new Howl({
+            src: ['/static/audio/success.mp3', '/static/audio/success.wav']
+        });
+        this.sounds.fail = new Howl({
+            src: ['/static/audio/fail.mp3', '/static/audio/fail.wav']
+        });
     },
     // Lifecycle hook - called when Vue is mounted on the page...
     mounted: function() {
@@ -146,7 +158,6 @@ export default {
     },
     methods: {
         refresh: function() {
-            console.log('Refresh - saving location in localStorage')
             // window.localStorage.setItem('location', this.location)
             // We don't need to reload the page - just request an update from the server
             this.getDewars()
@@ -214,11 +225,12 @@ export default {
                     // We get a DEWARHISTORYID instead
                     if ( json['DEWARHISTORYID'] > 0 ) {
                         self.message = "Updated " + barcode + " to " + location
-                        // self.playSuccess()
+                        self.isError = false
+                        self.playSuccess()
                     } else {
                         self.message = "Error - no dewar history id returned"
                         self.isError = true
-                        // self.playFail();
+                        self.playFail();
                     }
                     // Request updated locations from DB                  
                     self.getDewars()
@@ -227,7 +239,7 @@ export default {
                     console.log(error)
                     self.message = "Error updating " + barcode + " to " + location
                     self.isError = true
-                    // self.playFail();
+                    self.playFail();
                 })
                 // Set focus to barcode (likely to want to reuse location)
                 this.$refs.barcode.focus()
@@ -360,6 +372,15 @@ export default {
                     this.onSetLocation(event)
                 }
             }
+        },
+        // Audio feedback methods
+        playSuccess: function() {
+            console.log("HAPPY BEEPS")
+            this.sounds.success.play()
+        },
+        playFail: function() {
+            console.log("SAD BEEPS")
+            this.sounds.fail.play()
         },
     }
 }
