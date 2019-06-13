@@ -1,9 +1,9 @@
 #
 # Configuration for the Zone4 Storage Area
 #
-# # Build list of rack locations e.g. EBIC-IN-[1..10]
-in_racks = ['EBIC-IN-{}'.format(i) for i in range(1,11)]
-out_racks = ['EBIC-OUT-{}'.format(i) for i in range(1,11)]
+# # Build list of rack locations e.g. EBIC-IN-[1..20]
+in_racks = ['EBIC-IN-{}'.format(i) for i in range(1,21)]
+out_racks = ['EBIC-OUT-{}'.format(i) for i in range(1,21)]
 
 rack_locations = in_racks + out_racks
 
