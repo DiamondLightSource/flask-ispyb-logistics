@@ -45,7 +45,7 @@ export default {
                         console.log(response)
                         let message = "Dewar removed " + barcode + " from location " + self.locationToRemove
 
-                        this.$store.dispatch("updateMessage", {text: message, isError: false})
+                        self.$store.dispatch("updateMessage", {text: message, isError: false})
                     })
                     .catch(function() {
                         let message = "Error removing dewar " + barcode + " from location " + self.locationToRemove

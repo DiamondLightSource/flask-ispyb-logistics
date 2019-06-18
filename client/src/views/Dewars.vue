@@ -237,7 +237,8 @@ export default {
         onConfirmClear: function(confirm) {
           if (confirm) {
             // Force a refresh of the data
-            this.getBarcodes()
+            // this.getBarcodes() // - does not work?! - forcing a reload
+            window.location.reload()
           }
           // Reset data that will disable dialog box
           this.locationToRemove = "";
