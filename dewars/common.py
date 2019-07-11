@@ -146,7 +146,7 @@ def find_dewars_by_location(locations):
     else:
         # If no dewars return 404 (and also return a blank list)
         if len(dewars.keys()) == 0:
-            logging.getLogger('ispyb-logistics').warn("Did not find any dewars for these locations {}".format(locations))
+            logging.getLogger('ispyb-logistics').debug("Did not find any dewars for these locations {}".format(locations))
             status_code = 404
         else:
             # Now update the list of dewars to our results dictionary

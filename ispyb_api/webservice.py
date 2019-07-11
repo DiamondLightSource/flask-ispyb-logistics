@@ -28,6 +28,7 @@ def set_location(barcode, location, awb=None):
 
         if r.status_code == requests.codes.ok:
             result = r.json()
+            logging.getLogger('ispyb-logistics').info("Set location in ISPyB via SynchWeb bc: {} loc: {} awb: {}".format(barcode, location, payload.get('TRACKINGNUMBERFROMSYNCHROTRON', 'No AWB provided')))
         else:
             logging.getLogger('ispyb-logistics').error("Error setting location in ISPyB via SynchWeb {} {}".format(r.status_code, r.text))
     except requests.ConnectionError:

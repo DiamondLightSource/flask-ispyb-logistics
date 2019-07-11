@@ -14,10 +14,10 @@ from dewars.routes import locations
 import ispyb_api 
 
 logger = logging.getLogger('ispyb-logistics')
-handler = logging.handlers.RotatingFileHandler('logs/logistics.log', maxBytes=1000000, backupCount=5)
+handler = logging.handlers.RotatingFileHandler('logs/logistics.log', maxBytes=10000000, backupCount=5)
 handler.setFormatter(logging.Formatter("[%(asctime)s] [%(levelname)s] [%(message)s]"))
 logger.addHandler(handler)
-logger.setLevel(logging.DEBUG)
+logger.setLevel(logging.INFO)
 
 app = Flask(__name__, static_folder="client/dist/static", static_url_path='/static')
 

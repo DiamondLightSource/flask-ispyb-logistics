@@ -55,7 +55,7 @@ def location():
         if location and barcode:
             result, status_code = update_dewar_location(barcode, location, awb)
         else:
-            logging.getLogger('ispyb-logistics').warn('Warning barcode and/or location not set, ignoring request.')
+            logging.getLogger('ispyb-logistics').warning('Warning barcode and/or location not set, ignoring request.')
 
             result = {'location': location,
                       'barcode': barcode,
