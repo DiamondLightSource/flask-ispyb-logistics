@@ -1,67 +1,61 @@
 <template>
   <div class="stores">
-        <div class="container-fluid">
+        <div class="">
 
             <!-- First set of columns are the top form elements -->
-            <div class="columns">
+            <div class="flex flex-col sm:flex-row">
 
                 <!-- Form element to set locations -->
-                <div class="column is-half solid-border">
-                    <h2 class="title has-text-centered">Scan Dewar and Barcode</h2>
+                <div class="w-1/2 border border-solid border-black m-2 p-2">
+                    <h2 class="text-3xl text-center font-bold">Scan Dewar and Barcode</h2>
 
                     <form>
-                        <div class="field">
-                            <label>Location</label>
-                            <div class="control">
-                            <input ref="location" type="text" class="input" v-model="location" v-on:keydown.enter="onLocationEnter" placeholder="Scan the location e.g. STORES-IN or STORES-OUT">        
-                            </div>
+                        <div class="m-4">
+                            <label class="block text-gray-700">Location</label>
+                            <input ref="location" type="text" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" v-model="location" v-on:keydown.enter="onLocationEnter" placeholder="Scan the location e.g. STORES-IN or STORES-OUT">
                         </div>
 
-                        <div class="field">
-                            <label>Barcode</label>
-                            <div class="control">
-                                <input ref="barcode" type="text" class="input" v-model="barcode" v-on:keydown.enter="onBarcodeEnter" placeholder="Scan the QR code / barcode from the dewar case">
-                            </div>
+                        <div class="m-4">
+                            <label class="block text-gray-700">Barcode</label>
+                            <input ref="barcode" type="text" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" v-model="barcode" v-on:keydown.enter="onBarcodeEnter" placeholder="Scan the QR code / barcode from the dewar case">
                         </div>
 
                         <!-- If location is STORES-IN do not show AWB field...-->
-                        <div v-show="location.toUpperCase() != 'STORES-IN'" class="field">
-                            <label>Airway Bill</label>
-                            <div class="control">
-                                <input ref="awb" type="text" class="input" v-model="awb" v-on:keydown.enter="onAwbEnter" placeholder="Scan the DHL / FedEx Airway Bill">
-                            </div>
+                        <div v-show="location.toUpperCase() != 'STORES-IN'" class="m-4">
+                            <label class="block text-gray-700">Airway Bill</label>
+                            <input ref="awb" type="text" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" v-model="awb" v-on:keydown.enter="onAwbEnter" placeholder="Scan the DHL / FedEx Airway Bill">
                         </div>
                     
-                        <div class="columns">
-                            <div class="column">
-                                <button type="submit" class="button is-link is-fullwidth" v-on:click="onSetLocation">Submit</button>              
-                            </div>
-                            <div class="column">
-                                <button type="cancel" class="button is-info is-fullwidth"  v-on:click="onClearLocationForm">Cancel</button>
-                            </div>
+                        <div class="flex">
+                            <button type="submit" class="text-white text-xl bg-blue-600 hover:bg-blue-700 rounded p-1 m-2 w-1/2" v-on:click="onSetLocation">Submit</button>              
+                            <button type="cancel" class="text-white text-xl bg-red-500 hover:bg-red-700  rounded p-1 m-2 w-1/2"  v-on:click="onClearLocationForm">Cancel</button>
                         </div>        
                     </form>
 
                 </div>
 
 
-                <div class="column is-half solid-border"> <!-- STORES LOCATIONS  -->
-                    <h2 class="title has-text-centered">Locations</h2>
+                <div class="w-1/2 border border-solid border-black m-2 p-2 "> <!-- STORES LOCATIONS  -->
+                    <h2 class="text-3xl text-center font-bold">Locations</h2>
                     <br />
-                    <nav class="level">
-                        <div class="level-item has-text-centered">
-                            <div>
-                                <img width=96 src='../assets/img/stores-in.gif'>
-                                <p class="subtitle">STORES-IN</p>                
+                    <div class="flex">
+                        <div class="w-1/2 mt-4">
+                            <div class="flex-col text-center">
+                                <div class="">
+                                    <img class="inline-block" width=96 src='../assets/img/stores-in.gif'>
+                                </div>
+                               <p class="">STORES-IN</p>  
                             </div>
                         </div>
-                        <div class="level-item has-text-centered">
-                            <div>
-                                <img width=96 src='../assets/img/stores-out.gif'>
-                                <p class="subtitle">STORES-OUT</p>
+                        <div class="w-1/2 mt-4">
+                            <div class="flex-col text-center">
+                                <div class="">
+                                    <img class="inline-block" width=96 src='../assets/img/stores-out.gif'>
+                                </div>
+                                <p class="">STORES-OUT</p>
                             </div>
                         </div>
-                    </nav>   
+                    </div>   
                 </div> <!-- END STORES LOCATIONS -->
 
 
@@ -71,9 +65,9 @@
                 Area for messages from back end 
                 Currently conditional render based on error or warning
             -->
-            <div v-if="message" class="columns">
-                <article class="column is-12 message" v-bind:class="[isError ? 'is-danger' : 'is-info']">
-                    <div class="message-body subtitle">
+            <div v-if="message" class="flex">
+                <article class="w-full message" v-bind:class="[isError ? 'bg-red-400' : 'bg-yellow-600']">
+                    <div class="text-2xl">
                     {{message}}
                     </div>
                 </article>
@@ -82,30 +76,59 @@
         </div> <!-- END container fluid -->
 
         <!-- Display the stores history -->
-        <div class="container-fluid">
-            <div class="has-text-centered">
-                <h1 class="title">History</h1>
-            </div>            
-            <br />
-            <table class="table is-bordered is-fullwidth is-striped">
-                <thead class="center-table">
+        <div class="flex flex-col">
+            <h1 class="text-3xl font-bold text-center p-4">History</h1>
+            <table class="border border-solid w-full">
+                <thead class="text-xl text-left bg-white-300">
                     <th>Date/Time</th><th>Barcode</th><th>In or Out?</th><th>Destination</th><th>Airway Bill</th>
                 </thead>
-                <tbody class="center-table">
-                    <tr v-for="(dewar, index) in dewars" v-bind:key="index">
+                <tbody class="text-xl">
+                    <!-- <tr v-for="(dewar, index) in dewars" v-bind:key="index">
                         <td>{{dewar.date}}</td>
                         <td>{{dewar.barcode.toUpperCase()}} <span v-if="dewar.sid"><a v-bind:href="'https://ispyb.diamond.ac.uk/shipments/sid/' + dewar.sid">&#8599;</a></span></td>
                         <td>{{dewar.inout.toUpperCase()}}</td>
-                        <td>{{dewar.destination}}</td>
+                        <td>{{dewar.destination}}</td> -->
+
                         <!-- If STORES OUT show links and/or plain AWB-->
-                        <td v-if="dewar.inout.toUpperCase() === 'STORES-OUT'">
+
+                        <!-- <td v-if="dewar.inout.toUpperCase() === 'STORES-OUT'">
                             <a v-if="isDHL(dewar.awb)" v-bind:href="'http://www.dhl.com/en/express/tracking.html?AWB=' + dewar.awb">{{dewar.awb}}</a>
                             <a v-else-if="isFedexDatabaseRecord(dewar.awb)" v-bind:href="'http://www.fedex.com/apps/fedextrack/?trackingnumber=' + dewar.awb">{{dewar.awb}}</a>
                             <span v-else>{{dewar.awb}}</span>
-                        </td>
+                        </td> -->
+
                         <!-- Else No value displayed if STORES-IN -->
-                        <td v-else>
+
+                        <!-- <td v-else>
                         </td>
+                    </tr> -->
+                    <tr class="hover:bg-blue-200">
+                        <td>01-01-2010</td>
+                        <td>cm1234-11-1111</td>
+                        <td>stores-in</td>
+                        <td>Zone 6</td>
+                        <td>123456789</td>
+                    </tr>
+                    <tr class="hover:bg-blue-200">
+                        <td>01-01-2010</td>
+                        <td>cm1234-11-1111</td>
+                        <td>stores-in</td>
+                        <td>Zone 6</td>
+                        <td>123456789</td>
+                    </tr>
+                    <tr class="hover:bg-blue-200">
+                        <td>01-01-2010</td>
+                        <td>cm1234-11-1111</td>
+                        <td>stores-in</td>
+                        <td>Zone 6</td>
+                        <td>123456789</td>
+                    </tr>
+                    <tr class="hover:bg-blue-200">
+                        <td>01-01-2010</td>
+                        <td>cm1234-11-1111</td>
+                        <td>stores-in</td>
+                        <td>Zone 6</td>
+                        <td>123456789</td>
                     </tr>
                 </tbody>
             </table>
@@ -407,5 +430,9 @@ export default {
       text-align: center;
       vertical-align: middle;
   }
+
+tr:nth-child(even) {
+  @apply bg-gray-200;
+}
 
 </style>
