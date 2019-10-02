@@ -10,25 +10,25 @@
                     <h2 class="text-3xl text-center font-bold">Scan Dewar and Barcode</h2>
 
                     <form>
-                        <div class="m-4">
+                        <div class="mb-3 px-2">
                             <label class="block text-gray-700">Location</label>
-                            <input ref="location" type="text" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" v-model="location" v-on:keydown.enter="onLocationEnter" placeholder="Scan the location e.g. STORES-IN or STORES-OUT">
+                            <input ref="location" type="text" class="shadow appearance-none border rounded w-full py-1 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" v-model="location" v-on:keydown.enter="onLocationEnter" placeholder="Scan the location e.g. STORES-IN or STORES-OUT">
                         </div>
 
-                        <div class="m-4">
+                        <div class="mb-3 px-2">
                             <label class="block text-gray-700">Barcode</label>
-                            <input ref="barcode" type="text" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" v-model="barcode" v-on:keydown.enter="onBarcodeEnter" placeholder="Scan the QR code / barcode from the dewar case">
+                            <input ref="barcode" type="text" class="shadow appearance-none border rounded w-full py-1 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" v-model="barcode" v-on:keydown.enter="onBarcodeEnter" placeholder="Scan the QR code / barcode from the dewar case">
                         </div>
 
                         <!-- If location is STORES-IN do not show AWB field...-->
-                        <div v-show="location.toUpperCase() != 'STORES-IN'" class="m-4">
+                        <div v-show="location.toUpperCase() != 'STORES-IN'" class="mb-3 px-2">
                             <label class="block text-gray-700">Airway Bill</label>
-                            <input ref="awb" type="text" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" v-model="awb" v-on:keydown.enter="onAwbEnter" placeholder="Scan the DHL / FedEx Airway Bill">
+                            <input ref="awb" type="text" class="shadow appearance-none border rounded w-full py-1 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" v-model="awb" v-on:keydown.enter="onAwbEnter" placeholder="Scan the DHL / FedEx Airway Bill">
                         </div>
                     
                         <div class="flex">
-                            <button type="submit" class="text-white text-xl bg-blue-600 hover:bg-blue-700 rounded p-1 m-2 w-1/2" v-on:click="onSetLocation">Submit</button>              
-                            <button type="cancel" class="text-white text-xl bg-red-500 hover:bg-red-700  rounded p-1 m-2 w-1/2"  v-on:click="onClearLocationForm">Cancel</button>
+                            <button type="submit" class="text-white bg-link hover:bg-blue-800 rounded p-1 m-2 w-1/2" v-on:click="onSetLocation">Submit</button>              
+                            <button type="cancel" class="text-white bg-info hover:bg-blue-600 rounded p-1 m-2 w-1/2"  v-on:click="onClearLocationForm">Cancel</button>
                         </div>        
                     </form>
 
@@ -66,8 +66,8 @@
                 Currently conditional render based on error or warning
             -->
             <div v-if="message" class="flex">
-                <article class="w-full message" v-bind:class="[isError ? 'bg-red-400' : 'bg-yellow-600']">
-                    <div class="text-2xl">
+                <article class="w-full m-2 px-12 py-4 border-l-4" v-bind:class="[isError ? 'bg-red-100 border-red-400 text-red-700' : 'bg-blue-100 border-blue-400 text-blue-800']">
+                    <div class="text-xl">
                     {{message}}
                     </div>
                 </article>
@@ -76,59 +76,31 @@
         </div> <!-- END container fluid -->
 
         <!-- Display the stores history -->
-        <div class="flex flex-col">
+        <div class="flex flex-col m-2 p-2">
             <h1 class="text-3xl font-bold text-center p-4">History</h1>
-            <table class="border border-solid w-full">
-                <thead class="text-xl text-left bg-white-300">
-                    <th>Date/Time</th><th>Barcode</th><th>In or Out?</th><th>Destination</th><th>Airway Bill</th>
+            <table class="border border-solid bg-white w-full">
+                <thead class="text-left bg-white-300 font-bold border border-solid">
+                    <th class="border px-3 py-2">Date/Time</th><th class="border px-3 py-2">Barcode</th><th class="border px-3 py-2">In or Out?</th><th class="border px-3 py-2">Destination</th><th class="border px-3 py-2">Airway Bill</th>
                 </thead>
-                <tbody class="text-xl">
-                    <!-- <tr v-for="(dewar, index) in dewars" v-bind:key="index">
-                        <td>{{dewar.date}}</td>
-                        <td>{{dewar.barcode.toUpperCase()}} <span v-if="dewar.sid"><a v-bind:href="'https://ispyb.diamond.ac.uk/shipments/sid/' + dewar.sid">&#8599;</a></span></td>
-                        <td>{{dewar.inout.toUpperCase()}}</td>
-                        <td>{{dewar.destination}}</td> -->
+                <tbody class="">
+                    <tr v-for="(dewar, index) in dewars" v-bind:key="index" class="hover:bg-blue-200">
+                        <td class="p-2 border">{{dewar.date}}</td>
+                        <td class="p-2 border">{{dewar.barcode.toUpperCase()}} <span v-if="dewar.sid"><a v-bind:href="'https://ispyb.diamond.ac.uk/shipments/sid/' + dewar.sid">&#8599;</a></span></td>
+                        <td class="p-2 border">{{dewar.inout.toUpperCase()}}</td>
+                        <td class="p-2 border">{{dewar.destination}}</td>
 
                         <!-- If STORES OUT show links and/or plain AWB-->
 
-                        <!-- <td v-if="dewar.inout.toUpperCase() === 'STORES-OUT'">
+                        <td v-if="dewar.inout.toUpperCase() === 'STORES-OUT'">
                             <a v-if="isDHL(dewar.awb)" v-bind:href="'http://www.dhl.com/en/express/tracking.html?AWB=' + dewar.awb">{{dewar.awb}}</a>
                             <a v-else-if="isFedexDatabaseRecord(dewar.awb)" v-bind:href="'http://www.fedex.com/apps/fedextrack/?trackingnumber=' + dewar.awb">{{dewar.awb}}</a>
                             <span v-else>{{dewar.awb}}</span>
-                        </td> -->
+                        </td>
 
                         <!-- Else No value displayed if STORES-IN -->
 
-                        <!-- <td v-else>
+                        <td v-else>
                         </td>
-                    </tr> -->
-                    <tr class="hover:bg-blue-200">
-                        <td>01-01-2010</td>
-                        <td>cm1234-11-1111</td>
-                        <td>stores-in</td>
-                        <td>Zone 6</td>
-                        <td>123456789</td>
-                    </tr>
-                    <tr class="hover:bg-blue-200">
-                        <td>01-01-2010</td>
-                        <td>cm1234-11-1111</td>
-                        <td>stores-in</td>
-                        <td>Zone 6</td>
-                        <td>123456789</td>
-                    </tr>
-                    <tr class="hover:bg-blue-200">
-                        <td>01-01-2010</td>
-                        <td>cm1234-11-1111</td>
-                        <td>stores-in</td>
-                        <td>Zone 6</td>
-                        <td>123456789</td>
-                    </tr>
-                    <tr class="hover:bg-blue-200">
-                        <td>01-01-2010</td>
-                        <td>cm1234-11-1111</td>
-                        <td>stores-in</td>
-                        <td>Zone 6</td>
-                        <td>123456789</td>
                     </tr>
                 </tbody>
             </table>
@@ -178,6 +150,14 @@ export default {
         this.getDewars()
         // Set page to refresh every 60 minutes
         setInterval(this.refresh, this.refreshInterval * 1000)
+    },
+    watch: {
+        message: function(val) {
+            if (val !== "") {
+                console.log("Clear message after " + this.clearMessageInterval + " s ")
+                setTimeout(this.clearMessages, this.clearMessageInterval*1000)
+            }
+        }
     },
     methods: {
         refresh: function() {
@@ -410,29 +390,9 @@ export default {
 </script>
 
 
-<!-- Small style changes to override default bulma css -->
+<!-- Small style changes to override default table colours -->
 <style>
-  .container-fluid {
-    padding: 20px;
-  }
-
-  div.solid-border {
-    border-style: solid;
-    border-width: 1px 1px 1px 1px;
-  }
-
-  .center-table th {
-      text-align: center;
-      vertical-align: middle;
-  }
-  
-  .center-table td {
-      text-align: center;
-      vertical-align: middle;
-  }
-
 tr:nth-child(even) {
-  @apply bg-gray-200;
+  @apply bg-blue-100;
 }
-
 </style>
