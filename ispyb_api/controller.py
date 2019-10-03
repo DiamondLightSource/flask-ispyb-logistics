@@ -7,7 +7,7 @@ from sqlalchemy.exc import DBAPIError
 from sqlalchemy import desc, func
 
 import webservice
-from models import Dewar, DewarTransportHistory, Shipping, Proposal
+from models import Dewar, DewarTransportHistory, LabContact, Laboratory, Shipping, Proposal, Person
 
 
 def set_location(barcode, location, awb=None):
@@ -225,6 +225,37 @@ def find_dewar_history_for_dewar(dewarCode, max_entries=3):
     except DBAPIError:
         logging.getLogger('ispyb-logistics').error('Database API Exception - no route to database host?')
         results = None
+
+    return results
+
+def get_shipping_return_address(barcode):
+    # Get the return lab address for this dewar.
+    # Dewar=>Shipping=>LabContact=>Laboratory
+    results = None
+    try:
+        records = Dewar.query.join(Shipping, Dewar.shippingId == Shipping.shippingId).\
+            join(LabContact, Shipping.returnLabContactId == LabContact.labContactId).\
+            join(Person, LabContact.personId == Person.personId).\
+            join(Laboratory, Person.laboratoryId == Laboratory.laboratoryId).\
+            filter(Dewar.barCode == barcode).\
+            order_by(desc(Dewar.dewarId)).\
+            limit(1).\
+            values(
+                Laboratory.address,
+                Laboratory.city,
+                Laboratory.country
+                )
+        # Get first item in generator list
+        shipment = records.next()
+
+        results = {
+            "address" : shipment[0],
+            "city"    : shipment[1],
+            "country" : shipment[2]
+        }
+
+    except DBAPIError:
+        logging.getLogger('ispyb-logistics').error('Database API Exception - no route to database host?')
 
     return results
 

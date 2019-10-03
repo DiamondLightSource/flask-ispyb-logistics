@@ -11,25 +11,6 @@ from ispyb_api import controller
 api = Blueprint('stores', __name__, url_prefix='/api/stores')
 
 
-"""
-Route for vue.js version
-"""
-# @api.route('/')
-# def vstores():
-#     return render_template('vue-stores.html', api_prefix='stores')
-
-# @api.route('/original')
-# def index():
-#     """
-#     Main page for dewar management
-#     """
-#     return render_template('stores.html',
-#                            title='Stores Dewar Management',
-#                            api_prefix='stores',
-#                            max_dewar_history=20
-#                            )
-
-
 @api.route('/dewars', methods=['GET', 'POST'])
 def location():
     result = {}
@@ -44,6 +25,10 @@ def location():
             dewar = result[key]
             if dewar['inout'].upper() == 'STORES-IN':
                 dewar['destination'] = get_destination_from_barcode(dewar['barcode'])
+            elif dewar['inout'].upper() == 'STORES-OUT':
+                shipping = controller.get_shipping_return_address(dewar['barcode'])
+                if shipping:
+                    dewar['destination'] = ', '.join([shipping['address'], shipping['city'], shipping['country']])
             else:
                 dewar['destination'] = ''
 
