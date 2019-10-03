@@ -2,30 +2,30 @@
     <section>
         <transition name="fade" mode="out-in">
             <section v-if="show_dewars" key="1">
-                <h2 class="title has-text-centered">Dewars that need refilling</h2>
+                <h2 class="text-3xl text-center font-bold py-2">Dewars that need refilling</h2>
                 <ul>
-                <li v-for="(dewar, index) in refill_dewars.slice(0, 5)" v-bind:key="index">
-                    <p class="is-size-5 has-text-centered has-background-danger has-text-black"><b>{{dewar}}</b></p>
-                </li>
+                    <li v-for="(dewar, index) in refill_dewars.slice(0, 5)" v-bind:key="index">
+                        <p class="px-2 text-lg text-center text-black bg-danger mx-4"><b>{{dewar}}</b></p>
+                    </li>
                 </ul>
-                <footer class="footer has-background-white-ter is-paddingless">
-                <div class="content has-text-centered">
-                    <p>(Scan dewars back into the same position after refilling)</p>
-                </div>
+                <footer class="">
+                    <div class="text-center py-2">
+                        <p>(Scan dewars back into the same position after refilling)</p>
+                    </div>
                 </footer>
             </section>
             <section v-else key="2">
-            <h2 class="title has-text-centered">Dewars that need dispatching</h2>
-            <ul>
-                <li v-for="(dewar, index) in dispatch_dewars.slice(0, 5)" v-bind:key="index">
-                <p class="is-size-5 has-text-centered has-background-warning has-text-black"><b>{{dewar}}</b></p>
-                </li>
-            </ul>
-            <footer class="footer has-background-white-ter is-paddingless">
-                <div class="content has-text-centered">
-                <p>(Dewars in need of dispatch - clear once removed from rack)</p>
-                </div>
-            </footer>
+                <h2 class="text-3xl text-center font-bold py-2">Dewars that need dispatching</h2>
+                <ul>
+                    <li v-for="(dewar, index) in dispatch_dewars.slice(0, 5)" v-bind:key="index">
+                        <p class="px-2 text-lg text-center text-black bg-warning mx-4"><b>{{dewar}}</b></p>
+                    </li>
+                </ul>
+                <footer class="">
+                    <div class="text-center py-2">
+                        <p>(Dewars in need of dispatch - clear once removed from rack)</p>
+                    </div>
+                </footer>
             </section>
         </transition>
     </section>

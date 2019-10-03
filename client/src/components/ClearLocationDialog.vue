@@ -5,18 +5,23 @@ Emits an event 'confirm-removal' with a boolean true/false if user confirmed act
 -->
 <template>
     <!-- This pops up to confirm the clear location action -->
-    <div class="modal" v-bind:class="{ 'is-active' : isActive }">
-      <div class="modal-background"></div>
-      <div class="modal-card">
-        <header class="modal-card-head">
-          <p class="modal-card-title">Confirm Clear</p>
-        </header>
-        <section class="modal-card-body">
+    <div v-if="isActive" 
+        class="fixed inset-0 w-full h-screen flex items-center justify-center bg-semi-75"
+        v-on:click.self="onClose()">
+        <button
+            aria-label="close"
+            class="absolute top-0 right-0 text-xl text-gray-500 font-bold my-2 mx-4" 
+            @click.prevent="onClose()">x</button>
+      <div class="w-full max-w-2xl bg-white shadow-lg rounded-lg p-4">
+        <header class="border-b-2">
+            <h1 class="text-xl">Confirm Clear</h1>
+            </header>
+        <section class="p-4">
           <p>Confirm removal of dewar from location {{locationToRemove}}?</p>
         </section>
-        <footer class="modal-card-foot">
-          <button class="button is-success" v-on:click="onConfirmClear(true)">Confirm</button>
-          <button class="button" v-on:click="onConfirmClear(false)">Cancel</button>
+        <footer class="flex border-t-2">
+          <button class="w-1/2 text-white bg-success hover:bg-green-700 rounded p-1 m-2" v-on:click="onConfirm()">Confirm</button>
+          <button class="w-1/2 text-white bg-danger hover:bg-red-700 rounded p-1 m-2" v-on:click="onClose()">Cancel</button>
         </footer>
       </div>
     </div>
@@ -28,34 +33,38 @@ export default {
     name: 'ClearLocationDialog',
     props: ['isActive', 'locationToRemove', 'rack_locations'],
     methods: {
-        // User has either confirmed or cancelled
-        onConfirmClear: function(confirm) {
-            if (confirm === true) {
-                // Extra check to ensure this is a valid location
-                let hasLocation = this.rack_locations.hasOwnProperty(this.locationToRemove)
+        // User has confirmed to remove the dewar from this location
+        onConfirm: function() {
+            // Extra check to ensure this is a valid location
+            let hasLocation = this.rack_locations.hasOwnProperty(this.locationToRemove)
 
-                if (hasLocation) {
-                    // Store variables for use within axios handler functions
-                    let self = this
-                    let barcode = this.rack_locations[this.locationToRemove]['barcode']
-                    let url = this.$store.state.apiRoot + "dewars/locations"
+            if (hasLocation) {
+                // Store variables for use within axios handler functions
+                let self = this
+                let location = this.locationToRemove
+                let barcode = this.rack_locations[location]['barcode']
+                let url = this.$store.state.apiRoot + "dewars/locations"
 
-                    this.$http.delete(url, {params: {'location': this.locationToRemove}})
-                    .then(function(response) {
-                        console.log(response)
-                        let message = "Dewar removed " + barcode + " from location " + self.locationToRemove
+                this.$http.delete(url, {params: {'location': location}})
+                .then(function(response) {
+                    console.log(response)
+                    let message = "Removing dewar " + barcode + " from location " + location + "..."
 
-                        self.$store.dispatch("updateMessage", {text: message, isError: false})
-                    })
-                    .catch(function() {
-                        let message = "Error removing dewar " + barcode + " from location " + self.locationToRemove
+                    self.$store.dispatch("updateMessage", {text: message, isError: false})
+                })
+                .catch(function() {
+                    console.log("Error removing dewar")
+                    let message = "Error removing dewar " + barcode + " from location " + location
 
-                        self.$store.dispatch("updateMessage", {text: message, isError: true})
-                    })
-                }
+                    self.$store.dispatch("updateMessage", {text: message, isError: true})
+                })
             }
-            this.$emit("confirm-removal", confirm)
+            this.$emit("confirm-removal", true)
         },
+        // User has cancelled        
+        onClose: function() {
+            this.$emit("confirm-removal", false)
+        }
     }
 }
 </script>

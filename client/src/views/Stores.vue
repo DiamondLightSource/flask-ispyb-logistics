@@ -92,8 +92,8 @@
                         <!-- If STORES OUT show links and/or plain AWB-->
 
                         <td v-if="dewar.inout.toUpperCase() === 'STORES-OUT'">
-                            <a v-if="isDHL(dewar.awb)" v-bind:href="'http://www.dhl.com/en/express/tracking.html?AWB=' + dewar.awb">{{dewar.awb}}</a>
-                            <a v-else-if="isFedexDatabaseRecord(dewar.awb)" v-bind:href="'http://www.fedex.com/apps/fedextrack/?trackingnumber=' + dewar.awb">{{dewar.awb}}</a>
+                            <a class="text-blue-500" v-if="isDHL(dewar.awb)" v-bind:href="'http://www.dhl.com/en/express/tracking.html?AWB=' + dewar.awb">{{dewar.awb}}</a>
+                            <a class="text-blue-500" v-else-if="isFedexDatabaseRecord(dewar.awb)" v-bind:href="'http://www.fedex.com/apps/fedextrack/?trackingnumber=' + dewar.awb">{{dewar.awb}}</a>
                             <span v-else>{{dewar.awb}}</span>
                         </td>
 

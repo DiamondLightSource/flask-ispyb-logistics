@@ -26,6 +26,7 @@ module.exports = {
             danger: '#ff3860',
             warning: '#ffdd57',
             success: '#23d160',
+            'semi-75': 'rgba(0, 0, 0, 0.75)'
           },
           spacing: {
             '96': '24rem',

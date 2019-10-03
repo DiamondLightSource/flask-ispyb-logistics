@@ -1,23 +1,17 @@
 <template>
     <section>
-        <h2 class="title has-text-centered">Find a Dewar</h2>
+        <h2 class="text-3xl text-center font-bold py-2">Find a Dewar</h2>
         <form>
-          <div class="field">
-            <label>BarCode or FacilityCode</label>
-            <div class="control">
-                <input type="text" class="input" v-model="facilitycode" placeholder="e.g. DLS-MX-####">
-            </div>
+          <div class="mb-3 px-2">
+            <label class="block text-gray-700">BarCode or FacilityCode</label>
+            <input type="text" class="shadow appearance-none border rounded w-full py-1 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" v-model="facilitycode" placeholder="e.g. DLS-MX-####">
           </div>
-          <div class="columns">
-            <div class="column">
-              <button type="submit" class="button is-link is-fullwidth" v-on:click="onFindDewar">Search</button>            
-            </div>
-            <div class="column">
-              <button type="submit" class="button is-info is-fullwidth" v-on:click="onClearFindForm">Cancel</button>            
-            </div>
+          <div class="flex">
+            <button type="submit" class="text-white bg-link hover:bg-blue-800 rounded p-1 m-2 w-1/2" v-on:click="onFindDewar">Search</button>            
+            <button type="submit" class="text-white bg-info hover:bg-blue-600 rounded p-1 m-2 w-1/2" v-on:click="onClearFindForm">Cancel</button>            
           </div>
-          <div v-if="searchResult" class="field has-text-left">
-              <p class="subtitle">Location History</p>
+          <div v-if="searchResult" class="flex flex-col text-left">
+              <p class="text-xl p-4">Location History</p>
               <ul class="timeline">
                 <li v-for="(item, index) in searchResult.slice(0,5)" v-bind:key="index" class="timeline-container">
                   <div class="timeline-content">
@@ -28,8 +22,8 @@
                 </li>
               </ul>
           </div>
-          <div v-else-if="searchResultError" class="field has-text-left">
-              <p class="subtitle has-text-danger">{{ searchResultError }}</p>
+          <div v-else-if="searchResultError" class="flex text-left">
+              <p class="text-xl px-4 text-danger">{{ searchResultError }}</p>
           </div>
         </form>
     </section>
@@ -121,7 +115,7 @@ export default {
 /* Timeline css see https://www.w3schools.com/howto/howto_css_timeline.asp */
 .timeline {
     position: relative;
-    margin: 0px auto;
+    margin: 10px;
 }
 /* This draws the line */
 .timeline::after {

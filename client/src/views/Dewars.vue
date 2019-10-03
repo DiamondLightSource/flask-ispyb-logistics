@@ -1,16 +1,16 @@
 <template>
-  <div class="container-fluid">
-    <div class="columns">
-      <div class="column is-one-third solid-border">
+  <div class="">
+    <div class="flex flex-col sm:flex-row">
+      <div class="w-full md:w-1/3 border border-solid border-black m-2">
         <ScanDewar 
           v-bind:allowed_locations="allowed_locations"
           v-on:dewars-updated="handleDewarUpdate">
           </ScanDewar>
       </div>
-      <div class="column is-one-third solid-border">
+      <div class="w-full md:w-1/3 border border-solid border-black m-2">
         <FindDewar></FindDewar>
       </div>
-      <div class="column is-one-third solid-border">
+      <div class="w-full md:w-1/3 border border-solid border-black m-2">
         <DispatchDewars v-bind:rack_locations="rack_locations"></DispatchDewars>
       </div>
     </div>
@@ -22,56 +22,32 @@
     <MessagePanel></MessagePanel>
     
     <!-- Display the rack locations, four columns across If Zone 6 -->
-    <div v-if="zone==='zone6'" class=" solid-border columns is-multiline">
-      <div class="column is-3" v-for="(dewar, rack) in rack_locations" v-bind:key="rack">
-        <div class="box has-background-white-ter" v-on:click="onClearLocation(rack)" v-bind:class="{'has-text-danger': dewar.needsLN2 && dewar.status !== 'dispatch-requested'}">
-          <span class="has-text-weight-bold">{{rack}}: </span>
-          <span v-if="dewar.barcode" class="content has-text-weight-bold">{{dewar.barcode}}</span>
-          <span v-else class="content is-invisible">empty</span>
-          <!-- Tags -->
-          <div class="tags has-addons">
-            <span v-if="dewar.arrivalDate" class="tag is-info">{{dewar.arrivalDate.split(' ').slice(0,4).join(" ")}}</span>
-            <span v-if="dewar.facilityCode" class="tag is-dark">{{dewar.facilityCode}}</span>
-            <span v-if="dewar.status == 'dispatch-requested'" class="tag is-warning">{{dewar.status}}</span>
-            <span v-else-if="dewar.needsLN2" class="tag is-danger">needs-refill</span>  
-          </div>
-        </div>
+    <div v-if="zone==='zone6'" class="flex flex-wrap">
+      <div class="w-full md:w-1/4 p-2" v-for="(dewar, rack) in rack_locations" v-bind:key="rack" v-on:click="onClearLocation(rack)">
+        <DewarCard 
+          v-bind:dewar="dewar"
+          v-bind:rack="rack">
+        </DewarCard>
       </div>
     </div>
 
     <!-- Display the rack locations, six columns across If Zone 4 -->
-    <div v-else-if="zone === 'zone4'" class=" solid-border columns is-multiline">
-      <div class="column is-2" v-for="(dewar, rack) in rack_locations" v-bind:key="rack">
-        <div class="box has-background-white-ter" v-on:click="onClearLocation(rack)" v-bind:class="{'has-text-danger': dewar.needsLN2 && dewar.status !== 'dispatch-requested'}">
-          <span class="has-text-weight-bold">{{rack}}: </span>
-          <span v-if="dewar.barcode" class="content has-text-weight-bold">{{dewar.barcode}}</span>
-          <span v-else class="content is-invisible">empty</span>
-          <!-- Tags -->
-          <div class="tags has-addons">
-            <span v-if="dewar.arrivalDate" class="tag is-info">{{dewar.arrivalDate.split(' ').slice(0,4).join(" ")}}</span>
-            <span v-if="dewar.facilityCode" class="tag is-dark">{{dewar.facilityCode}}</span>
-            <span v-if="dewar.status == 'dispatch-requested'" class="tag is-warning">{{dewar.status}}</span>
-            <span v-else-if="dewar.needsLN2" class="tag is-danger">needs-refill</span>  
-          </div>
-        </div>
+    <div v-else-if="zone === 'zone4'" class="flex flex-wrap">
+      <div class="w-full md:w-1/6 p-2" v-for="(dewar, rack) in rack_locations" v-bind:key="rack" v-on:click="onClearLocation(rack)">
+        <DewarCard 
+          v-bind:dewar="dewar"
+          v-bind:rack="rack">
+        </DewarCard>
       </div>
     </div>
 
     <!-- Display the rack locations, four columns across If Zone 6 -->
-    <div v-else-if="zone==='ebic'" class=" solid-border columns is-multiline">
-      <div class="column is-3" v-for="(dewar, rack) in rack_locations" v-bind:key="rack">
-        <div class="box has-background-white-ter" v-on:click="onClearLocation(rack)" v-bind:class="{'has-text-danger': dewar.needsLN2 && dewar.status !== 'dispatch-requested'}">
-          <span class="has-text-weight-bold">{{rack}}: </span>
-          <span v-if="dewar.barcode" class="content has-text-weight-bold">{{dewar.barcode}}</span>
-          <span v-else class="content is-invisible">empty</span>
-          <!-- Tags -->
-          <div class="tags has-addons">
-            <span v-if="dewar.arrivalDate" class="tag is-info">{{dewar.arrivalDate.split(' ').slice(0,4).join(" ")}}</span>
-            <span v-if="dewar.facilityCode" class="tag is-dark">{{dewar.facilityCode}}</span>
-            <span v-if="dewar.status == 'dispatch-requested'" class="tag is-warning">{{dewar.status}}</span>
-            <span v-else-if="dewar.needsLN2" class="tag is-danger">needs-refill</span>  
-          </div>
-        </div>
+    <div v-else-if="zone==='ebic'" class="flex flex-wrap">
+      <div class="w-full md:w-1/4 p-2" v-for="(dewar, rack) in rack_locations" v-bind:key="rack" v-on:click="onClearLocation(rack)">
+        <DewarCard 
+          v-bind:dewar="dewar"
+          v-bind:rack="rack">
+        </DewarCard>
       </div>
     </div>
 
@@ -97,6 +73,7 @@ import FindDewar from '@/components/FindDewar.vue';
 import DispatchDewars from '@/components/DispatchDewars.vue';
 import MessagePanel from '@/components/MessagePanel.vue';
 import ClearLocationDialog from '@/components/ClearLocationDialog.vue';
+import DewarCard from '@/components/DewarCard.vue';
 
 export default {
   name: 'DewarZone',
@@ -106,7 +83,8 @@ export default {
     ScanDewar,
     DispatchDewars,
     MessagePanel,
-    ClearLocationDialog
+    ClearLocationDialog,
+    DewarCard
   },
   data() {
     return {
@@ -229,6 +207,7 @@ export default {
         // Handler for clear location event (rack location clicked)
         // This will trigger the confirm dialog box to show up
         onClearLocation: function(location) {
+          console.log("on Clear Location clicked")
           // This location will be upper case because we control how it is rendered
           this.isRemoveDialogActive = true
           this.locationToRemove = location
@@ -236,9 +215,11 @@ export default {
         // User has either confirmed or cancelled
         onConfirmClear: function(confirm) {
           if (confirm) {
-            // Force a refresh of the data
-            // this.getBarcodes() // - does not work?! - forcing a reload
-            window.location.reload()
+            // Calling getBarodes straight away hits some cache issue
+            // Delay the refresh so we ensure next call is accurate
+            setTimeout(this.getBarcodes, 3000)
+            // Brute force approach works if the timeout does not...
+            // window.location.reload()
           }
           // Reset data that will disable dialog box
           this.locationToRemove = "";
