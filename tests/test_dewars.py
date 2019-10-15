@@ -17,6 +17,8 @@ import ispyb_api
 from ispyb_api import db
 from ispyb_api import controller
 from ispyb_api.models import Dewar, DewarTransportHistory
+from ispyb_api.models import Shipping, LabContact, Person, Laboratory
+
 from dewars.zone6 import rack_locations
 
 class MyTest(TestCase):
@@ -24,12 +26,12 @@ class MyTest(TestCase):
         app = Flask(__name__)
         app.config['TESTING'] = True
 
-        os.environ['ISPYB_CONFIG_FILE'] = 'test.cfg'
+        os.environ['ISPYB_CONFIG_FILE'] = 'tests/test.cfg'
         os.environ['ISPYB_CONFIG_SECTION'] = 'ispyb_dev'
 
         ispyb_api.init_app(app)
 
-        self.barcodes = ['sw19782-13-i03-0025656', 'SW19782-17-I24-0026897']
+        self.barcodes = ['mx1005-0008799'] #sw19782-13-i03-0025656', 'SW19782-17-I24-0026897']
 
         return app
 
@@ -74,7 +76,33 @@ class MyTest(TestCase):
         except NoResultFound:
             logging.getLogger('ispyb-logistics').error("Error retrieving dewars")
 
-        return results
+        print results
+
+    def test_find_shipping_return_address(self):
+        # Get the return lab address for this dewar.
+        # Dewar=>Shipping=>LabContact=>Laboratory
+        barcode = self.barcodes[0]
+        results = None
+        try:
+            results = Dewar.query.join(Shipping, Dewar.shippingId == Shipping.shippingId).\
+                join(LabContact, Shipping.returnLabContactId == LabContact.labContactId).\
+                join(Person, LabContact.personId == Person.personId).\
+                join(Laboratory, Person.laboratoryId == Laboratory.laboratoryId).\
+                filter(Dewar.barCode == barcode).\
+                order_by(desc(Dewar.dewarId)).\
+                values(
+                    Dewar.dewarId, 
+                    Person.givenName,
+                    Person.familyName,
+                    Laboratory.address,
+                    Laboratory.city,
+                    Laboratory.country
+                    )
+        except NoResultFound:
+            logging.getLogger('ispyb-logistics').error('Database API Exception - no route to database host?')
+
+        for r in results:
+            print r
 
 if __name__ == "__main__":
     logger = logging.getLogger('ispyb-logistics')
