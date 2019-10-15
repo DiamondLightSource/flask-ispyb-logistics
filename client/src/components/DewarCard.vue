@@ -7,7 +7,7 @@ Emits an event 'clear-location' which should be handled by the parent component
     <div class="border rounded shadow h-full p-4 cursor-pointer" v-bind:class="{'text-danger': dewar.needsLN2 && dewar.status !== 'dispatch-requested'}">
         <span class="font-bold">{{rack}}: </span>
         <span v-if="dewar.barcode" class="font-bold">{{dewar.barcode}}</span>
-        <span v-else class="">empty</span>
+        <span v-else class=""></span>
         <!-- Tags -->
         <div class="flex flex-wrap">
             <span v-if="dewar.arrivalDate" class="text-xs text-white bg-info py-1 px-2 ">{{dewar.arrivalDate.split(' ').slice(0,4).join(" ")}}</span>
