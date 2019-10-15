@@ -92,13 +92,22 @@
                         <!-- If STORES OUT show links and/or plain AWB-->
 
                         <td v-if="dewar.inout.toUpperCase() === 'STORES-OUT'">
-                            <a class="text-blue-500" v-if="isDHL(dewar.awb)" v-bind:href="'http://www.dhl.com/en/express/tracking.html?AWB=' + dewar.awb">{{dewar.awb}}</a>
-                            <a class="text-blue-500" v-else-if="isFedexDatabaseRecord(dewar.awb)" v-bind:href="'http://www.fedex.com/apps/fedextrack/?trackingnumber=' + dewar.awb">{{dewar.awb}}</a>
+                            <a class="text-blue-500"
+                                v-if="isDHL(dewar.awb)"
+                                v-on:mouseover="onGetCourierDestination(dewar)"
+                                v-on:mouseleave="onResetCourierDestination(dewar)"
+                                v-bind:href="'https://www.dhl.com/en/express/tracking.html?AWB=' + dewar.awb">{{dewar.awb}} (DHL)</a>
+                            <a class="text-blue-500"
+                                v-else-if="isFedexDatabaseRecord(dewar.awb)"
+                                v-bind:href="'http://www.fedex.com/apps/fedextrack/?trackingnumber=' + dewar.awb">{{dewar.awb}} (FedEx)</a>
                             <span v-else>{{dewar.awb}}</span>
+                            <div v-bind:class="[dewar.courierDestination ? 'absolute bg-gray-300 text-blue-400 p-px' : 'hidden']">
+                                <p class="text-xl">DHL Destination: </p>
+                                <p class="text-sm">{{dewar.courierDestination}}</p>
+                            </div>
                         </td>
 
                         <!-- Else No value displayed if STORES-IN -->
-
                         <td v-else>
                         </td>
                     </tr>
@@ -109,6 +118,8 @@
 </template>
 
 <script>
+// Importing axios so we can cancel requests
+import axios from 'axios'
 import {Howl} from 'howler'
 
 export default {
@@ -181,6 +192,8 @@ export default {
             
             dewars.forEach(function(index) {
               let dewar = json[index]
+              // Set a default courier destination so we can use it as popup later
+              dewar.courierDestination = ''
 
               self.dewars.push(dewar)
             })
@@ -272,7 +285,33 @@ export default {
             // When form is cleared, set focus to the input location element
             this.$refs.location.focus();
         },
+        // Get the intended courier destination
+        // Currently only implemented for DHL but could be extended on backend
+        onGetCourierDestination: function(dewar) {
+            let url = this.$store.state.apiRoot + "stores/dewars/courier/destination"
+            let theDewar = dewar
+            // Set a flag on the dewar to indicate we are retrieving the courier destination
+            theDewar.hover = true
 
+            this.$http.get(url, {params: {'awb':dewar.awb}})
+            .then(function(response) {
+                // It's possible we have moved off the dewar link, in which case ignore the response
+                if (theDewar.hover) {
+                    let json = response.data
+                    theDewar.courierDestination = json.value
+                }
+            }).catch(function(error) {
+                console.log(error)
+            })
+        },
+        onResetCourierDestination: function(dewar) {
+            // Its possible we have left before the api call returns.
+            if (dewar.courierDestination) {
+                dewar.courierDestination = ''
+            }
+            // Reset the "hover" tag
+            dewar.hover = false
+        },
         // Clear error/info messages in one go 
         clearMessages: function() {
           this.message = ""

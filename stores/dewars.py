@@ -6,10 +6,12 @@ from flask import render_template
 from flask import jsonify
 from flask import request
 
+
+import requests
+
 from ispyb_api import controller
 
 api = Blueprint('stores', __name__, url_prefix='/api/stores')
-
 
 @api.route('/dewars', methods=['GET', 'POST'])
 def location():
@@ -56,6 +58,39 @@ def location():
                       'status': 'fail - location and/or barcode not set',
                       }
             status_code = 400
+
+    response = jsonify(result)
+    response.status_code = status_code
+
+    return response
+
+# Currently only working for DHL but could be extended...
+@api.route('/dewars/courier/destination', methods=["GET"])
+def destination():
+    awb = request.args.get('awb')
+    url = 'https://www.dhl.com/shipmentTracking?AWB={}'.format(awb)
+
+    result = {}
+    status_code = 200
+
+    try:
+        # Added timeout to request
+        r = requests.get(url, timeout=5)
+
+        if r.status_code == requests.codes.ok:
+            data = r.json()
+            result = data['results'][0]['destination']
+            logging.getLogger('ispyb-logistics').info("Got Destination from DHL {}".format(result))
+        else:
+            logging.getLogger('ispyb-logistics').error("Error getting dewar destination from DHL {} {}".format(r.status_code, r.text))
+            status_code = 404
+
+    except requests.ConnectionError:
+        logging.getLogger('ispyb-logistics').error("Error (connection) trying to contact DHL")
+        status_code = 404
+    except requests.Timeout:
+        logging.getLogger('ispyb-logistics').error("Error (timeout) trying to contact DHL")
+        status_code = 500
 
     response = jsonify(result)
     response.status_code = status_code
