@@ -15,14 +15,18 @@ api = Blueprint('stores', __name__, url_prefix='/api/stores')
 
 @api.route('/dewars', methods=['GET', 'POST'])
 def location():
+    """
+    Main method that returns a list of dewars that are stores in/out.
+    Destination if either derived from rules based on barcode prefix (for stores-in)
+    or from the return lab contact address (if stores-out)
+    """
     result = {}
     status_code = 200
 
     if request.method == 'GET':
-        result = controller.find_dewar_history_for_locations(['STORES-IN', 'STORES-OUT'], max_entries=20)
+        result = controller.find_dewar_history_for_locations(['STORES-IN', 'STORES-OUT'], max_entries=50)
         # Append the destination to the results
-        # Its not stored in the database so we determine it here based on barcode
-        # Only relevant for incoming dewars though (stores-in)
+        # It's not stored in the database so we determine it here based on barcode or lab contact address
         for key in result.keys():
             dewar = result[key]
             if dewar['inout'].upper() == 'STORES-IN':

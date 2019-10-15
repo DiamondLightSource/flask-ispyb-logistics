@@ -114,6 +114,10 @@
                 </tbody>
             </table>
         </div>
+
+        <footer class="py-4">
+            <!-- Only here to provide some padding -->
+        </footer>
   </div>
 </template>
 
