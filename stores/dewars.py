@@ -27,8 +27,16 @@ def location():
                 dewar['destination'] = get_destination_from_barcode(dewar['barcode'])
             elif dewar['inout'].upper() == 'STORES-OUT':
                 shipping = controller.get_shipping_return_address(dewar['barcode'])
+                # Depending on how the address is filled out we may not have a city field
+                # Should have a country but checking just in case
                 if shipping:
-                    dewar['destination'] = ', '.join([shipping['city'], shipping['country']])
+                    city = shipping['city'] if shipping['city'] else ''
+                    country = shipping['country'] if shipping['country'] else ''
+
+                    if city:
+                        dewar['destination'] = ', '.join([city, country])
+                    else:
+                        dewar['destination'] = country
             else:
                 dewar['destination'] = ''
 
