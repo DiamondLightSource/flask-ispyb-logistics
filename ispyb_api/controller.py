@@ -5,7 +5,9 @@ import itertools
 from sqlalchemy.orm.exc import NoResultFound, MultipleResultsFound
 from sqlalchemy.exc import DBAPIError
 from sqlalchemy import desc, func
+from sqlalchemy.orm import aliased
 
+from . import db
 import webservice
 from models import Dewar, DewarTransportHistory, LabContact, Laboratory, Shipping, Proposal, Person
 
@@ -75,6 +77,7 @@ def get_dewar_by_barcode(barcode):
 def find_dewars_by_location(locations):
     """
     This method will find the most recent dewar stored in each location.
+    It matches the Dewar.storageLocation with DewarTransportHistory.storageLocation
     """
     logging.getLogger('ispyb-logistics').debug("find_dewars_by_location {}".format(','.join(locations)))
     
@@ -91,10 +94,10 @@ def find_dewars_by_location(locations):
             filter(Dewar.dewarId == DewarTransportHistory.dewarId).\
             filter(func.lower(Dewar.storageLocation) == func.lower(DewarTransportHistory.storageLocation)).\
             order_by(desc(DewarTransportHistory.arrivalDate)).\
-            values(Dewar.barCode, 
-                   Dewar.FACILITYCODE, 
-                   Dewar.bltimeStamp, 
-                   Dewar.storageLocation, 
+            values(Dewar.barCode,
+                   Dewar.FACILITYCODE,
+                   Dewar.bltimeStamp,
+                   Dewar.storageLocation,
                    DewarTransportHistory.arrivalDate,
                    DewarTransportHistory.dewarStatus,
                    )
@@ -107,7 +110,14 @@ def find_dewars_by_location(locations):
             else:
                 logging.getLogger('ispyb-logistics').debug('Found entry for this dewar {} in {} at {}'.format(dewar.barCode, dewar.storageLocation, dewar.arrivalDate))
                 # Returning three items per location [barcode, arrivalDate and FacilityCode]
-                results[dewar.storageLocation.upper()] = [dewar.barCode, dewar.arrivalDate.isoformat(), dewar.FACILITYCODE, dewar.dewarStatus]
+                results[dewar.storageLocation.upper()] = {
+                    'barcode': dewar.barCode,
+                    'arrivalDate': dewar.arrivalDate.isoformat(),
+                    'facilityCode': dewar.FACILITYCODE,
+                    'status': dewar.dewarStatus,
+                    'onBeamline': False,
+                    'dewarLocation': dewar.storageLocation # In this case it matches the dewar
+                }
 
     except NoResultFound:
         logging.getLogger('ispyb-logistics').error("Error retrieving dewars")
@@ -117,7 +127,7 @@ def find_dewars_by_location(locations):
 
     return results
 
-def find_dewar_history_for_locations(locations, max_entries=20):
+def find_dewar_history_for_locations(locations, max_entries=20, match_locations=True):
     """
     This method will find 'n' entries from the dewar transport history table filtered by location.
 
@@ -131,17 +141,25 @@ def find_dewar_history_for_locations(locations, max_entries=20):
         # Get the timestamp and location from the transport history
         # Order so we get the most recent first...
         # Check if the locations match between dewar and transport history
-        dewars = DewarTransportHistory.query.join(Dewar).join(Shipping).\
+        query = DewarTransportHistory.query.join(Dewar).join(Shipping).\
             filter(func.lower(DewarTransportHistory.storageLocation).in_(locations)).\
             filter(Dewar.dewarId == DewarTransportHistory.dewarId).\
-            filter(Dewar.shippingId == Shipping.shippingId).\
-            filter(Dewar.storageLocation == DewarTransportHistory.storageLocation).\
-            order_by(desc(DewarTransportHistory.arrivalDate)).\
-            limit(max_entries).\
-            values(Dewar.barCode,
+            filter(Dewar.shippingId == Shipping.shippingId)
+
+        if match_locations:
+            query = query.filter(Dewar.storageLocation == DewarTransportHistory.storageLocation)
+
+        query = query.order_by(desc(DewarTransportHistory.DewarTransportHistoryId)).\
+            group_by(DewarTransportHistory.storageLocation)
+
+        if max_entries > 0:
+            query = query.limit(max_entries)
+
+        dewars = query.values(Dewar.barCode,
                    Dewar.FACILITYCODE,
                    Dewar.bltimeStamp,
-                   Dewar.trackingNumberFromSynchrotron,
+                   Dewar.trackingNumberFromSynchrotron, # Airway bill
+                   Dewar.storageLocation,
                    DewarTransportHistory.storageLocation,
                    DewarTransportHistory.arrivalDate,
                    DewarTransportHistory.dewarStatus,
@@ -149,16 +167,20 @@ def find_dewar_history_for_locations(locations, max_entries=20):
                    )
 
         for index, dewar in enumerate(dewars):
-            logging.getLogger('ispyb-logistics').info('Found entry {} for this dewar {} in {} at {}'.format(index, dewar.barCode, dewar.storageLocation, dewar.arrivalDate))
+
+            barCode, facilityCode, bltimestamp, awb, dewarLoc, storageLoc, arrivalDate, status, shippingId = dewar
+
+            logging.getLogger('ispyb-logistics').info('Found entry {} for this dewar {} in {} at {}'.format(index, barCode, storageLoc, arrivalDate))
             # Build the return object - format aligns a previous iteration of the app
             results[str(index)] = {
-                'barcode':dewar.barCode,
-                'date': dewar.arrivalDate.isoformat(),
-                'inout': dewar.storageLocation, # should really change 'inout' to location
-                'facilitycode': dewar.FACILITYCODE,
-                'status': dewar.dewarStatus,
-                'awb': dewar.trackingNumberFromSynchrotron,
-                'sid': dewar.shippingId,
+                'barcode':barCode,
+                'date': arrivalDate.isoformat(),
+                'storageLocation': storageLoc,
+                'dewar_location': dewarLoc,
+                'facilitycode': facilityCode,
+                'status': status,
+                'awb': awb,
+                'sid': shippingId,
                  }
 
     except NoResultFound:
@@ -168,6 +190,74 @@ def find_dewar_history_for_locations(locations, max_entries=20):
         results = None
 
     return results
+
+
+
+def find_recent_storage_history(locations):
+    """
+    This method was designed specifically for zone4.
+    The aim is to find out if the passed locations are actually empty or if the case is still present.
+    We do this by finding the most recent entry for each location - then check to see if the dewar location is different.
+    If it's at a beamline return true
+    else if at stores out or "removed" then show as empty
+
+    Returns {'<location>': {'barcode':barcode, 'dewarLocation': dewarLocation, 'date':arrivalDate...}, }
+    """
+    results = {}
+
+    try:
+        # Query for dewars in passed locations list
+        # Use case insensitive search for storageLocation
+        # We want to find the latest entry for each location.
+        # If the dewar is still on site (on Beamline) return a value, else pass empty object
+        subq = db.session.query(
+            DewarTransportHistory.DewarTransportHistoryId, func.max(DewarTransportHistory.arrivalDate).label('lastArrival')
+        ).group_by(DewarTransportHistory.storageLocation).subquery()
+
+        dewars = DewarTransportHistory.query.join(subq, DewarTransportHistory.arrivalDate == subq.c.lastArrival).\
+            join(Dewar, Dewar.dewarId == DewarTransportHistory.dewarId).\
+            filter(func.lower(DewarTransportHistory.storageLocation).in_(locations)).\
+                values(
+                    Dewar.dewarId,
+                    Dewar.barCode,
+                    Dewar.FACILITYCODE,
+                    Dewar.dewarStatus,
+                    DewarTransportHistory.DewarTransportHistoryId,
+                    DewarTransportHistory.arrivalDate,
+                    DewarTransportHistory.storageLocation.label('storageLocation'),
+                    Dewar.storageLocation.label('dewarLocation')
+                )
+        for dewar in dewars:
+            logging.getLogger('ispyb-logistics').info('Found entry for this dewar {} = {}'.format(dewar.storageLocation, dewar))
+            # Build the return object - format aligns a previous iteration of the app
+
+            # Conditions
+            # - if the dewarStatus is 'processing...' then show as still occupied
+            # - if the location begins with i then its at a beamline, show as still occupied
+            onBeamline = False
+            if dewar.dewarStatus.lower().startswith('processing'):
+                onBeamline = True
+            elif any(b in dewar.dewarLocation.lower() for b in ['i02', 'i03', 'i04', 'i04-1', 'i19', 'i23', 'i24']):
+                onBeamline = True
+
+            results[dewar.storageLocation] = {
+                'barcode': dewar.barCode,
+                'facilityCode': dewar.FACILITYCODE,
+                'dewarStatus': dewar.dewarStatus,
+                'arrivalDate': dewar.arrivalDate.isoformat(),
+                'onBeamline': onBeamline,
+                'dewarLocation': dewar.dewarLocation,
+            }
+
+    except NoResultFound:
+        logging.getLogger('ispyb-logistics').error("Error retrieving dewars")
+    except DBAPIError:
+        logging.getLogger('ispyb-logistics').error('Database API Exception - no route to database host?')
+        results = None
+
+    return results
+
+
 
 def find_dewar_history_for_dewar(dewarCode, max_entries=3):
     """

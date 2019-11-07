@@ -129,7 +129,7 @@ def update_dewar_location(barcode, location, awb=None):
 
 def find_dewars_by_location(locations):
     # Could use an ordered dict here but jsonify step will break it
-    results = OrderedDict([(location, ["","","",""]) for location in locations])
+    results = OrderedDict([(location, {'barcode':"", 'arrivalDate':"", 'facilityCode':"", 'status':"", 'onBeamline':False}) for location in locations])
     # Initialise here so we can preserve the order
     # for location in locations:
     #     results[location] = ["", "", ""]
@@ -149,8 +149,22 @@ def find_dewars_by_location(locations):
             logging.getLogger('ispyb-logistics').debug("Did not find any dewars for these locations {}".format(locations))
             status_code = 404
         else:
-            # Now update the list of dewars to our results dictionary
+            # Now update the list of dewars to our results dictionary (Make sure to preseve upper case locations)
             for key, value in dewars.iteritems():
-                results[key] = value
+                results[key.upper()] = value
+
+            # For locations showing as empty - check that the dewars are not actually on beamline...
+            # Required for main zone4 use case where the case is left in the storageLocation
+            empty_locations = [location for location in locations if results[location]['barcode'] == '']
+
+            processing_dewars = controller.find_recent_storage_history(empty_locations)
+            # Add dewars that are in processing to our return list
+            # Make sure to preseve upper case locations
+            # Front end can filter 'onBeamline'
+            for key, value in processing_dewars.iteritems():
+                logging.getLogger('ispyb-logistics').info("Adding empty locations {}".format(key))
+                if value['onBeamline']:
+                    results[key.upper()] = value
+                # Else ignore as the dewar is elsewhere....
 
     return results, status_code
