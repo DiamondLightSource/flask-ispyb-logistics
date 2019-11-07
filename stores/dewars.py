@@ -29,9 +29,9 @@ def location():
         # It's not stored in the database so we determine it here based on barcode or lab contact address
         for key in result.keys():
             dewar = result[key]
-            if dewar['inout'].upper() == 'STORES-IN':
+            if dewar['storageLocation'].upper() == 'STORES-IN':
                 dewar['destination'] = get_destination_from_barcode(dewar['barcode'])
-            elif dewar['inout'].upper() == 'STORES-OUT':
+            elif dewar['storageLocation'].upper() == 'STORES-OUT':
                 shipping = controller.get_shipping_return_address(dewar['barcode'])
                 # Depending on how the address is filled out we may not have a city field
                 # Should have a country but checking just in case

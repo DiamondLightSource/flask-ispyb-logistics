@@ -86,12 +86,12 @@
                     <tr v-for="(dewar, index) in dewars" v-bind:key="index" class="hover:bg-blue-200">
                         <td class="p-2 border">{{dewar.date}}</td>
                         <td class="p-2 border">{{dewar.barcode.toUpperCase()}} <span v-if="dewar.sid"><a v-bind:href="'https://ispyb.diamond.ac.uk/shipments/sid/' + dewar.sid">&#8599;</a></span></td>
-                        <td class="p-2 border">{{dewar.inout.toUpperCase()}}</td>
+                        <td class="p-2 border">{{dewar.storageLocation.toUpperCase()}}</td>
                         <td class="p-2 border">{{dewar.destination}}</td>
 
                         <!-- If STORES OUT show links and/or plain AWB-->
 
-                        <td v-if="dewar.inout.toUpperCase() === 'STORES-OUT'">
+                        <td v-if="dewar.storageLocation.toUpperCase() === 'STORES-OUT'">
                             <a class="text-blue-500"
                                 v-if="isDHL(dewar.awb)"
                                 v-on:mouseover="onGetCourierDestination(dewar)"
@@ -123,7 +123,6 @@
 
 <script>
 // Importing axios so we can cancel requests
-import axios from 'axios'
 import {Howl} from 'howler'
 
 export default {
