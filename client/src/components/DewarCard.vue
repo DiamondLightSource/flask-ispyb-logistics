@@ -4,7 +4,8 @@ Card displaying dewar information stored in a specific rack location
 Emits an event 'clear-location' which should be handled by the parent component
 -->
 <template>
-    <div class="border rounded shadow h-full p-4 cursor-pointer" v-bind:class="{'text-danger': dewar.needsLN2 && dewar.status !== 'dispatch-requested'}">
+    <div class="border rounded shadow h-full p-4 cursor-pointer"
+        v-bind:class="{'text-danger': dewar.needsLN2 && dewar.status !== 'dispatch-requested', 'bg-gray-400' : dewar.onBeamline}">
         <span class="font-bold">{{rack}}: </span>
         <span v-if="dewar.barcode" class="font-bold">{{dewar.barcode}}</span>
         <span v-else class=""></span>

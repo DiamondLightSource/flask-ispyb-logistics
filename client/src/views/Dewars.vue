@@ -153,16 +153,16 @@ export default {
             let racklist = Object.keys(json)
             
             racklist.forEach(function(rack) {
-              let barcode = json[rack][0]
-              let arrivalDate = json[rack][1]
-              let facilityCode = json[rack][2]
-              let status = json[rack][3]
+              // Marshall the data into the format we want
+              let dewarInfo = json[rack]
               let needsLN2 = false
+              // Flag to indicate dewar is on beamline (and therefore space is taken)...
+              let onBeamline = dewarInfo.onBeamline ? dewarInfo.onBeamline : false
 
-              // Check here if arrivalData > 5 days    
-              if (arrivalDate !== "") {
+              // Check here if arrivalData > 5 days (and dewar is not on beamline being processed)
+              if (dewarInfo.arrivalDate !== "" && !onBeamline) {
                 let nowSecs = new Date().getTime()/1000;
-                let lastFillSeconds = Date.parse(arrivalDate)/1000
+                let lastFillSeconds = Date.parse(dewarInfo.arrivalDate)/1000
 
                 let deltaTime = nowSecs - lastFillSeconds
 
@@ -170,7 +170,14 @@ export default {
                   needsLN2 = true
                 }
               }
-              rack_data[rack] = {'barcode': barcode, 'arrivalDate': arrivalDate, 'needsLN2': needsLN2, 'facilityCode': facilityCode, 'status': status}
+              rack_data[rack] = {
+                'barcode': dewarInfo.barcode,
+                'arrivalDate': dewarInfo.arrivalDate,
+                'facilityCode': dewarInfo.facilityCode,
+                'status': dewarInfo.status,
+                'needsLN2': needsLN2,
+                'onBeamline': onBeamline
+              }
             })
             // Re-assign rack_locations property to trigger reactivity
             // Otherwise Vue has a hard time running computed properties
