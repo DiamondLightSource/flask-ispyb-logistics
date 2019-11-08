@@ -170,7 +170,7 @@ def find_dewar_history_for_locations(locations, max_entries=20, match_locations=
 
             barCode, facilityCode, bltimestamp, awb, dewarLoc, storageLoc, arrivalDate, status, shippingId = dewar
 
-            logging.getLogger('ispyb-logistics').info('Found entry {} for this dewar {} in {} at {}'.format(index, barCode, storageLoc, arrivalDate))
+            logging.getLogger('ispyb-logistics').debug('Found entry {} for this dewar {} in {} at {}'.format(index, barCode, storageLoc, arrivalDate))
             # Build the return object - format aligns a previous iteration of the app
             results[str(index)] = {
                 'barcode':barCode,
@@ -228,7 +228,7 @@ def find_recent_storage_history(locations):
                     Dewar.storageLocation.label('dewarLocation')
                 )
         for dewar in dewars:
-            logging.getLogger('ispyb-logistics').info('Found entry for this dewar {} = {}'.format(dewar.storageLocation, dewar))
+            logging.getLogger('ispyb-logistics').debug('Found entry for this dewar {} = {}'.format(dewar.storageLocation, dewar))
             # Build the return object - format aligns a previous iteration of the app
 
             # Conditions
@@ -295,7 +295,7 @@ def find_dewar_history_for_dewar(dewarCode, max_entries=3):
 
         # Return is a generator so we need to iterate through results
         for index, dewar in enumerate(dewarHistory):
-            logging.getLogger('ispyb-logistics').info('Found entry {} for this dewar {} in {}'.format(index, dewar.barCode, dewar.storageLocation))
+            logging.getLogger('ispyb-logistics').debug('Found entry {} for this dewar {} in {}'.format(index, dewar.barCode, dewar.storageLocation))
 
             if results is None:
                 results = {}

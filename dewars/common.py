@@ -162,7 +162,7 @@ def find_dewars_by_location(locations):
             # Make sure to preseve upper case locations
             # Front end can filter 'onBeamline'
             for key, value in processing_dewars.iteritems():
-                logging.getLogger('ispyb-logistics').info("Adding empty locations {}".format(key))
+                logging.getLogger('ispyb-logistics').debug("Adding empty locations {}".format(key))
                 if value['onBeamline']:
                     results[key.upper()] = value
                 # Else ignore as the dewar is elsewhere....
