@@ -10,10 +10,13 @@ from . import Base
 
 class BLSession(Base):
     __tablename__ = 'BLSession'
+    __table_args__ = (
+        Index('proposalId', 'proposalId', 'visit_number', unique=True),
+    )
 
     sessionId = Column(Integer, primary_key=True)
     beamLineSetupId = Column(ForeignKey(u'BeamLineSetup.beamLineSetupId', ondelete=u'CASCADE', onupdate=u'CASCADE'), index=True)
-    proposalId = Column(ForeignKey(u'Proposal.proposalId', ondelete=u'CASCADE', onupdate=u'CASCADE'), nullable=False, index=True, server_default=text("0"))
+    proposalId = Column(ForeignKey(u'Proposal.proposalId'), nullable=False, index=True, server_default=text("0"))
     beamCalendarId = Column(ForeignKey(u'BeamCalendar.beamCalendarId'), index=True)
     projectCode = Column(String(45))
     startDate = Column(DateTime, index=True)
@@ -36,6 +39,7 @@ class BLSession(Base):
     lastUpdate = Column(DateTime, nullable=False, server_default=text("'0000-00-00 00:00:00'"))
     protectedData = Column(String(1024))
     externalId = Column(BINARY(16))
+    archived = Column(Integer, server_default=text("0"))
 
     BeamCalendar = relationship(u'BeamCalendar')
     BeamLineSetup = relationship(u'BeamLineSetup')
@@ -135,6 +139,7 @@ class Detector(Base):
     numberOfPixelsY = Column(Integer)
     detectorRollMin = Column(Float(asdecimal=True))
     detectorRollMax = Column(Float(asdecimal=True))
+    localName = Column(String(40))
 
 
 class Dewar(Base):
@@ -185,7 +190,7 @@ class LabContact(Base):
     labContactId = Column(Integer, primary_key=True)
     personId = Column(ForeignKey(u'Person.personId', ondelete=u'CASCADE', onupdate=u'CASCADE'), nullable=False)
     cardName = Column(String(40), nullable=False)
-    proposalId = Column(ForeignKey(u'Proposal.proposalId', ondelete=u'CASCADE', onupdate=u'CASCADE'), nullable=False, index=True)
+    proposalId = Column(ForeignKey(u'Proposal.proposalId'), nullable=False, index=True)
     defaultCourrierCompany = Column(String(45))
     courierAccount = Column(String(45))
     billingReference = Column(String(45))
@@ -219,8 +224,8 @@ class Person(Base):
     laboratoryId = Column(ForeignKey(u'Laboratory.laboratoryId'), index=True)
     siteId = Column(Integer, index=True)
     personUUID = Column(String(45))
-    familyName = Column(String(100), index=True)
-    givenName = Column(String(45))
+    familyName = Column(String(100, u'utf8mb4_unicode_ci'), index=True)
+    givenName = Column(String(45, u'utf8mb4_unicode_ci'))
     title = Column(String(45))
     emailAddress = Column(String(60))
     phoneNumber = Column(String(45))
@@ -241,12 +246,13 @@ class Proposal(Base):
 
     proposalId = Column(Integer, primary_key=True)
     personId = Column(ForeignKey(u'Person.personId', ondelete=u'CASCADE', onupdate=u'CASCADE'), nullable=False, index=True, server_default=text("0"))
-    title = Column(String(255))
+    title = Column(String(255, u'utf8mb4_unicode_ci'))
     proposalCode = Column(String(45))
     proposalNumber = Column(String(45))
     bltimeStamp = Column(DateTime, nullable=False, server_default=text("current_timestamp()"))
     proposalType = Column(String(2))
     externalId = Column(BINARY(16))
+    state = Column(ENUM(u'Open', u'Closed', u'Cancelled'), server_default=text("'Open'"))
 
     Person = relationship(u'Person')
 
@@ -255,7 +261,7 @@ class Shipping(Base):
     __tablename__ = 'Shipping'
 
     shippingId = Column(Integer, primary_key=True)
-    proposalId = Column(ForeignKey(u'Proposal.proposalId', ondelete=u'CASCADE', onupdate=u'CASCADE'), nullable=False, index=True, server_default=text("0"))
+    proposalId = Column(ForeignKey(u'Proposal.proposalId'), nullable=False, index=True, server_default=text("0"))
     shippingName = Column(String(45), index=True)
     deliveryAgent_agentName = Column(String(45))
     deliveryAgent_shippingDate = Column(Date)
