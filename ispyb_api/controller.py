@@ -127,10 +127,9 @@ def find_dewars_by_location(locations):
 
     return results
 
-def find_dewar_history_for_locations(locations, max_entries=20, match_locations=True):
+def find_dewar_history_for_locations(locations, max_entries=20):
     """
     This method will find 'n' entries from the dewar transport history table filtered by location.
-
     Returns {'1', {'barcode':barcode, 'awb':awb, 'date':arrivalDate...}, }
     """
     results = {}
@@ -141,25 +140,17 @@ def find_dewar_history_for_locations(locations, max_entries=20, match_locations=
         # Get the timestamp and location from the transport history
         # Order so we get the most recent first...
         # Check if the locations match between dewar and transport history
-        query = DewarTransportHistory.query.join(Dewar).join(Shipping).\
+        dewars = DewarTransportHistory.query.join(Dewar).join(Shipping).\
             filter(func.lower(DewarTransportHistory.storageLocation).in_(locations)).\
             filter(Dewar.dewarId == DewarTransportHistory.dewarId).\
-            filter(Dewar.shippingId == Shipping.shippingId)
-
-        if match_locations:
-            query = query.filter(Dewar.storageLocation == DewarTransportHistory.storageLocation)
-
-        query = query.order_by(desc(DewarTransportHistory.DewarTransportHistoryId)).\
-            group_by(DewarTransportHistory.storageLocation)
-
-        if max_entries > 0:
-            query = query.limit(max_entries)
-
-        dewars = query.values(Dewar.barCode,
+            filter(Dewar.shippingId == Shipping.shippingId).\
+            filter(Dewar.storageLocation == DewarTransportHistory.storageLocation).\
+            order_by(desc(DewarTransportHistory.arrivalDate)).\
+            limit(max_entries).\
+            values(Dewar.barCode,
                    Dewar.FACILITYCODE,
                    Dewar.bltimeStamp,
-                   Dewar.trackingNumberFromSynchrotron, # Airway bill
-                   Dewar.storageLocation,
+                   Dewar.trackingNumberFromSynchrotron,
                    DewarTransportHistory.storageLocation,
                    DewarTransportHistory.arrivalDate,
                    DewarTransportHistory.dewarStatus,
@@ -167,20 +158,16 @@ def find_dewar_history_for_locations(locations, max_entries=20, match_locations=
                    )
 
         for index, dewar in enumerate(dewars):
-
-            barCode, facilityCode, bltimestamp, awb, dewarLoc, storageLoc, arrivalDate, status, shippingId = dewar
-
-            logging.getLogger('ispyb-logistics').debug('Found entry {} for this dewar {} in {} at {}'.format(index, barCode, storageLoc, arrivalDate))
+            logging.getLogger('ispyb-logistics').debug('Found entry {} for this dewar {} in {} at {}'.format(index, dewar.barCode, dewar.storageLocation, dewar.arrivalDate))
             # Build the return object - format aligns a previous iteration of the app
             results[str(index)] = {
-                'barcode':barCode,
-                'date': arrivalDate.isoformat(),
-                'storageLocation': storageLoc,
-                'dewar_location': dewarLoc,
-                'facilitycode': facilityCode,
-                'status': status,
-                'awb': awb,
-                'sid': shippingId,
+                'barcode':dewar.barCode,
+                'date': dewar.arrivalDate.isoformat(),
+                'storageLocation': dewar.storageLocation, # should really change 'inout' to location
+                'facilitycode': dewar.FACILITYCODE,
+                'status': dewar.dewarStatus,
+                'awb': dewar.trackingNumberFromSynchrotron,
+                'sid': dewar.shippingId,
                  }
 
     except NoResultFound:
@@ -190,8 +177,6 @@ def find_dewar_history_for_locations(locations, max_entries=20, match_locations=
         results = None
 
     return results
-
-
 
 def find_recent_storage_history(locations):
     """
@@ -346,6 +331,9 @@ def get_shipping_return_address(barcode):
 
     except DBAPIError:
         logging.getLogger('ispyb-logistics').error('Database API Exception - no route to database host?')
+
+    except Exception:
+        logging.getLogger('ispyb-logistics').error('No shipping record for this dewar')
 
     return results
 
