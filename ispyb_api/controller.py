@@ -144,7 +144,6 @@ def find_dewar_history_for_locations(locations, max_entries=20):
             filter(func.lower(DewarTransportHistory.storageLocation).in_(locations)).\
             filter(Dewar.dewarId == DewarTransportHistory.dewarId).\
             filter(Dewar.shippingId == Shipping.shippingId).\
-            filter(Dewar.storageLocation == DewarTransportHistory.storageLocation).\
             order_by(desc(DewarTransportHistory.arrivalDate)).\
             limit(max_entries).\
             values(Dewar.barCode,
