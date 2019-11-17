@@ -85,7 +85,7 @@ def remove_dewar_from_location(location):
     result = controller.find_dewars_by_location([location])
 
     if location in result:
-        barcode = result[location][0]
+        barcode = result[location]['barcode']
 
         logging.getLogger('ispyb-logistics').debug("Remove barcode %s from location %s" % (barcode, location))
         # Should we update the transport history to show its been taken out?
