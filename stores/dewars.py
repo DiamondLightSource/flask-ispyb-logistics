@@ -24,27 +24,30 @@ def location():
     status_code = 200
 
     if request.method == 'GET':
-        result = controller.find_dewar_history_for_locations(['STORES-IN', 'STORES-OUT'], max_entries=50)
-        # Append the destination to the results
-        # It's not stored in the database so we determine it here based on barcode or lab contact address
-        for key in result.keys():
-            dewar = result[key]
-            if dewar['storageLocation'].upper() == 'STORES-IN':
-                dewar['destination'] = get_destination_from_barcode(dewar['barcode'])
-            elif dewar['storageLocation'].upper() == 'STORES-OUT':
-                shipping = controller.get_shipping_return_address(dewar['barcode'])
-                # Depending on how the address is filled out we may not have a city field
-                # Should have a country but checking just in case
-                if shipping:
-                    city = shipping['city'] if shipping['city'] else ''
-                    country = shipping['country'] if shipping['country'] else ''
+        try:
+            result = controller.find_dewar_history_for_locations(['STORES-IN', 'STORES-OUT'], max_entries=50)
+            # Append the destination to the results
+            # It's not stored in the database so we determine it here based on barcode or lab contact address
+            for key in result.keys():
+                dewar = result[key]
+                if dewar['storageLocation'].upper() == 'STORES-IN':
+                    dewar['destination'] = get_destination_from_barcode(dewar['barcode'])
+                elif dewar['storageLocation'].upper() == 'STORES-OUT':
+                    shipping = controller.get_shipping_return_address(dewar['barcode'])
+                    # Depending on how the address is filled out we may not have a city field
+                    # Should have a country but checking just in case
+                    if shipping:
+                        city = shipping['city'] if shipping['city'] else ''
+                        country = shipping['country'] if shipping['country'] else ''
 
-                    if city:
-                        dewar['destination'] = ', '.join([city, country])
-                    else:
-                        dewar['destination'] = country
-            else:
-                dewar['destination'] = ''
+                        if city:
+                            dewar['destination'] = ', '.join([city, country])
+                        else:
+                            dewar['destination'] = country
+                else:
+                    dewar['destination'] = ''
+        except AttributeError:
+            logging.getLogger('ispyb-logistics').warning('No dewar history found for stores locations')
 
     elif request.method == 'POST':
         location = request.form['location']
