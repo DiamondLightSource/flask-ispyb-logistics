@@ -6,7 +6,7 @@ The calling method will jsonify the result
 """
 import logging
 from collections import OrderedDict
-from ispyb_api import controller
+import api.ispyb.service as ispyb_service
 
 
 def find_dewar(facilitycode):
@@ -21,7 +21,7 @@ def find_dewar(facilitycode):
 
     # Do we have a valid facility code?
     if facilitycode:
-        dewar = controller.get_dewar_by_facilitycode(facilitycode)
+        dewar = ispyb_service.get_dewar_by_facilitycode(facilitycode)
 
         if dewar:
             # All good so status code is 200 (default)
@@ -32,7 +32,7 @@ def find_dewar(facilitycode):
         else:
             result = {'status': 'fail',
                       'reason': 'facilitycode not found'}
-            # controller unable to find dewar
+            # ispyb_service unable to find dewar
             status_code = 404
 
     else:
@@ -57,7 +57,7 @@ def find_dewar_history(dewarcode):
 
     # Do we have a valid facility code?
     if dewarcode:
-        dewar = controller.find_dewar_history_for_dewar(dewarcode, history_depth)
+        dewar = ispyb_service.find_dewar_history_for_dewar(dewarcode, history_depth)
 
         if dewar:
             # All good so status code is 200 (default)
@@ -68,7 +68,7 @@ def find_dewar_history(dewarcode):
         else:
             result = {'status': 'fail',
                       'reason': 'facility/barcode not found'}
-            # controller unable to find dewar
+            # ispyb_service unable to find dewar
             status_code = 404
     else:
         result = {'status': 'fail',
@@ -82,7 +82,7 @@ def remove_dewar_from_location(location):
     status_code = 401 # Default unauthorized request
 
     # Find the dewar in this location (pass in as a list item)
-    result = controller.find_dewars_by_location([location])
+    result = ispyb_service.find_dewars_by_location([location])
 
     if location in result:
         barcode = result[location]['barcode']
@@ -90,13 +90,13 @@ def remove_dewar_from_location(location):
         logging.getLogger('ispyb-logistics').debug("Remove barcode %s from location %s" % (barcode, location))
         # Should we update the transport history to show its been taken out?
         # It would affect the LN2 top up assumption
-        result = controller.set_location(barcode, 'REMOVED FROM {}'.format(location))
+        result = ispyb_service.set_location(barcode, 'REMOVED FROM {}'.format(location))
 
         if result:
             status_code = 200
         else:
             result = {'status': "fail",
-                      'reason': 'webservice failed to accept delete request'}
+                      'reason': 'ispyb service failed to accept delete request'}
     else:
         logging.getLogger('ispyb-logistics').warn('Could not find a dewar in location {}'.format(location))
 
@@ -115,7 +115,7 @@ def update_dewar_location(barcode, location, awb=None):
 
     logging.getLogger('ispyb-logistics').debug("Update barcode %s to location %s" % (barcode, location))
 
-    result = controller.set_location(barcode, location, awb)
+    result = ispyb_service.set_location(barcode, location, awb)
 
     if result is None:
         result = {'location': location,
@@ -136,7 +136,7 @@ def find_dewars_by_location(locations):
 
     status_code = 200
 
-    dewars = controller.find_dewars_by_location(locations)
+    dewars = ispyb_service.find_dewars_by_location(locations)
 
     if dewars is None:
         results = {'location': locations,
@@ -157,7 +157,7 @@ def find_dewars_by_location(locations):
             # Required for main zone4 use case where the case is left in the storageLocation
             empty_locations = [location for location in locations if results[location]['barcode'] == '']
 
-            processing_dewars = controller.find_recent_storage_history(empty_locations)
+            processing_dewars = ispyb_service.find_recent_storage_history(empty_locations)
             # Add dewars that are in processing to our return list
             # Make sure to preseve upper case locations
             # Front end can filter 'onBeamline'

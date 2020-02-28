@@ -9,7 +9,7 @@ from flask import request
 
 import requests
 
-from ispyb_api import controller
+import api.ispyb.service as ispyb_service
 
 api = Blueprint('stores', __name__, url_prefix='/api/stores')
 
@@ -25,7 +25,7 @@ def location():
 
     if request.method == 'GET':
         try:
-            result = controller.find_dewar_history_for_locations(['STORES-IN', 'STORES-OUT'], max_entries=50)
+            result = ispyb_service.find_dewar_history_for_locations(['STORES-IN', 'STORES-OUT'], max_entries=50)
             # Append the destination to the results
             # It's not stored in the database so we determine it here based on barcode or lab contact address
             for key in result.keys():
@@ -33,7 +33,7 @@ def location():
                 if dewar['storageLocation'].upper() == 'STORES-IN':
                     dewar['destination'] = get_destination_from_barcode(dewar['barcode'])
                 elif dewar['storageLocation'].upper() == 'STORES-OUT':
-                    shipping = controller.get_shipping_return_address(dewar['barcode'])
+                    shipping = ispyb_service.get_shipping_return_address(dewar['barcode'])
                     # Depending on how the address is filled out we may not have a city field
                     # Should have a country but checking just in case
                     if shipping:
@@ -116,13 +116,13 @@ def update_dewar_location(barcode, location, awb=None):
     if awb:
         awb = awb.replace('+', '_')
 
-    result = controller.set_location(barcode, location, awb)
+    result = ispyb_service.set_location(barcode, location, awb)
 
     if result is None:
         result = {'location': location,
                   'barcode': barcode,
                   'awb': awb,
-                  'status': 'fail - controller did not set location',
+                  'status': 'fail - ispyb service did not set location',
                   }
         status_code = 400
 
