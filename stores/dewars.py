@@ -150,12 +150,14 @@ def get_destination_from_barcode(barcode):
             # Try to derive the destination from proposal type
             session = controller.get_instrument_from_dewar(barcode)
 
-            instrument = session.get('instrument')
+            instrument = session.get('instrument', '').upper()
 
-            if instrument and instrument.upper() in EBIC.instruments:
+            if instrument in EBIC.instruments:
                 destination = EBIC.destination
-            elif instrument and instrument.upper() in MX.instruments:
+            elif instrument in MX.instruments:
                 destination = MX.destination
+            elif instrument in I14.instruments:
+                destination = I14.destination
             else:
                 destination = 'Unknown'
     except:
