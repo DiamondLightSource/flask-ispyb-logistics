@@ -6,12 +6,13 @@ from flask import render_template
 from flask import jsonify
 from flask import request
 
-
 import requests
 
 from ispyb_api import controller
+from destinations import EBIC, MX, I14
 
 api = Blueprint('stores', __name__, url_prefix='/api/stores')
+
 
 @api.route('/dewars', methods=['GET', 'POST'])
 def location():
@@ -139,14 +140,26 @@ def get_destination_from_barcode(barcode):
     try:
         barcode_prefix = barcode.upper()[0:2]
 
-        if barcode_prefix == 'SP' or 'I14' in barcode.upper():
-            destination = 'I14'
-        elif barcode_prefix == 'EM' or barcode_prefix == 'BI' or any(b in barcode.upper() for b in ['M01', 'M02', 'M03', 'M04', 'M05', 'M06', 'M07']):
-            destination = 'eBIC'
-        elif barcode_prefix == 'MX' or any(b in barcode.upper() for b in ['I03', 'I04', 'I19', 'I23', 'I24']):
-            destination = 'Zone 6 store'
+        if barcode_prefix in I14.proposal_codes or any('-{}'.format(b) in barcode.upper() for b in I14.instruments):
+            destination = I14.destination
+        elif barcode_prefix in EBIC.proposal_codes or any('-{}'.format(b) in barcode.upper() for b in EBIC.instruments):
+            destination = EBIC.destination
+        elif barcode_prefix in MX.proposal_codes or any('-{}'.format(b) in barcode.upper() for b in MX.instruments):
+            destination = MX.destination
         else:
-            destination = 'Unknown'
+            # Try to derive the destination from proposal type
+            session = controller.get_instrument_from_dewar(barcode)
+
+            instrument = session.get('instrument', '').upper()
+
+            if instrument in EBIC.instruments:
+                destination = EBIC.destination
+            elif instrument in MX.instruments:
+                destination = MX.destination
+            elif instrument in I14.instruments:
+                destination = I14.destination
+            else:
+                destination = 'Unknown'
     except:
         logging.getLogger('ispyb-logistics').error('Could not get destination from barcode {}'.format(barcode))
 

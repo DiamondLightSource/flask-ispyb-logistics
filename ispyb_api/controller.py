@@ -9,7 +9,7 @@ from sqlalchemy.orm import aliased
 
 from . import db
 import webservice
-from models import Dewar, DewarTransportHistory, LabContact, Laboratory, Shipping, Proposal, Person
+from models import Dewar, DewarTransportHistory, LabContact, Laboratory, Shipping, Proposal, Person, BLSession
 
 
 def set_location(barcode, location, awb=None):
@@ -361,6 +361,43 @@ def find_dewars_by_proposal(proposal_code, proposal_number):
                Proposal.title, 
                Shipping.shippingName)
                
+    return results
+
+def get_instrument_from_dewar(dewarBarCode):
+    """
+    If there is no other indication of a target location from the barcode look up similar sessions
+    This looks at the dewar => sessions and picks the most recent session with a beamline
+    """
+    results = None
+
+    records = Dewar.query.join(Shipping).join(Proposal).join(BLSession).\
+        filter(Shipping.shippingId == Dewar.shippingId).\
+        filter(Proposal.proposalId == Shipping.proposalId).\
+        filter(BLSession.proposalId == Proposal.proposalId).\
+        filter(Dewar.barCode == dewarBarCode).\
+        filter(BLSession.beamLineName != None).\
+        order_by(desc(BLSession.sessionId)).\
+        limit(1).\
+        values(Dewar.dewarId, 
+               Dewar.barCode,
+               Proposal.proposalCode,
+               Proposal.proposalNumber,
+               BLSession.beamLineName,
+               BLSession.visit_number)
+
+    try:
+        firstRecord = records.next()
+
+        logging.getLogger('ispyb-logistics').debug('get_instrument_from_dewar first: {}'.format(firstRecord))
+
+        results = {
+            'barcode': firstRecord.barCode,
+            'visit_number': firstRecord.visit_number,
+            'instrument': firstRecord.beamLineName,
+            }
+    except:
+        logging.getLogger('ispyb-logistics').error('Could not get valid instrument from dewar {}'.format(dewarBarCode))
+
     return results
 
 def is_facility_code(code):
