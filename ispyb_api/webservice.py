@@ -6,7 +6,7 @@ import urlparse
 # Build the URL for the POST route (using env settings)
 synchweb_host = os.environ.get("SYNCHWEB_HOST", "http://192.168.33.10")
 synchweb_url = urlparse.urljoin(synchweb_host, "/api/shipment/dewars/history")
-
+verify_ssl = True
 
 def set_location(barcode, location, awb=None):
     """
@@ -24,7 +24,7 @@ def set_location(barcode, location, awb=None):
 
     try:
         # Added timeout to request
-        r = requests.post(synchweb_url, data=payload, timeout=5)
+        r = requests.post(synchweb_url, data=payload, timeout=5, verify=verify_ssl)
 
         if r.status_code == requests.codes.ok:
             result = r.json()

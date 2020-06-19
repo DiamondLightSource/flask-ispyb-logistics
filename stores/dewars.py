@@ -13,6 +13,15 @@ from ispyb_api import controller
 
 api = Blueprint('stores', __name__, url_prefix='/api/stores')
 
+# Storing list of instruments with their destinations here
+class EBIC:
+    destination = 'eBIC'
+    instruments = ['M01', 'M02', 'M03', 'M04', 'M05', 'M06', 'M07', 'M08', 'M09', 'M10', 'M11', 'M12', 'I05']
+
+class MX:
+    destination = 'Zone 4 Store'
+    instruments = ['I02-2', 'I03', 'I04', 'I19', 'I23', 'I24']
+
 @api.route('/dewars', methods=['GET', 'POST'])
 def location():
     """
@@ -141,12 +150,22 @@ def get_destination_from_barcode(barcode):
 
         if barcode_prefix == 'SP' or 'I14' in barcode.upper():
             destination = 'I14'
-        elif barcode_prefix == 'EM' or barcode_prefix == 'BI' or any(b in barcode.upper() for b in ['M01', 'M02', 'M03', 'M04', 'M05', 'M06', 'M07']):
-            destination = 'eBIC'
-        elif barcode_prefix == 'MX' or any(b in barcode.upper() for b in ['I03', 'I04', 'I19', 'I23', 'I24']):
-            destination = 'Zone 6 store'
+        elif barcode_prefix == 'EM' or barcode_prefix == 'BI' or any(b in barcode.upper() for b in EBIC.instruments):
+            destination = EBIC.destination
+        elif barcode_prefix == 'MX' or any(b in barcode.upper() for b in MX.instruments):
+            destination = MX.destination
         else:
-            destination = 'Unknown'
+            # Try to derive the destination from proposal type
+            session = controller.get_instrument_from_dewar(barcode)
+
+            instrument = session.get('instrument')
+
+            if instrument and instrument.upper() in EBIC.instruments:
+                destination = EBIC.destination
+            elif instrument and instrument.upper() in MX.instruments:
+                destination = MX.destination
+            else:
+                destination = 'Unknown'
     except:
         logging.getLogger('ispyb-logistics').error('Could not get destination from barcode {}'.format(barcode))
 
