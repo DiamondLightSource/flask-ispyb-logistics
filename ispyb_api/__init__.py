@@ -1,6 +1,6 @@
 import os
-from ConfigParser import ConfigParser
-from ConfigParser import NoOptionError, NoSectionError
+from configparser import ConfigParser
+from configparser import NoOptionError, NoSectionError
 
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.engine.url import URL
@@ -20,11 +20,11 @@ def read_db_config(filename, section):
     # db = ispyb
 
     db_url = None
-    
+
     try:
         config = ConfigParser()
         config.read(filename)
-    
+
         db_url = URL(drivername='mysql+mysqlconnector',
                      username=config.get(section, 'user'),
                      password=config.get(section, 'pw'),
@@ -37,7 +37,7 @@ def read_db_config(filename, section):
         print("Error the config file {} does not exist, or have the {} section".format(filename, section))
 
     return db_url
-    
+
 
 def init_app(app):
     """
@@ -49,7 +49,7 @@ def init_app(app):
     print("Reading database credentials from {} [{}] ".format(config_filename, config_section))
 
     db_url = read_db_config(config_filename, config_section)
-    
+
     if db_url is None:
         db_url = 'mysql+mysqlconnector://ispyb:integration@localhost:3306/ispyb'
 
