@@ -8,8 +8,8 @@ from sqlalchemy import desc, func
 from sqlalchemy.orm import aliased
 
 from . import db
-import webservice
-from models import Dewar, DewarTransportHistory, LabContact, Laboratory, Shipping, Proposal, Person, BLSession
+from . import webservice
+from .models import Dewar, DewarTransportHistory, LabContact, Laboratory, Shipping, Proposal, Person, BLSession
 
 
 def set_location(barcode, location, awb=None):
@@ -37,7 +37,7 @@ def get_dewar_by_facilitycode(fc):
     """
     result = None
 
-    # Facility codes are reused, so we want the most recent version 
+    # Facility codes are reused, so we want the most recent version
     # We work that out based on the newest (highest) dewarId
     # Could also specify that its a dewar on site, at-facility perhaps?
     d = Dewar.query.filter(Dewar.FACILITYCODE == fc).order_by(desc(Dewar.dewarId)).first()
@@ -59,7 +59,7 @@ def get_dewar_by_barcode(barcode):
     logging.getLogger('ispyb-logistics').debug("get_dewar_by_barcode {}".format(barcode))
     result = {}
 
-    try: 
+    try:
         d = Dewar.query.filter_by(barCode = barcode).one()
 
         result['dewarId'] = d.dewarId
@@ -80,13 +80,13 @@ def find_dewars_by_location(locations):
     It matches the Dewar.storageLocation with DewarTransportHistory.storageLocation
     """
     logging.getLogger('ispyb-logistics').debug("find_dewars_by_location {}".format(','.join(locations)))
-    
+
     results = {}
 
-    try: 
+    try:
         # Query for dewars with transporthistory locations in the list
         # Use case insensitive search for storageLocation
-        # Get the timestamp and location from the transport history 
+        # Get the timestamp and location from the transport history
         # Order so we get the most recent first...
         # The Dewar storageLocation does not always match the transport history
         dewars = Dewar.query.join(DewarTransportHistory).\
@@ -294,8 +294,8 @@ def find_dewar_history_for_dewar(dewarCode, max_entries=3):
 
         # Annoyingly we find lots of entries where the locations are the same (i04, i04, i04... for every puck scan)
         # This method removes all duplicate sequential entries for us...
-        results['storageLocations'] = [g.next() for k,g in itertools.groupby(locations, lambda x: x.get('location'))]
-        
+        results['storageLocations'] = [next(g) for k,g in itertools.groupby(locations, lambda x: x.get('location'))]
+
     except DBAPIError:
         logging.getLogger('ispyb-logistics').error('Database API Exception - no route to database host?')
         results = None
@@ -344,7 +344,7 @@ def find_dewars_by_proposal(proposal_code, proposal_number):
         filter(Proposal.proposalCode == proposal_code, Proposal.proposalNumber == proposal_number).\
         filter(Proposal.proposalId == Shipping.proposalId).\
         filter(Shipping.shippingId == Dewar.shippingId).\
-        values(Dewar.dewarId, 
+        values(Dewar.dewarId,
                Dewar.shippingId,
                Dewar.barCode,
                Dewar.code,
@@ -358,9 +358,9 @@ def find_dewars_by_proposal(proposal_code, proposal_number):
                Dewar.FACILITYCODE,
                Dewar.weight,
                Dewar.deliveryAgent_barcode,
-               Proposal.title, 
+               Proposal.title,
                Shipping.shippingName)
-               
+
     return results
 
 def get_instrument_from_dewar(dewarBarCode):
@@ -378,7 +378,7 @@ def get_instrument_from_dewar(dewarBarCode):
         filter(BLSession.beamLineName != None).\
         order_by(desc(BLSession.sessionId)).\
         limit(1).\
-        values(Dewar.dewarId, 
+        values(Dewar.dewarId,
                Dewar.barCode,
                Proposal.proposalCode,
                Proposal.proposalNumber,
@@ -386,7 +386,7 @@ def get_instrument_from_dewar(dewarBarCode):
                BLSession.visit_number)
 
     try:
-        firstRecord = records.next()
+        firstRecord = next(records)
 
         logging.getLogger('ispyb-logistics').debug('get_instrument_from_dewar first: {}'.format(firstRecord))
 
@@ -410,7 +410,7 @@ def is_facility_code(code):
 
     expr = re.compile(r'[A-Z]{3}-[A-Z]{2}-\d', re.IGNORECASE)
     match = expr.match(code)
-    
+
     if match:
         logging.getLogger('ispyb-logistics').debug('{} is a facility code'.format(code))
         result = True
