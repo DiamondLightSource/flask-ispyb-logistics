@@ -150,7 +150,7 @@ def find_dewars_by_location(locations):
             status_code = 404
         else:
             # Now update the list of dewars to our results dictionary (Make sure to preseve upper case locations)
-            for key, value in dewars.iteritems():
+            for key, value in dewars.items():
                 results[key.upper()] = value
 
             # For locations showing as empty - check that the dewars are not actually on beamline...
@@ -161,7 +161,7 @@ def find_dewars_by_location(locations):
             # Add dewars that are in processing to our return list
             # Make sure to preseve upper case locations
             # Front end can filter 'onBeamline'
-            for key, value in processing_dewars.iteritems():
+            for key, value in processing_dewars.items():
                 logging.getLogger('ispyb-logistics').debug("Adding empty locations {}".format(key))
                 if value['onBeamline']:
                     results[key.upper()] = value

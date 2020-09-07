@@ -1,11 +1,11 @@
 import os
 import logging
 import requests
-import urlparse
+from urllib.parse import urljoin
 
 # Build the URL for the POST route (using env settings)
-synchweb_host = os.environ.get("SYNCHWEB_HOST", "http://192.168.33.10")
-synchweb_url = urlparse.urljoin(synchweb_host, "/api/shipment/dewars/history")
+synchweb_host = os.environ.get("SYNCHWEB_HOST", "https://192.168.33.10")
+synchweb_url = urljoin(synchweb_host, "/api/shipment/dewars/history")
 verify_ssl = True
 
 def set_location(barcode, location, awb=None):
