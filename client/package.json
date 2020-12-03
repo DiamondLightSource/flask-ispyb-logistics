@@ -10,6 +10,7 @@
   "dependencies": {
     "axios": "^0.19.0",
     "core-js": "^2.6.5",
+    "font-awesome": "^4.7.0",
     "howler": "^2.1.2",
     "tailwindcss": "^1.1.2",
     "typeface-cantarell": "0.0.72",

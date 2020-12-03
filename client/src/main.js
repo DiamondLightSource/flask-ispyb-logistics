@@ -7,12 +7,14 @@ import 'typeface-cantarell'
 import 'tailwindcss/tailwind.css'
 import axios from 'axios'
 
+import 'font-awesome/css/font-awesome.css'
+
 Vue.config.productionTip = false
 
 Vue.prototype.$http = axios
 
 new Vue({
-  router,
   store,
+  router,
   render: h => h(App)
 }).$mount('#app')

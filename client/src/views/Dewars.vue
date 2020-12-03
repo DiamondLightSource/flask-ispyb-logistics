@@ -23,8 +23,9 @@
     
     <!-- Display the rack locations, four columns across If Zone 6 -->
     <div v-if="zone==='zone6'" class="flex flex-wrap">
-      <div class="w-full md:w-1/4 p-2" v-for="(dewar, rack) in rack_locations" v-bind:key="rack" v-on:click="onClearLocation(rack)">
-        <DewarCard 
+      <div class="w-full md:w-1/4 p-2" v-for="(dewar, rack) in rack_locations" v-bind:key="rack">
+        <DewarCard
+          v-on:clear-location="onClearLocation"
           v-bind:dewar="dewar"
           v-bind:rack="rack">
         </DewarCard>
@@ -33,8 +34,10 @@
 
     <!-- Display the rack locations, six columns across If Zone 4 -->
     <div v-else-if="zone === 'zone4'" class="flex flex-wrap">
-      <div class="w-full md:w-1/6 p-2" v-for="(dewar, rack) in rack_locations" v-bind:key="rack" v-on:click="onClearLocation(rack)">
-        <DewarCard 
+      <div class="w-full md:w-1/6 p-2" v-for="(dewar, rack) in rack_locations" v-bind:key="rack" >
+        <DewarCard
+          v-on:clear-location="onClearLocation"
+          v-on:update-dewar="onUpdateDewar"
           v-bind:dewar="dewar"
           v-bind:rack="rack">
         </DewarCard>
@@ -56,6 +59,7 @@
       <p>No known storage location</p>
     </div>
 
+
     <!-- This pops up to confirm the clear location action -->
     <ClearLocationDialog 
       v-on:confirm-removal="onConfirmClear" 
@@ -63,6 +67,13 @@
       v-bind:locationToRemove="locationToRemove"
       v-bind:rack_locations="rack_locations">
     </ClearLocationDialog>
+
+    <DewarReportDialog
+      v-on:confirm-update="onConfirmUpdate"
+      v-bind:isActive="isUpdateDialogActive"
+      v-bind:barcode="dewarBarcode">
+    </DewarReportDialog>
+
   </div>
 
 </template>
@@ -73,6 +84,7 @@ import FindDewar from '@/components/FindDewar.vue';
 import DispatchDewars from '@/components/DispatchDewars.vue';
 import MessagePanel from '@/components/MessagePanel.vue';
 import ClearLocationDialog from '@/components/ClearLocationDialog.vue';
+import DewarReportDialog from '@/components/DewarReportDialog.vue';
 import DewarCard from '@/components/DewarCard.vue';
 
 export default {
@@ -84,7 +96,8 @@ export default {
     DispatchDewars,
     MessagePanel,
     ClearLocationDialog,
-    DewarCard
+    DewarCard,
+    DewarReportDialog
   },
   data() {
     return {
@@ -96,6 +109,9 @@ export default {
       // Timeout handle - used to determine if we need to refresh page
       refresh: null,
       refreshInterval: 60000, // refresh interval in milliseconds
+      // Dewar Report fields
+      dewarBarcode: null,
+      isUpdateDialogActive: false,
     }
   },
   created: function() {
@@ -231,6 +247,21 @@ export default {
           // Reset data that will disable dialog box
           this.locationToRemove = "";
           this.isRemoveDialogActive = false
+        },
+        // Handler for clear location event (rack location clicked)
+        // This will trigger the confirm dialog box to show up
+        onUpdateDewar: function(barcode) {
+          console.log("on Update Dewar clicked, barcode: " + barcode)
+          // This location will be upper case because we control how it is rendered
+          this.dewarBarcode = barcode
+          this.isUpdateDialogActive = true
+        },
+        // User has either confirmed or cancelled
+        onConfirmUpdate: function(confirm) {
+          console.log("Confirm Update Dewar: " + confirm)
+          // Reset data that will disable dialog box
+          this.dewarBarcode = null;
+          this.isUpdateDialogActive = false
         },
     }
 }
