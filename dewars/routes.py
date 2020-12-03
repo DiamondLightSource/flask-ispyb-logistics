@@ -17,14 +17,19 @@ from . import common
 from . import ebic
 from . import zone4
 from . import zone6
+from . import lab14
 
 locations = {'zone6': zone6.rack_locations,
              'zone4': zone4.rack_locations,
-             'ebic': ebic.rack_locations}
+             'ebic': ebic.rack_locations,
+             'lab14': lab14.rack_locations
+             }
 
 beamlines = {'zone6': zone6.beamline_locations,
              'zone4': zone4.beamline_locations,
-             'ebic': ebic.beamline_locations}
+             'ebic': ebic.beamline_locations,
+             'lab14': lab14.beamline_locations
+             }
 
 
 api = Blueprint('zones', __name__, url_prefix='/api')
@@ -135,6 +140,37 @@ def find():
     result, status_code = common.find_dewar_history(facilitycode)
 
     return __json_response(result, status_code)
+
+@api.route('/containers/locations/<zone>', methods=['GET'])
+def get_container_locations(zone='lab14'):
+    """
+    API route for container (lab14) management
+    """
+    result = {}
+    status_code = 200
+
+    if zone not in locations:
+        result = {'status': 'fail',
+                   'message': 'Zone parameter not valid for this application'}
+        status_code = 400
+
+        return __json_response(result, status_code)
+
+    if request.method == 'GET':
+        # Get Rack Locations for this zone
+        rack_locations = locations.get(zone)
+        # Get any dewar with provided rack locations
+        # There should only be one per location
+        result, status_code = common.find_containers_by_location(rack_locations)
+    else:
+        result = {'location': '',
+                  'barcode': '',
+                  'status': 'fail',
+                  'reason': 'Method/route not implemented yet'}
+        status_code = 501
+
+    return __json_response(result, status_code)
+
 
 def __json_response(result, code):
     """

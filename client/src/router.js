@@ -3,6 +3,7 @@ import Router from 'vue-router'
 import Home from './views/Home.vue'
 import Stores from './views/Stores.vue'
 import Dewars from './views/Dewars.vue'
+import Lab14 from './views/Lab14.vue'
 
 Vue.use(Router)
 
@@ -36,6 +37,12 @@ export default new Router({
       name: 'EBIC',
       component: Dewars,
       props: {zone: 'ebic'}
+    },
+    {
+      path: '/lab14',
+      name: 'Lab14',
+      component: Lab14,
+      props: {zone: 'lab14'}
     }
   ]
 })

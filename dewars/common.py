@@ -168,3 +168,31 @@ def find_dewars_by_location(locations):
                 # Else ignore as the dewar is elsewhere....
 
     return results, status_code
+
+def find_containers_by_location(locations):
+    # Could use an ordered dict here but jsonify step will break it
+    results = OrderedDict([(location, {'barcode':"", 'arrivalDate':"", 'facilityCode':"", 'status':"", 'onBeamline':False}) for location in locations])
+    # Initialise here so we can preserve the order
+    # for location in locations:
+    #     results[location] = ["", "", ""]
+
+    status_code = 200
+
+    containers = controller.find_containers_by_location(locations)
+
+    if containers is None:
+        results = {'location': locations,
+                  'status': 'fail',
+                  'reason': 'Error retrieving containers from database'}
+        status_code = 503
+    else:
+        # If no containers return 404 (and also return a blank list)
+        if len(containers.keys()) == 0:
+            logging.getLogger('ispyb-logistics').debug("Did not find any containers for these locations {}".format(locations))
+            status_code = 404
+        else:
+            # Now update the list of containers to our results dictionary (Make sure to preseve upper case locations)
+            for key, value in containers.items():
+                results[key.upper()] = value
+
+    return results, status_code
