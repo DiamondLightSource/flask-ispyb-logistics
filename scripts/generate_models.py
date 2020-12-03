@@ -17,7 +17,7 @@ db_url = ispyb_api.read_db_config(config_filename, config_section)
 
 print(db_url)
 
-call(["sqlacodegen", "{}".format(db_url), "--tables", "DewarTransportHistory", "--outfile", tmpfile])
+call(["sqlacodegen", "{}".format(db_url), "--tables", "DewarTransportHistory,ContainerHistory", "--outfile", tmpfile])
 
 call("sed s'/Base = declarative_base()/from . import Base/' {} | sed '/metadata = Base.metadata/d' > {}".format(tmpfile, outfile), shell=True)
 
