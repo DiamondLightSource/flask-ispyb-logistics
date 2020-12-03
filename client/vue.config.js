@@ -79,6 +79,20 @@ module.exports = {
         // chunks to include on this page, by default includes
         // extracted common chunks and vendor chunks.
         chunks: ['chunk-vendors', 'chunk-common', 'zone6']
+      },
+      lab14: {
+        // entry for the page
+        entry: 'src/apps/lab14/main.js',
+        // the source template
+        template: 'public/index.html',
+        // output as dist/index.html
+        filename: 'lab14.html',
+        // when using title option,
+        // template title tag needs to be <title><%= htmlWebpackPlugin.options.title %></title>
+        title: 'ISPyB Logistics Lab14',
+        // chunks to include on this page, by default includes
+        // extracted common chunks and vendor chunks.
+        chunks: ['chunk-vendors', 'chunk-common', 'lab14']
       }
     }
 }

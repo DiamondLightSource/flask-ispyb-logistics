@@ -1,5 +1,5 @@
 # coding: utf-8
-from sqlalchemy import BINARY, Column, Date, DateTime, Float, ForeignKey, Index, Integer, String, Text, Time, text
+from sqlalchemy import BINARY, Column, Date, DateTime, Float, ForeignKey, Index, Integer, SmallInteger, String, Text, Time, text
 from sqlalchemy.orm import relationship
 from sqlalchemy.dialects.mysql.enumerated import ENUM
 from sqlalchemy.ext.declarative import declarative_base
@@ -10,14 +10,11 @@ from . import Base
 
 class BLSession(Base):
     __tablename__ = 'BLSession'
-    __table_args__ = (
-        Index('proposalId', 'proposalId', 'visit_number', unique=True),
-    )
 
     sessionId = Column(Integer, primary_key=True)
-    beamLineSetupId = Column(ForeignKey(u'BeamLineSetup.beamLineSetupId', ondelete=u'CASCADE', onupdate=u'CASCADE'), index=True)
-    proposalId = Column(ForeignKey(u'Proposal.proposalId'), nullable=False, index=True, server_default=text("0"))
-    beamCalendarId = Column(ForeignKey(u'BeamCalendar.beamCalendarId'), index=True)
+    beamLineSetupId = Column(ForeignKey('BeamLineSetup.beamLineSetupId', ondelete='CASCADE', onupdate='CASCADE'), index=True)
+    proposalId = Column(ForeignKey('Proposal.proposalId', ondelete='CASCADE', onupdate='CASCADE'), nullable=False, index=True, server_default=text("0"))
+    beamCalendarId = Column(ForeignKey('BeamCalendar.beamCalendarId'), index=True)
     projectCode = Column(String(45))
     startDate = Column(DateTime, index=True)
     endDate = Column(DateTime, index=True)
@@ -25,7 +22,7 @@ class BLSession(Base):
     scheduled = Column(Integer)
     nbShifts = Column(Integer)
     comments = Column(String(2000))
-    beamLineOperator = Column(String(255))
+    beamLineOperator = Column(String(45))
     bltimeStamp = Column(DateTime, nullable=False, server_default=text("current_timestamp()"))
     visit_number = Column(Integer, server_default=text("0"))
     usedFlag = Column(Integer)
@@ -41,9 +38,9 @@ class BLSession(Base):
     externalId = Column(BINARY(16))
     archived = Column(Integer, server_default=text("0"))
 
-    BeamCalendar = relationship(u'BeamCalendar')
-    BeamLineSetup = relationship(u'BeamLineSetup')
-    Proposal = relationship(u'Proposal')
+    BeamCalendar = relationship('BeamCalendar')
+    BeamLineSetup = relationship('BeamLineSetup')
+    Proposal = relationship('Proposal')
 
 
 class BeamCalendar(Base):
@@ -60,7 +57,7 @@ class BeamLineSetup(Base):
     __tablename__ = 'BeamLineSetup'
 
     beamLineSetupId = Column(Integer, primary_key=True)
-    detectorId = Column(ForeignKey(u'Detector.detectorId'), index=True)
+    detectorId = Column(ForeignKey('Detector.detectorId'), index=True)
     synchrotronMode = Column(String(255))
     undulatorType1 = Column(String(45))
     undulatorType2 = Column(String(45))
@@ -106,7 +103,67 @@ class BeamLineSetup(Base):
     monoBandwidthMin = Column(Float(asdecimal=True))
     monoBandwidthMax = Column(Float(asdecimal=True))
 
-    Detector = relationship(u'Detector')
+    Detector = relationship('Detector')
+
+
+class Container(Base):
+    __tablename__ = 'Container'
+
+    containerId = Column(Integer, primary_key=True)
+    dewarId = Column(ForeignKey('Dewar.dewarId', ondelete='CASCADE', onupdate='CASCADE'), index=True)
+    code = Column(String(45))
+    containerType = Column(String(20))
+    capacity = Column(Integer)
+    sampleChangerLocation = Column(String(20))
+    containerStatus = Column(String(45), index=True)
+    bltimeStamp = Column(DateTime)
+    beamlineLocation = Column(String(20), index=True)
+    screenId = Column(ForeignKey('Screen.screenId'), index=True)
+    scheduleId = Column(ForeignKey('Schedule.scheduleId'), index=True)
+    barcode = Column(String(45), unique=True)
+    imagerId = Column(ForeignKey('Imager.imagerId'), index=True)
+    sessionId = Column(ForeignKey('BLSession.sessionId', ondelete='SET NULL', onupdate='CASCADE'), index=True)
+    ownerId = Column(ForeignKey('Person.personId'), index=True)
+    requestedImagerId = Column(ForeignKey('Imager.imagerId'), index=True)
+    requestedReturn = Column(Integer, server_default=text("0"))
+    comments = Column(String(255))
+    experimentType = Column(String(20))
+    storageTemperature = Column(Float)
+    containerRegistryId = Column(ForeignKey('ContainerRegistry.containerRegistryId'), index=True)
+    scLocationUpdated = Column(DateTime)
+    priorityPipelineId = Column(ForeignKey('ProcessingPipeline.processingPipelineId'), index=True)
+
+    ContainerRegistry = relationship('ContainerRegistry')
+    Dewar = relationship('Dewar')
+    Imager = relationship('Imager', primaryjoin='Container.imagerId == Imager.imagerId')
+    Person = relationship('Person')
+    ProcessingPipeline = relationship('ProcessingPipeline')
+    Imager1 = relationship('Imager', primaryjoin='Container.requestedImagerId == Imager.imagerId')
+    Schedule = relationship('Schedule')
+    Screen = relationship('Screen')
+    BLSession = relationship('BLSession')
+
+
+class ContainerHistory(Base):
+    __tablename__ = 'ContainerHistory'
+
+    containerHistoryId = Column(Integer, primary_key=True)
+    containerId = Column(ForeignKey('Container.containerId', ondelete='CASCADE', onupdate='CASCADE'), index=True)
+    location = Column(String(45))
+    blTimeStamp = Column(DateTime, nullable=False, server_default=text("current_timestamp()"))
+    status = Column(String(45))
+    beamlineName = Column(String(20))
+
+    Container = relationship('Container')
+
+
+class ContainerRegistry(Base):
+    __tablename__ = 'ContainerRegistry'
+
+    containerRegistryId = Column(Integer, primary_key=True)
+    barcode = Column(String(20))
+    comments = Column(String(255))
+    recordTimestamp = Column(DateTime, server_default=text("current_timestamp()"))
 
 
 class Detector(Base):
@@ -146,7 +203,7 @@ class Dewar(Base):
     __tablename__ = 'Dewar'
 
     dewarId = Column(Integer, primary_key=True)
-    shippingId = Column(ForeignKey(u'Shipping.shippingId', ondelete=u'CASCADE', onupdate=u'CASCADE'), index=True)
+    shippingId = Column(ForeignKey('Shipping.shippingId', ondelete='CASCADE', onupdate='CASCADE'), index=True)
     code = Column(String(45), index=True)
     comments = Column(String)
     storageLocation = Column(String(45))
@@ -154,30 +211,40 @@ class Dewar(Base):
     bltimeStamp = Column(DateTime)
     isStorageDewar = Column(Integer, server_default=text("0"))
     barCode = Column(String(45), unique=True)
-    firstExperimentId = Column(ForeignKey(u'BLSession.sessionId', ondelete=u'CASCADE', onupdate=u'CASCADE'), index=True)
+    firstExperimentId = Column(ForeignKey('BLSession.sessionId', ondelete='CASCADE', onupdate='CASCADE'), index=True)
     customsValue = Column(Integer)
     transportValue = Column(Integer)
     trackingNumberToSynchrotron = Column(String(30))
     trackingNumberFromSynchrotron = Column(String(30))
-    type = Column(ENUM(u'Dewar', u'Toolbox'), nullable=False, server_default=text("'Dewar'"))
-    FACILITYCODE = Column(String(20))
+    type = Column(ENUM('Dewar', 'Toolbox', 'Parcel'), nullable=False, server_default=text("'Dewar'"))
+    facilityCode = Column(String(20))
     weight = Column(Float)
     deliveryAgent_barcode = Column(String(30))
 
-    BLSession = relationship(u'BLSession')
-    Shipping = relationship(u'Shipping')
+    BLSession = relationship('BLSession')
+    Shipping = relationship('Shipping')
 
 
 class DewarTransportHistory(Base):
     __tablename__ = 'DewarTransportHistory'
 
     DewarTransportHistoryId = Column(Integer, primary_key=True)
-    dewarId = Column(ForeignKey(u'Dewar.dewarId', ondelete=u'CASCADE', onupdate=u'CASCADE'), index=True)
+    dewarId = Column(ForeignKey('Dewar.dewarId', ondelete='CASCADE', onupdate='CASCADE'), index=True)
     dewarStatus = Column(String(45), nullable=False)
-    storageLocation = Column(String(45))
-    arrivalDate = Column(DateTime)
+    storageLocation = Column(String(45), nullable=False)
+    arrivalDate = Column(DateTime, nullable=False)
 
-    Dewar = relationship(u'Dewar')
+    Dewar = relationship('Dewar')
+
+
+class Imager(Base):
+    __tablename__ = 'Imager'
+
+    imagerId = Column(Integer, primary_key=True)
+    name = Column(String(45), nullable=False)
+    temperature = Column(Float)
+    serial = Column(String(45))
+    capacity = Column(SmallInteger)
 
 
 class LabContact(Base):
@@ -188,9 +255,9 @@ class LabContact(Base):
     )
 
     labContactId = Column(Integer, primary_key=True)
-    personId = Column(ForeignKey(u'Person.personId', ondelete=u'CASCADE', onupdate=u'CASCADE'), nullable=False)
+    personId = Column(ForeignKey('Person.personId', ondelete='CASCADE', onupdate='CASCADE'), nullable=False)
     cardName = Column(String(40), nullable=False)
-    proposalId = Column(ForeignKey(u'Proposal.proposalId'), nullable=False, index=True)
+    proposalId = Column(ForeignKey('Proposal.proposalId', ondelete='CASCADE', onupdate='CASCADE'), nullable=False, index=True)
     defaultCourrierCompany = Column(String(45))
     courierAccount = Column(String(45))
     billingReference = Column(String(45))
@@ -198,8 +265,8 @@ class LabContact(Base):
     dewarAvgTransportValue = Column(Integer, nullable=False, server_default=text("0"))
     recordTimeStamp = Column(DateTime, nullable=False, server_default=text("current_timestamp()"))
 
-    Person = relationship(u'Person')
-    Proposal = relationship(u'Proposal')
+    Person = relationship('Person')
+    Proposal = relationship('Proposal')
 
 
 class Laboratory(Base):
@@ -214,6 +281,7 @@ class Laboratory(Base):
     url = Column(String(255))
     organization = Column(String(45))
     recordTimeStamp = Column(DateTime, nullable=False, server_default=text("current_timestamp()"))
+    laboratoryPk = Column(Integer)
     postcode = Column(String(15))
 
 
@@ -221,21 +289,41 @@ class Person(Base):
     __tablename__ = 'Person'
 
     personId = Column(Integer, primary_key=True)
-    laboratoryId = Column(ForeignKey(u'Laboratory.laboratoryId'), index=True)
+    laboratoryId = Column(ForeignKey('Laboratory.laboratoryId'), index=True)
     siteId = Column(Integer, index=True)
     personUUID = Column(String(45))
-    familyName = Column(String(100, u'utf8mb4_unicode_ci'), index=True)
-    givenName = Column(String(45, u'utf8mb4_unicode_ci'))
+    familyName = Column(String(100), index=True)
+    givenName = Column(String(45))
     title = Column(String(45))
     emailAddress = Column(String(60))
     phoneNumber = Column(String(45))
     login = Column(String(45), unique=True)
     faxNumber = Column(String(45))
-    cache = Column(Text)
     recordTimeStamp = Column(DateTime, nullable=False, server_default=text("current_timestamp()"))
+    cache = Column(Text)
     externalId = Column(BINARY(16))
 
-    Laboratory = relationship(u'Laboratory')
+    Laboratory = relationship('Laboratory')
+
+
+class ProcessingPipeline(Base):
+    __tablename__ = 'ProcessingPipeline'
+
+    processingPipelineId = Column(Integer, primary_key=True)
+    processingPipelineCategoryId = Column(ForeignKey('ProcessingPipelineCategory.processingPipelineCategoryId'), index=True)
+    name = Column(String(20), nullable=False)
+    discipline = Column(String(10), nullable=False)
+    pipelineStatus = Column(ENUM('automatic', 'optional', 'deprecated'))
+    reprocessing = Column(Integer, server_default=text("1"))
+
+    ProcessingPipelineCategory = relationship('ProcessingPipelineCategory')
+
+
+class ProcessingPipelineCategory(Base):
+    __tablename__ = 'ProcessingPipelineCategory'
+
+    processingPipelineCategoryId = Column(Integer, primary_key=True)
+    name = Column(String(20), nullable=False)
 
 
 class Proposal(Base):
@@ -245,23 +333,41 @@ class Proposal(Base):
     )
 
     proposalId = Column(Integer, primary_key=True)
-    personId = Column(ForeignKey(u'Person.personId', ondelete=u'CASCADE', onupdate=u'CASCADE'), nullable=False, index=True, server_default=text("0"))
-    title = Column(String(255, u'utf8mb4_unicode_ci'))
+    personId = Column(ForeignKey('Person.personId', ondelete='CASCADE', onupdate='CASCADE'), nullable=False, index=True, server_default=text("0"))
+    title = Column(String(200))
     proposalCode = Column(String(45))
     proposalNumber = Column(String(45))
     bltimeStamp = Column(DateTime, nullable=False, server_default=text("current_timestamp()"))
     proposalType = Column(String(2))
     externalId = Column(BINARY(16))
-    state = Column(ENUM(u'Open', u'Closed', u'Cancelled'), server_default=text("'Open'"))
+    state = Column(ENUM('Open', 'Closed', 'Cancelled'), server_default=text("'Open'"))
 
-    Person = relationship(u'Person')
+    Person = relationship('Person')
+
+
+class Schedule(Base):
+    __tablename__ = 'Schedule'
+
+    scheduleId = Column(Integer, primary_key=True)
+    name = Column(String(45))
+
+
+class Screen(Base):
+    __tablename__ = 'Screen'
+
+    screenId = Column(Integer, primary_key=True)
+    name = Column(String(45))
+    proposalId = Column(ForeignKey('Proposal.proposalId'), index=True)
+    _global = Column('global', Integer)
+
+    Proposal = relationship('Proposal')
 
 
 class Shipping(Base):
     __tablename__ = 'Shipping'
 
     shippingId = Column(Integer, primary_key=True)
-    proposalId = Column(ForeignKey(u'Proposal.proposalId'), nullable=False, index=True, server_default=text("0"))
+    proposalId = Column(ForeignKey('Proposal.proposalId', ondelete='CASCADE', onupdate='CASCADE'), nullable=False, index=True, server_default=text("0"))
     shippingName = Column(String(45), index=True)
     deliveryAgent_agentName = Column(String(45))
     deliveryAgent_shippingDate = Column(Date)
@@ -273,9 +379,9 @@ class Shipping(Base):
     laboratoryId = Column(Integer, index=True)
     isStorageShipping = Column(Integer, server_default=text("0"))
     creationDate = Column(DateTime, index=True)
-    comments = Column(String(255))
-    sendingLabContactId = Column(ForeignKey(u'LabContact.labContactId', ondelete=u'CASCADE', onupdate=u'CASCADE'), index=True)
-    returnLabContactId = Column(ForeignKey(u'LabContact.labContactId', ondelete=u'CASCADE', onupdate=u'CASCADE'), index=True)
+    comments = Column(String(1000))
+    sendingLabContactId = Column(ForeignKey('LabContact.labContactId', ondelete='CASCADE', onupdate='CASCADE'), index=True)
+    returnLabContactId = Column(ForeignKey('LabContact.labContactId', ondelete='CASCADE', onupdate='CASCADE'), index=True)
     returnCourier = Column(String(45))
     dateOfShippingToUser = Column(DateTime)
     shippingType = Column(String(45))
@@ -289,10 +395,10 @@ class Shipping(Base):
     deliveryAgent_pickupConfirmation = Column(String(10))
     deliveryAgent_readyByTime = Column(Time)
     deliveryAgent_callinTime = Column(Time)
-    deliveryAgent_productCode = Column(String(10))
-    deliveryAgent_flightCodePersonId = Column(ForeignKey(u'Person.personId'), index=True)
+    deliveryAgent_productcode = Column(String(10))
+    deliveryAgent_flightCodePersonId = Column(ForeignKey('Person.personId'), index=True)
 
-    Person = relationship(u'Person')
-    Proposal = relationship(u'Proposal')
-    LabContact = relationship(u'LabContact', primaryjoin='Shipping.returnLabContactId == LabContact.labContactId')
-    LabContact1 = relationship(u'LabContact', primaryjoin='Shipping.sendingLabContactId == LabContact.labContactId')
+    Person = relationship('Person')
+    Proposal = relationship('Proposal')
+    LabContact = relationship('LabContact', primaryjoin='Shipping.returnLabContactId == LabContact.labContactId')
+    LabContact1 = relationship('LabContact', primaryjoin='Shipping.sendingLabContactId == LabContact.labContactId')

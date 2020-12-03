@@ -48,6 +48,10 @@ def zone4_page():
 def zone6_page():
     return send_file('client/dist/zone6.html')
 
+@app.route("/lab14/")
+def lab14_page():
+    return send_file('client/dist/lab14.html')
+
 
 if __name__ == '__main__':
     app.run(debug=True)
