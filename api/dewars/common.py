@@ -6,7 +6,7 @@ The calling method will jsonify the result
 """
 import logging
 from collections import OrderedDict
-from ispyb_api import controller
+from api.ispyb_api import controller
 
 
 def find_dewar(facilitycode):

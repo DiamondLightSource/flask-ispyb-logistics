@@ -1,7 +1,10 @@
 import sys
 import logging
 
-from ispyb_api import controller
+# We are not a package and the intent is to run this from the parent dir
+sys.path.append('../')
+
+from api.ispyb_api import controller
 
 facilitycodes = ['DLS-MX-0001', 'dls-mx-0001', 'DLS-EM-0000', 'AAA-AA-12345']
 not_facilitycodes = ['dls-mx-1', 'DL-MX-1234', 'DLS-MX-AA00', 'aaa-a-1', 'cm123245-1-i01-12345']

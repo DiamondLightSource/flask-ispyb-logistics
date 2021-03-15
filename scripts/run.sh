@@ -1,5 +1,5 @@
 #!/bin/bash
-export ISPYB_CONFIG_FILE=tests/test.cfg
+export ISPYB_CONFIG_FILE=api/tests/test.cfg
 export ISPYB_CONFIG_SECTION=ispyb_dev
 
 export FLASK_APP=app.py

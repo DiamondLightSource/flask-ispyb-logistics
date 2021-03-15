@@ -6,12 +6,12 @@ from flask import render_template
 from flask import send_file
 
 # Simplified this down to two modules stores and dewar-zones
-from stores.dewars import api as stores_api
-from dewars.routes import api as dewars_api
-from dewars.routes import beamlines
-from dewars.routes import locations
+from api.stores.dewars import api as stores_api
+from api.dewars.routes import api as dewars_api
+from api.dewars.routes import beamlines
+from api.dewars.routes import locations
 
-import ispyb_api
+from api import ispyb_api
 
 logger = logging.getLogger('ispyb-logistics')
 handler = logging.handlers.RotatingFileHandler('logs/logistics.log', maxBytes=10000000, backupCount=5)

@@ -8,15 +8,16 @@ from flask import Flask
 from flask_testing import TestCase
 import json
 
-# Run this from the parent dir
-# Run with python -m tests/test_controller
+# We are not a package and the intent is to run this from the parent dir
+sys.path.append('../')
 
-import ispyb_api
-from ispyb_api import db
-from ispyb_api import models
-from ispyb_api import controller
-from dewars.zone6 import rack_locations
-from dewars.zone4 import rack_locations as zone4_locations
+
+import api.ispyb_api
+from api.ispyb_api import db
+from api.ispyb_api import models
+from api.ispyb_api import controller
+from api.dewars.zone6 import rack_locations
+from api.dewars.zone4 import rack_locations as zone4_locations
 
 class MyTest(TestCase):
     def create_app(self):
@@ -28,7 +29,7 @@ class MyTest(TestCase):
 
         self.logger = logging.getLogger('ispyb-logistics')
 
-        ispyb_api.init_app(app)
+        api.ispyb_api.init_app(app)
 
         return app
 
