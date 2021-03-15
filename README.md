@@ -1,7 +1,9 @@
 # ISPyB Logistics (Dewar Management)
 
 ## Setup
-Create a virtualenv then install dependencies with pip
+Create a virtualenv (e.g python 3.8) then install dependencies with pip
+    $ virtualenv --python=python3.8
+    $ source .env/bin/activate
     $ pip install -r requirements.txt
 
 ## Configuration
