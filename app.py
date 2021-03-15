@@ -11,7 +11,7 @@ from dewars.routes import api as dewars_api
 from dewars.routes import beamlines
 from dewars.routes import locations
 
-import ispyb_api 
+import ispyb_api
 
 logger = logging.getLogger('ispyb-logistics')
 handler = logging.handlers.RotatingFileHandler('logs/logistics.log', maxBytes=10000000, backupCount=5)
@@ -39,11 +39,11 @@ def stores_page():
 @app.route("/ebic/")
 def ebic_page():
     return send_file('client/dist/ebic.html')
-    
+
 @app.route("/zone4/")
 def zone4_page():
     return send_file('client/dist/zone4.html')
-    
+
 @app.route("/zone6/")
 def zone6_page():
     return send_file('client/dist/zone6.html')

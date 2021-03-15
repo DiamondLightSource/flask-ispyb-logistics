@@ -12,11 +12,11 @@ from flask import request
 from flask import make_response
 
 # Local imports
-import common
+from . import common
 
-import ebic
-import zone4
-import zone6
+from . import ebic
+from . import zone4
+from . import zone6
 
 locations = {'zone6': zone6.rack_locations,
              'zone4': zone4.rack_locations,
