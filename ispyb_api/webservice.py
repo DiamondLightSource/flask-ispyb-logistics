@@ -6,7 +6,9 @@ from urllib.parse import urljoin
 # Build the URL for the POST route (using env settings)
 synchweb_host = os.environ.get("SYNCHWEB_HOST", "https://192.168.33.10")
 synchweb_url = urljoin(synchweb_host, "/api/shipment/dewars/history")
-verify_ssl = True
+# In production we want to use ssl and verify the certificate. 
+# Not for debug though so we can disable the ssl check via environment variable SYNCHWEB_SSL=0
+verify_ssl = True if os.environ.get("SYNCHWEB_SSL", "1") == "1" else False
 
 def set_location(barcode, location, awb=None):
     """
