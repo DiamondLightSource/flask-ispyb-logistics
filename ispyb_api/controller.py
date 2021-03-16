@@ -66,7 +66,7 @@ def get_dewar_by_facilitycode(fc):
     # Facility codes are reused, so we want the most recent version
     # We work that out based on the newest (highest) dewarId
     # Could also specify that its a dewar on site, at-facility perhaps?
-    d = Dewar.query.filter(Dewar.FACILITYCODE == fc).order_by(desc(Dewar.dewarId)).first()
+    d = Dewar.query.filter(Dewar.facilityCode == fc).order_by(desc(Dewar.dewarId)).first()
 
     if d:
         result = {'barcode': d.barCode,  'dewarId': d.dewarId, 'storageLocation': d.storageLocation}
@@ -91,7 +91,7 @@ def get_dewar_by_barcode(barcode):
         result['dewarId'] = d.dewarId
         result['barCode'] = d.barCode
         result['storageLocation'] = d.storageLocation
-        result['facilityCode'] = d.FACILITYCODE
+        result['facilityCode'] = d.facilityCode
 
     except NoResultFound:
         logging.getLogger('ispyb-logistics').error("Error barcode {} does not exist in ISPyB".format(barcode))
@@ -121,7 +121,7 @@ def find_dewars_by_location(locations):
             filter(func.lower(Dewar.storageLocation) == func.lower(DewarTransportHistory.storageLocation)).\
             order_by(desc(DewarTransportHistory.arrivalDate)).\
             values(Dewar.barCode,
-                   Dewar.FACILITYCODE,
+                   Dewar.facilityCode,
                    Dewar.bltimeStamp,
                    Dewar.storageLocation,
                    DewarTransportHistory.arrivalDate,
@@ -139,7 +139,7 @@ def find_dewars_by_location(locations):
                 results[dewar.storageLocation.upper()] = {
                     'barcode': dewar.barCode,
                     'arrivalDate': dewar.arrivalDate.isoformat(),
-                    'facilityCode': dewar.FACILITYCODE,
+                    'facilityCode': dewar.facilityCode,
                     'status': dewar.dewarStatus,
                     'onBeamline': False,
                     'dewarLocation': dewar.storageLocation # In this case it matches the dewar
@@ -173,7 +173,7 @@ def find_dewar_history_for_locations(locations, max_entries=20):
             order_by(desc(DewarTransportHistory.arrivalDate)).\
             limit(max_entries).\
             values(Dewar.barCode,
-                   Dewar.FACILITYCODE,
+                   Dewar.facilityCode,
                    Dewar.bltimeStamp,
                    Dewar.trackingNumberFromSynchrotron,
                    DewarTransportHistory.storageLocation,
@@ -189,7 +189,7 @@ def find_dewar_history_for_locations(locations, max_entries=20):
                 'barcode':dewar.barCode,
                 'date': dewar.arrivalDate.isoformat(),
                 'storageLocation': dewar.storageLocation, # should really change 'inout' to location
-                'facilitycode': dewar.FACILITYCODE,
+                'facilitycode': dewar.facilityCode,
                 'status': dewar.dewarStatus,
                 'awb': dewar.trackingNumberFromSynchrotron,
                 'sid': dewar.shippingId,
@@ -230,7 +230,7 @@ def find_recent_storage_history(locations):
                 values(
                     Dewar.dewarId,
                     Dewar.barCode,
-                    Dewar.FACILITYCODE,
+                    Dewar.facilityCode,
                     Dewar.dewarStatus,
                     DewarTransportHistory.DewarTransportHistoryId,
                     DewarTransportHistory.arrivalDate,
@@ -252,7 +252,7 @@ def find_recent_storage_history(locations):
 
             results[dewar.storageLocation] = {
                 'barcode': dewar.barCode,
-                'facilityCode': dewar.FACILITYCODE,
+                'facilityCode': dewar.facilityCode,
                 'dewarStatus': dewar.dewarStatus,
                 'arrivalDate': dewar.arrivalDate.isoformat(),
                 'onBeamline': onBeamline,
@@ -287,7 +287,7 @@ def find_dewar_history_for_dewar(dewarCode, max_entries=3):
             filter(Dewar.dewarId == DewarTransportHistory.dewarId)
 
         if is_facility_code(dewarCode):
-            query = query.filter(Dewar.FACILITYCODE == dewarCode)
+            query = query.filter(Dewar.facilityCode == dewarCode)
         else:
             # Try using the passed variable as barcode
             query = query.filter(Dewar.barCode == dewarCode)
@@ -296,7 +296,7 @@ def find_dewar_history_for_dewar(dewarCode, max_entries=3):
             limit(max_entries).\
             values(Dewar.barCode,
                    Dewar.dewarId,
-                   Dewar.FACILITYCODE,
+                   Dewar.facilityCode,
                    DewarTransportHistory.storageLocation,
                    DewarTransportHistory.arrivalDate,
                    )
@@ -313,7 +313,7 @@ def find_dewar_history_for_dewar(dewarCode, max_entries=3):
                 results['storageLocations'] = []
                 # Only one barcode/facilitycode, so just grab first one...?
                 results['barCode'] = dewar.barCode
-                results['facilityCode'] = dewar.FACILITYCODE
+                results['facilityCode'] = dewar.facilityCode
             # Content that differs for each entry...
             item = {'location': dewar.storageLocation, 'arrivalDate': dewar.arrivalDate.isoformat()}
             locations.append(item)
@@ -381,7 +381,7 @@ def find_dewars_by_proposal(proposal_code, proposal_number):
                Dewar.barCode,
                Dewar.firstExperimentId,
                Dewar.type,
-               Dewar.FACILITYCODE,
+               Dewar.facilityCode,
                Dewar.weight,
                Dewar.deliveryAgent_barcode,
                Proposal.title,
