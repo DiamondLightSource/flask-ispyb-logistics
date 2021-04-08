@@ -476,6 +476,38 @@ def find_containers_by_location(locations):
 
     return results
 
+def find_container_by_barcode(barcode):
+    """
+    This method will find a container based on its barcode.
+    Code is set for registered containers but barcode isn't
+
+    It enforces only one result and will throw an error if there is not one.
+    """
+    logging.getLogger('ispyb-logistics').info("find_container_by_barcode {}".format(barcode))
+    result = {}
+
+    try:
+        records = Container.query.join(Dewar).join(Shipping).\
+            filter(Dewar.dewarId == Container.dewarId).\
+            filter(Shipping.shippingId == Dewar.shippingId).\
+            filter(Container.code == barcode).\
+            order_by(desc(Container.containerId)).\
+            values(Shipping.shippingName,
+                   Container.code,
+                   Container.storageTemperature,
+                   )
+
+        container = next(records)
+
+        result['shippingName'] = container.shippingName
+        result['code'] = container.code
+        result['storageTemperature'] = container.storageTemperature
+        
+    except NoResultFound:
+        logging.getLogger('ispyb-logistics').error("Error container barcode {} does not exist in ISPyB".format(barcode))
+
+    return result
+
 def is_facility_code(code):
     """
     Utiliy method to check if the string provided is a facilitycode

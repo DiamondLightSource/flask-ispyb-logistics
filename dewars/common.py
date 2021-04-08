@@ -196,3 +196,28 @@ def find_containers_by_location(locations):
                 results[key.upper()] = value
 
     return results, status_code
+
+def find_container(barcode):
+    """
+    Return container details for this item
+    """
+    result = {}
+    status_code = 200
+    # Do we have a valid facility code?
+    if barcode:
+        container = controller.find_container_by_barcode(barcode)
+
+        if container:
+            # All good so status code is 200 (default)
+            result = container
+        else:
+            result = {'status': 'fail',
+                      'reason': 'facility/barcode not found'}
+            # controller unable to find container
+            status_code = 404
+    else:
+        result = {'status': 'fail',
+                  'reason': 'invalid facility or barcode'}
+        status_code = 400
+
+    return result, status_code

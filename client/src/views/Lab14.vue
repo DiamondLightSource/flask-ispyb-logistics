@@ -2,13 +2,13 @@
   <div>
     <div class="flex flex-col sm:flex-row">
       <div class="w-full md:w-1/3 border border-solid border-black m-2">
+        <FindContainer></FindContainer>
+      </div>
+      <div class="w-full md:w-1/3 border border-solid border-black m-2">
         <ScanContainer 
           v-bind:allowed_locations="allowed_locations"
           v-on:dewars-updated="handleDewarUpdate">
           </ScanContainer>
-      </div>
-      <div class="w-full md:w-1/3 border border-solid border-black m-2">
-        <FindContainer></FindContainer>
       </div>
     </div>
     <!-- 
