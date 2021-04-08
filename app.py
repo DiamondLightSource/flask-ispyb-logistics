@@ -10,6 +10,7 @@ from stores.dewars import api as stores_api
 from dewars.routes import api as dewars_api
 from dewars.routes import beamlines
 from dewars.routes import locations
+from containers.routes import api as containers_api
 
 import ispyb_api
 
@@ -23,6 +24,7 @@ app = Flask(__name__, static_folder="client/dist/static", static_url_path='/stat
 
 app.register_blueprint(stores_api)
 app.register_blueprint(dewars_api)
+app.register_blueprint(containers_api)
 
 # Initialise flask sqla
 ispyb_api.init_app(app)
