@@ -6,14 +6,33 @@
 			<storage-bin
 				:title="bin.location"
 				:containers="bin.containers"
-				v-on="$listeners"
+				@clear-containers="onShowClearStorageBin"
+				@clear-container-from-bin="onShowClearContainer"
 			/>
 		</div>
+
+		<!-- This pops up to confirm the clear all bins within a storage location -->
+		<clear-storage-bin-dialog 
+      v-on:confirm-removal="onConfirmClearStorageBin" 
+      v-bind:isActive="isClearStorageBinActive"
+      v-bind:storageBin="storageBin"
+      v-bind:containers="containersToRemove">
+		</clear-storage-bin-dialog>
+
+    <!-- This pops up to confirm the clear location action -->
+    <clear-container-dialog 
+      v-on:confirm-removal="onConfirmClearContainer" 
+      v-bind:isActive="isClearContainerActive"
+      v-bind:locationToRemove="locationToRemove"
+      v-bind:containerId="containerId">
+    </clear-container-dialog>
 	</div>
 </template>
 
 <script>
 import StorageBin from '@/components/StorageBin.vue'
+import ClearStorageBinDialog from '@/components/ClearStorageBinDialog.vue';
+import ClearContainerDialog from '../components/ClearContainerDialog.vue';
 
 export default {
 	name: 'storage-location',
@@ -22,6 +41,22 @@ export default {
 		locations: {
 			type: Array,
 			default: function() { return [] }
+		}
+	},
+	components: {
+		'storage-bin': StorageBin,
+    'clear-container-dialog': ClearContainerDialog,
+		'clear-storage-bin-dialog': ClearStorageBinDialog
+	},
+	data() {
+		return {
+			isClearStorageBinActive: false,
+			containersToRemove: [],
+			storageBin: '',
+			// Attributes needed to clear container from location
+      isClearContainerActive: false,
+      containerId: 0,
+      locationToRemove: '',
 		}
 	},
 	computed: {
@@ -49,9 +84,39 @@ export default {
 			return result
 		}
 	},
-	components: {
-		'storage-bin': StorageBin,
-	},
+	methods: {
+		onShowClearStorageBin: function(payload) {
+			// This trick reliably triggers the vue reactivity
+			this.containersToRemove = payload.containers.filter( () => { return true })
+			this.storageBin = payload.storageBin
+			this.isClearStorageBinActive = true
+    },
+		// User has either confirmed or cancelled
+    onConfirmClearStorageBin: function(confirm) {
+      if (confirm) this.$emit('storage-location-changed')
+      // Reset data that will disable dialog box
+      this.containersToRemove = [];
+			this.storageBin = ''
+      this.isClearStorageBinActive = false
+    },
+		onShowClearContainer: function(payload) {
+			if (!payload.id || !payload.location) {
+				this.$store.dispatch('updateMessage', {text: 'Error with payload from clear-container event', isError: true})
+				return
+			}
+      this.isClearContainerActive = true
+      this.containerId = payload.id
+      this.locationToRemove = payload.location
+    },    
+    // User has either confirmed or cancelled
+    onConfirmClearContainer: function(confirm) {
+      if (confirm) this.$emit('storage-location-changed')
+      // Reset data that will disable dialog box
+      this.containerId = 0;
+      this.isClearContainerActive = false
+      this.locationToRemove = ''
+    },
+	}
 }
 </script>
 

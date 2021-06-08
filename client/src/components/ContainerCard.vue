@@ -26,7 +26,7 @@ export default {
     },
     methods: {
         onRemoveFromBin: function(id) {
-            this.$emit('remove-container-from-bin', {id: id, location: this.container.location})
+            this.$emit('clear-container-from-bin', {id: id, location: this.container.location})
         },
     }
 }

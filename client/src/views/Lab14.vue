@@ -24,36 +24,25 @@
         <storage-location
           title="Storage Location: ULT"
           :locations="ult_locations"
-          @remove-container-from-bin="onRemoveContainerFromBin"
-          @clear-containers="onClearAllContainersFromBin"
+          @storage-location-changed="onStorageLocationChanged"
         />
       </div>
       <div class="w-1/3">
         <storage-location
           title="Storage Location: RF"
           :locations="rf_locations"
-          @remove-container-from-bin="onRemoveContainerFromBin"
-          @clear-containers="onClearAllContainersFromBin"
+          @storage-location-changed="onStorageLocationChanged"
         />
       </div>
       <div class="w-1/3">
         <storage-location
           title="Storage Location: RT"
           :locations="rt_locations"
-          @remove-container-from-bin="onRemoveContainerFromBin"
-          @clear-containers="onClearAllContainersFromBin"
+          @storage-location-changed="onStorageLocationChanged"
         />
       </div>
     </div>
 
-    <!-- This pops up to confirm the clear location action -->
-    <ClearContainerDialog 
-      v-on:confirm-removal="onConfirmClear" 
-      v-bind:isActive="isRemoveDialogActive"
-      v-bind:locationToRemove="locationToRemove"
-      v-bind:containerId="containerId"
-      v-bind:beamlines="beamlines">
-    </ClearContainerDialog>
   </div>
 </template>
 
@@ -61,7 +50,6 @@
 import ScanContainer from '@/components/ScanContainer.vue';
 import FindContainer from '@/components/FindContainer.vue';
 import MessagePanel from '@/components/MessagePanel.vue';
-import ClearContainerDialog from '@/components/ClearContainerDialog.vue';
 import StorageLocation from '@/components/StorageLocation.vue';
 
 export default {
@@ -71,16 +59,11 @@ export default {
     FindContainer,
     ScanContainer,
     MessagePanel,
-    ClearContainerDialog,
-    'storage-location': StorageLocation,
+    'storage-location': StorageLocation
   },
   data() {
     return {
-      containerId: 0,
-      isRemoveDialogActive: false,
-      locationToRemove: '',
       beamlines: [],
-
       rack_locations: {},
       container_data: [],
       // Timeout handle - used to determine if we need to refresh page
@@ -142,6 +125,7 @@ export default {
       this.$http.get(url)
       .then(function(response) {
         self.beamlines = response.data.map( (bl) => bl.toLowerCase())
+        self.$store.commit('setBeamlines', self.beamlines)
       })
       .catch(function(error) {
         console.log("Error getting valid beamline locations " + error)
@@ -192,31 +176,12 @@ export default {
         // Triggers vue reactivity so computed properties work
         this.container_locations = data.filter( function() { return true })    
     },
-    onClearAllContainersFromBin: function(ids) {
-      ids.forEach( function(id) {
-        console.log("Clear containers from bin " + id)
-      })
-    },
-    onRemoveContainerFromBin: function(payload) {
-      console.log("Remove Container From Bin " + payload.id)
-      this.isRemoveDialogActive = true
-      this.containerId = payload.id
-      this.locationToRemove = payload.location
-    },    
-    // User has either confirmed or cancelled
-    onConfirmClear: function(confirm) {
-      if (confirm) {
+    onStorageLocationChanged: function() {
         // Calling getBarodes straight away hits some cache issue
         // Delay the refresh so we ensure next call is accurate
-        setTimeout(this.getContainers, 3000)
-        // Brute force approach works if the timeout does not...
-        // window.location.reload()
-      }
-      // Reset data that will disable dialog box
-      this.containerId = 0;
-      this.isRemoveDialogActive = false
-      this.locationToRemove = ''
+        setTimeout(this.refreshContainers, 2000)
     },
+
   }
 }
 </script>

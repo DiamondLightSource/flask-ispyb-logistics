@@ -18,7 +18,7 @@ Emits an event 'confirm-removal' with a boolean true/false if user confirmed act
                 <h1 class="text-xl">Confirm Clear</h1>
             </header>
             <section class="p-4 flex flex-col">
-            <p class="mb-2">Confirm removal of container {{containerId}} from {{locationToRemove}}?</p>
+            <p class="mb-2">Confirm removal of container id {{containerId}} from {{locationToRemove}}?</p>
             <div class="">
                 <label class="mr-2">Is Container moving to beamline?</label>
                 <input class="mr-2" type="checkbox" v-model="toBeamline"/><span v-if="toBeamline">Yes</span><span v-else>No</span>
@@ -51,11 +51,6 @@ export default {
             type: Number,
             required: true
         },
-        // We need the beamlines to check if the provided location is valid
-        beamlines: {
-            type: Array,
-            required: true,
-        },
         locationToRemove: {
             type: String,
             required: true
@@ -67,9 +62,9 @@ export default {
             beamline: '',
         }
     },
-    watch: {
-        toBeamline: function(newVal) {
-            console.log("toBeamline: " + newVal)
+    computed: {
+        beamlines: function() {
+            return this.$store.state.beamlines
         }
     },
     methods: {

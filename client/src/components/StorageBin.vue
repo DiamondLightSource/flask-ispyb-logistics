@@ -37,7 +37,7 @@ export default {
 				let containerIds = filtered.map( function(item) { 
 					if (item.id != '') return item.id
 				})
-				if (containerIds) this.$emit('clear-containers', containerIds)
+				if (containerIds) this.$emit('clear-containers', {containers: containerIds, storageBin: this.title})
 			},
 		}
 }
