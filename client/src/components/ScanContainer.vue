@@ -39,11 +39,11 @@ export default {
         return {
             barcode: '',
             location: '',
+            sounds: {}
         }
     },
     // Initialize the sound library and files
     created: function() {
-        this.sounds = {}
         this.sounds.success = new Howl({
             src: ['/static/audio/success.mp3', '/static/audio/success.wav']
         });
