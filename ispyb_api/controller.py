@@ -1,6 +1,7 @@
 import re
 import logging
 import itertools
+import datetime
 
 from sqlalchemy.orm.exc import NoResultFound, MultipleResultsFound
 from sqlalchemy.exc import DBAPIError
@@ -9,8 +10,10 @@ from sqlalchemy.orm import aliased
 
 from . import db
 from . import webservice
-from .models import Container, ContainerHistory, Dewar, DewarTransportHistory, LabContact, Laboratory, Shipping, Proposal, Person, BLSession
+from .models import Dewar, DewarTransportHistory, LabContact, Laboratory, Shipping, Proposal, Person, BLSession
 
+# What age do we ignore container history entries
+CONTAINER_FILTER_DAYS_LIMIT = 30
 
 def set_location(barcode, location, awb=None):
     """
@@ -30,32 +33,6 @@ def set_location(barcode, location, awb=None):
         actual_barcode = barcode
 
     return webservice.set_location(actual_barcode, location, awb)
-
-def set_container_location(barcode, location):
-    """
-    Redirect this request to SynchWeb to trigger e-mail alerts etc
-
-    This might be a facility code (if the label is unreadable)
-    So first check if this is a facility code, then use the actual barcode
-    """
-    # Test if this is actually a facility code
-    if is_facility_code(barcode):
-        container = get_container_by_facilitycode(barcode)
-        if container:
-            actual_barcode = container.get('barcode')
-        else:
-            actual_barcode = None
-    else:
-        actual_barcode = barcode
-
-    return webservice.set_container_location(actual_barcode, location)
-
-def get_container_by_facilitycode(fc):
-    """
-    This method will find a container based on its facilitycode.
-    """
-    result = None
-    return result
 
 def get_dewar_by_facilitycode(fc):
     """
@@ -425,88 +402,6 @@ def get_instrument_from_dewar(dewarBarCode):
         logging.getLogger('ispyb-logistics').error('Could not get valid instrument from dewar {}'.format(dewarBarCode))
 
     return results
-
-def find_containers_by_location(locations):
-    """
-    This method will find the most recent container stored in each location.
-    It matches the Container.storageLocation with ContainerHistory.storageLocation
-    """
-    logging.getLogger('ispyb-logistics').debug("find_containers_by_location {}".format(','.join(locations)))
-
-    results = {}
-
-    try:
-        # Query for dewars with transporthistory locations in the list
-        # Use case insensitive search for storageLocation
-        # Get the timestamp and location from the transport history
-        # Order so we get the most recent first...
-        # The Dewar storageLocation does not always match the transport history
-        containers = Container.query.join(ContainerHistory).\
-            filter(func.lower(ContainerHistory.location).in_(locations)).\
-            filter(Container.containerId == ContainerHistory.containerId).\
-            order_by(desc(ContainerHistory.blTimeStamp)).\
-            values(Container.barcode,
-                   Container.code,
-                   ContainerHistory.blTimeStamp,
-                   ContainerHistory.location,
-                   ContainerHistory.status,
-                   )
-
-        for container in containers:
-            # If we already have an entry, it means there is a more recent change for a dewar in this location
-            # Note we store the data in upper case - SynchWeb uses lower case while the UI requests data in upper case...
-            if container.location.upper() in results:
-                logging.getLogger('ispyb-logistics').debug('Ignoring older entry for dewar {} location {} at {}'.format(container.barcode, container.location, container.blTimeStamp))
-            else:
-                logging.getLogger('ispyb-logistics').debug('Found entry for this dewar {} in {} at {}'.format(container.barcode, container.location, container.blTimeStamp))
-                # Returning three items per location [barcode, arrivalDate and FacilityCode]
-                results[container.storageLocation.upper()] = {
-                    'code': container.code,
-                    'barcode': container.barcode,
-                    'arrivalDate': container.blTimeStamp.isoformat(),
-                    'status': container.status,
-                    'location': container.location # In this case it matches the dewar
-                }
-
-    except NoResultFound:
-        logging.getLogger('ispyb-logistics').error("Error retrieving dewars")
-    except DBAPIError:
-        logging.getLogger('ispyb-logistics').error('Database API Exception - no route to database host?')
-        results = None
-
-    return results
-
-def find_container_by_barcode(barcode):
-    """
-    This method will find a container based on its barcode.
-    Code is set for registered containers but barcode isn't
-
-    It enforces only one result and will throw an error if there is not one.
-    """
-    logging.getLogger('ispyb-logistics').info("find_container_by_barcode {}".format(barcode))
-    result = {}
-
-    try:
-        records = Container.query.join(Dewar).join(Shipping).\
-            filter(Dewar.dewarId == Container.dewarId).\
-            filter(Shipping.shippingId == Dewar.shippingId).\
-            filter(Container.code == barcode).\
-            order_by(desc(Container.containerId)).\
-            values(Shipping.shippingName,
-                   Container.code,
-                   Container.storageTemperature,
-                   )
-
-        container = next(records)
-
-        result['shippingName'] = container.shippingName
-        result['code'] = container.code
-        result['storageTemperature'] = container.storageTemperature
-        
-    except NoResultFound:
-        logging.getLogger('ispyb-logistics').error("Error container barcode {} does not exist in ISPyB".format(barcode))
-
-    return result
 
 def is_facility_code(code):
     """

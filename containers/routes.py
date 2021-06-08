@@ -79,11 +79,19 @@ def update_location():
     result = {}
     status_code = 200
 
-    if request.method == 'POST':
-        location = request.form['location']
-        barcode = request.form['barcode']
+    logging.getLogger('ispyb-logistics').info("Update container locations")
 
-        result, status_code = common.update_container_location(barcode, location)
+    if request.method == 'POST':
+        location = request.form.get('location')
+        cid = request.form.get('containerId')      
+        barcode = request.form.get('barcode')
+
+        logging.getLogger('ispyb-logistics').info("Update container locations {}".format(location))
+
+        if cid:
+            result, status_code = common.update_container_location(cid, None, location)
+        else:
+            result, status_code = common.update_container_location(None, barcode, location)
 
     else:
         result = {'location': '',

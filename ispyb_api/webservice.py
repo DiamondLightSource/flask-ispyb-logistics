@@ -41,7 +41,7 @@ def set_location(barcode, location, awb=None):
 
     return result
 
-def set_container_location(barcode, location):
+def set_container_location(code, location):
     """
     New method that calls the SynchWeb rest services
 
@@ -50,15 +50,44 @@ def set_container_location(barcode, location):
     global container_history_url
     result = None
 
-    payload = {'BARCODE': barcode, 'LOCATION': location}
+    payload = {'CODE': code, 'LOCATION': location}
 
+    logging.getLogger('ispyb-logistics').info("Set container location in ISPyB via SynchWeb payload: {}".format(payload))
+    
     try:
         # Added timeout to request
-        r = requests.post(dewar_history_url, data=payload, timeout=5, verify=verify_ssl)
+        r = requests.post(container_history_url, data=payload, timeout=5, verify=verify_ssl)
 
         if r.status_code == requests.codes.ok:
             result = r.json()
-            logging.getLogger('ispyb-logistics').info("Set location in ISPyB via SynchWeb bc: {} loc: {} ".format(barcode, location))
+            logging.getLogger('ispyb-logistics').info("Set location in ISPyB via SynchWeb bc: {} loc: {} ".format(code, location))
+        else:
+            logging.getLogger('ispyb-logistics').error("Error setting location in ISPyB via SynchWeb {} {}".format(r.status_code, r.text))
+    except requests.ConnectionError:
+        logging.getLogger('ispyb-logistics').error("Error (connection) trying to post to {}".format(container_history_url))
+    except requests.Timeout:
+        logging.getLogger('ispyb-logistics').error("Error (timeout) trying to post to {}".format(container_history_url))
+
+    return result
+
+def set_container_location_from_id(id, location):
+    """
+    New method that calls the SynchWeb rest services
+
+    This updates ISPyB with dewar history and triggers e-mails
+    """
+    global container_history_url
+    result = None
+
+    payload = {'CONTAINERID': id, 'LOCATION': location}
+
+    try:
+        # Added timeout to request
+        r = requests.post(container_history_url, data=payload, timeout=5, verify=verify_ssl)
+
+        if r.status_code == requests.codes.ok:
+            result = r.json()
+            logging.getLogger('ispyb-logistics').info("Set location in ISPyB via SynchWeb id: {} loc: {} ".format(id, location))
         else:
             logging.getLogger('ispyb-logistics').error("Error setting location in ISPyB via SynchWeb {} {}".format(r.status_code, r.text))
     except requests.ConnectionError:

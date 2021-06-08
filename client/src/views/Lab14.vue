@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div class="bg-gray-200">
     <div class="flex flex-col sm:flex-row">
       <div class="w-full md:w-1/3 border border-solid border-black m-2">
         <FindContainer></FindContainer>
@@ -7,7 +7,7 @@
       <div class="w-full md:w-1/3 border border-solid border-black m-2">
         <ScanContainer 
           v-bind:allowed_locations="allowed_locations"
-          v-on:dewars-updated="handleDewarUpdate">
+          v-on:dewars-updated="refreshContainers">
           </ScanContainer>
       </div>
     </div>
@@ -18,31 +18,51 @@
     <MessagePanel></MessagePanel>
     
     <!-- Display the rack locations, four columns across If Zone 6 -->
-    <div class="flex flex-wrap">
-      <div class="w-full md:w-1/4 p-2" v-for="(dewar, rack) in rack_locations" v-bind:key="rack" v-on:click="onClearLocation(rack)">
-        <ContainerCard 
-          v-bind:container="dewar"
-          v-bind:rack="rack">
-        </ContainerCard>
+    <!-- Lab 14 Needs three columns of locations ULT, RF, RT -->
+    <div class="flex flex-wrap mt-4 border-t border-solid border-black">
+      <div class="w-1/3">
+        <storage-location
+          title="Storage Location: ULT"
+          :locations="ult_locations"
+          @remove-container-from-bin="onRemoveContainerFromBin"
+          @clear-containers="onClearAllContainersFromBin"
+        />
+      </div>
+      <div class="w-1/3">
+        <storage-location
+          title="Storage Location: RF"
+          :locations="rf_locations"
+          @remove-container-from-bin="onRemoveContainerFromBin"
+          @clear-containers="onClearAllContainersFromBin"
+        />
+      </div>
+      <div class="w-1/3">
+        <storage-location
+          title="Storage Location: RT"
+          :locations="rt_locations"
+          @remove-container-from-bin="onRemoveContainerFromBin"
+          @clear-containers="onClearAllContainersFromBin"
+        />
       </div>
     </div>
 
     <!-- This pops up to confirm the clear location action -->
-    <ClearLocationDialog 
+    <ClearContainerDialog 
       v-on:confirm-removal="onConfirmClear" 
       v-bind:isActive="isRemoveDialogActive"
       v-bind:locationToRemove="locationToRemove"
-      v-bind:rack_locations="rack_locations">
-    </ClearLocationDialog>
+      v-bind:containerId="containerId"
+      v-bind:beamlines="beamlines">
+    </ClearContainerDialog>
+  </div>
 </template>
 
 <script>
 import ScanContainer from '@/components/ScanContainer.vue';
 import FindContainer from '@/components/FindContainer.vue';
-import DispatchDewars from '@/components/DispatchDewars.vue';
 import MessagePanel from '@/components/MessagePanel.vue';
-import ClearLocationDialog from '@/components/ClearLocationDialog.vue';
-import ContainerCard from '@/components/ContainerCard.vue';
+import ClearContainerDialog from '@/components/ClearContainerDialog.vue';
+import StorageLocation from '@/components/StorageLocation.vue';
 
 export default {
   name: 'Lab14Zone',
@@ -50,47 +70,57 @@ export default {
   components: {
     FindContainer,
     ScanContainer,
-    DispatchDewars,
     MessagePanel,
-    ClearLocationDialog,
-    ContainerCard
+    ClearContainerDialog,
+    'storage-location': StorageLocation,
   },
   data() {
     return {
-      locationToRemove: null,
+      containerId: 0,
       isRemoveDialogActive: false,
+      locationToRemove: '',
       beamlines: [],
 
       rack_locations: {},
+      container_data: [],
       // Timeout handle - used to determine if we need to refresh page
       refresh: null,
       refreshInterval: 60000, // refresh interval in milliseconds
+      message: '',
+      container_locations: [],
     }
   },
   created: function() {
     // Get Valid Locations
-    console.log("Lab14 Storage Zone Component Created")
-    let self = this
-
-    let url = this.$store.state.apiRoot + "beamlines/" + this.zone
-
-    this.$http.get(url)
-    .then(function(response) {
-      let json = response.data
-      self.beamlines = json
-    })
-    .catch(function(error) {
-      console.log("Error getting valid beamline locations " + error)
-    })
+    this.getBeamlineLocations()
   },
   computed: {
     // We allow users to set the location for 'rack' and 'beamline' locations
       allowed_locations: function() {
-        return this.beamlines.concat(Object.keys(this.rack_locations))
+        return this.beamlines.concat(this.container_locations.map( function(item) { return item.location }))
       },
       // Get the zone from the Vuex Store
       zone: function() {
         return this.$store.state.zone
+      },
+      ult_locations: function() {
+        // Group all 'ult' locations into an array
+        let ult = this.container_locations.filter( function(item) {
+          return item.location.toLowerCase().startsWith('ult')
+        })
+        return ult
+      },
+      rf_locations: function() {
+        let filtered = this.container_locations.filter( function(item) {
+          return item.location.toLowerCase().startsWith('rf')
+        })
+        return filtered
+      },
+      rt_locations: function() {
+        let filtered = this.container_locations.filter( function(item) {
+          return item.location.toLowerCase().startsWith('rt')
+        })
+        return filtered
       }
   },
   // Lifecycle hook - called when Vue is mounted on the page (trigger first get request)...
@@ -98,91 +128,94 @@ export default {
     this.getContainers()
   },
   methods: {
-    // Main method to retrieve dewar status for locations relevant to this zone
-    getContainers: function() {
-        let self = this
-        let rack_data = {} // Placeholder for new data
-
-        if (self.refresh) {
-          // If we have been triggered by a form post/update,
-          // Cancel the current timeout (avoid double refresh)
-          clearTimeout(self.refresh)
-        }
-
-        let url = this.$store.state.apiRoot + "containers/locations/" + this.zone
-    
-        this.$http.get(url)
-        .then(function(response) {
-          let json = response.data
-
-          let racklist = Object.keys(json)
-          
-          racklist.forEach(function(rack) {
-            // Marshall the data into the format we want
-            let dewarInfo = json[rack]
-            let needsLN2 = false
-
-            rack_data[rack] = {
-              'barcode': dewarInfo.barcode,
-              'arrivalDate': dewarInfo.arrivalDate,
-              'facilityCode': '',
-              'status': dewarInfo.status,
-              'needsLN2': false,
-              'onBeamline': false
-            }
-          })
-          // Re-assign rack_locations property to trigger reactivity
-          // Otherwise Vue has a hard time running computed properties
-          self.rack_locations = rack_data
-        })
-        .catch(function(error) {
-          let message = ""
-          let isError = true
-          if (error.response.status === 404) {
-            // No dewars found - might be true
-            message = "Warning no dewars found in these locations"
-
-            // Set array to blank set so it shows placholders in page
-            let racklist = Object.keys(error.response.data)
-            
-            console.log("Error but rack list = " + racklist)
-            
-            racklist.forEach(function(rack) {
-              rack_data[rack] = {'barcode':'', 'arrivalDate':'', 'needsLN2': false, 'facilityCode': '', 'status': ''}
-            })
-            self.rack_locations = rack_data
-          } else if (error.response.status == 503) {
-            message = "ISPyB database service unavailable"
-            console.log("Caught 503 Service unavailable...")
-          } else {
-            message = "Error retrieving dewar location information from database"
-          }
-          self.$store.commit('updateMessage', {text: message, isError: isError})
-        })
-        // Now setup the next update
-        self.refresh = setTimeout(self.getBarcodes, self.refreshInterval)
-      },
-      
-    // Handler for clear location event (rack location clicked)
-    // This will trigger the confirm dialog box to show up
-    onClearLocation: function(location) {
-      console.log("on Clear Location clicked")
-      // This location will be upper case because we control how it is rendered
-      this.isRemoveDialogActive = true
-      this.locationToRemove = location
+    refreshContainers: function() {
+      // Control updating cards with container info
+      if (this.refresh) clearTimeout(this.refresh)
+      this.getContainers()
+      // Now setup the next update
+      this.refresh = setTimeout(this.getContainers, this.refreshInterval)
     },
+    getBeamlineLocations: function() {
+      let self = this
+      let url = this.$store.state.apiRoot + "beamlines/" + this.zone
+
+      this.$http.get(url)
+      .then(function(response) {
+        self.beamlines = response.data.map( (bl) => bl.toLowerCase())
+      })
+      .catch(function(error) {
+        console.log("Error getting valid beamline locations " + error)
+      })
+    },
+    // Main method to retrieve container status for locations relevant to this zone
+    getContainers: function() {
+      let self = this
+      // let rack_data = {}
+      let data = []
+      let url = this.$store.state.apiRoot + "containers/locations/" + this.zone
+  
+      this.$http.get(url).then(function(response) {
+        data = self.handleContainersOK(response.data)
+      })
+      .catch(function(error) {
+        data = self.handleContainersFailed(error)
+      }).finally( function() {
+        self.setLocationContents(data)
+      })
+    },
+
+    handleContainersOK: function(payload) {
+      // let racklist = Object.keys(payload)
+      let container_locations = []
+      
+      payload.forEach(function(item) {
+        // Info should be an array of items
+        container_locations.push(item)
+      })
+      return container_locations
+    },
+
+    handleContainersFailed: function(error) {
+      let message = this.getErrorMessage(error.response.status)
+      
+      this.$store.dispatch('updateMessage', {text: message, isError: true})
+      
+      return error.response.data
+    },
+
+    getErrorMessage: function(status) {
+      if (status === 404) return "No containers found in these locations"
+      else if (status == 503) return "ISPyB database service unavailable"
+      else return "Error retrieving container information from database"
+    },
+    setLocationContents: function(data) {
+        // Triggers vue reactivity so computed properties work
+        this.container_locations = data.filter( function() { return true })    
+    },
+    onClearAllContainersFromBin: function(ids) {
+      ids.forEach( function(id) {
+        console.log("Clear containers from bin " + id)
+      })
+    },
+    onRemoveContainerFromBin: function(payload) {
+      console.log("Remove Container From Bin " + payload.id)
+      this.isRemoveDialogActive = true
+      this.containerId = payload.id
+      this.locationToRemove = payload.location
+    },    
     // User has either confirmed or cancelled
     onConfirmClear: function(confirm) {
       if (confirm) {
         // Calling getBarodes straight away hits some cache issue
         // Delay the refresh so we ensure next call is accurate
-        setTimeout(this.getBarcodes, 3000)
+        setTimeout(this.getContainers, 3000)
         // Brute force approach works if the timeout does not...
         // window.location.reload()
       }
       // Reset data that will disable dialog box
-      this.locationToRemove = "";
+      this.containerId = 0;
       this.isRemoveDialogActive = false
+      this.locationToRemove = ''
     },
   }
 }

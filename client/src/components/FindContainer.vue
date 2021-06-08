@@ -13,6 +13,7 @@
           <div v-if="searchResult" class="flex flex-col text-left">
               <p class="text-xl font-bold px-2">ContainerInformation</p>
               <p class="text-md px-2">Shipment: {{searchResult.shipmentName}}</p>
+              <p class="text-md px-2">Location: {{searchResult.location}}</p>
               <p class="text-md px-2">Storage Temperature: {{searchResult.temperature}}</p>
           </div>
           <div v-else-if="searchResultError" class="flex text-left">
@@ -83,8 +84,9 @@ export default {
             // Should be array of {location: 'location', arrivalDate: 'arrival date'}
             let storageTemperature = json["storageTemperature"]
             let shippingName = json["shippingName"]
+            let location = json["location"]
 
-            this.searchResult = {temperature: storageTemperature, shipmentName: shippingName}
+            this.searchResult = {temperature: storageTemperature, shipmentName: shippingName, location: location}
         },
         containerNotFound: function() {
             this.searchResult = null
