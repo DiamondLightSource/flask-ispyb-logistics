@@ -1,0 +1,7 @@
+Flask
+Flask-SQLAlchemy
+mysql-connector
+requests
+sqlacodegen
+SQLAlchemy<1.4
+gunicorn

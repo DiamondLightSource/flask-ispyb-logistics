@@ -205,7 +205,7 @@ export default {
             } else {
               message = "Error retrieving dewar location information from database"
             }
-            self.$store.commit('updateMessage', {text: message, isError: isError})
+            self.$store.dispatch('updateMessage', {text: message, isError: isError})
           })
           // Now setup the next update
           self.refresh = setTimeout(self.getBarcodes, self.refreshInterval)
