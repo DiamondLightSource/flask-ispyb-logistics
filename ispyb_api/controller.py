@@ -94,10 +94,12 @@ def find_dewars_by_location(locations):
             filter(Dewar.dewarId == DewarTransportHistory.dewarId).\
             filter(func.lower(Dewar.storageLocation) == func.lower(DewarTransportHistory.storageLocation)).\
             order_by(desc(DewarTransportHistory.arrivalDate)).\
-            values(Dewar.barCode,
+            values(Dewar.dewarId,
+                   Dewar.barCode,
                    Dewar.FACILITYCODE,
                    Dewar.bltimeStamp,
                    Dewar.storageLocation,
+                   Dewar.comments,
                    DewarTransportHistory.arrivalDate,
                    DewarTransportHistory.dewarStatus,
                    )
@@ -111,10 +113,12 @@ def find_dewars_by_location(locations):
                 logging.getLogger('ispyb-logistics').debug('Found entry for this dewar {} in {} at {}'.format(dewar.barCode, dewar.storageLocation, dewar.arrivalDate))
                 # Returning three items per location [barcode, arrivalDate and FacilityCode]
                 results[dewar.storageLocation.upper()] = {
+                    'dewarId': dewar.dewarId,
                     'barcode': dewar.barCode,
                     'arrivalDate': dewar.arrivalDate.isoformat(),
                     'facilityCode': dewar.FACILITYCODE,
                     'status': dewar.dewarStatus,
+                    'comments': dewar.comments,
                     'onBeamline': False,
                     'dewarLocation': dewar.storageLocation # In this case it matches the dewar
                 }
@@ -399,6 +403,14 @@ def get_instrument_from_dewar(dewarBarCode):
         logging.getLogger('ispyb-logistics').error('Could not get valid instrument from dewar {}'.format(dewarBarCode))
 
     return results
+
+def update_comments(dewarId, comments):
+    """
+    Redirect this request to SynchWeb to trigger e-mail alerts etc
+
+    """
+    # Test if this is actually a facility code
+    return webservice.update_comments(dewarId, comments)
 
 def is_facility_code(code):
     """

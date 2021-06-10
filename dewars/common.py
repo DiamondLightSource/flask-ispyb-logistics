@@ -168,3 +168,20 @@ def find_dewars_by_location(locations):
                 # Else ignore as the dewar is elsewhere....
 
     return results, status_code
+
+def update_dewar_comments(dewarId, comments):
+    result = {}
+    status_code = 200
+
+    logging.getLogger('ispyb-logistics').debug("Update dewarId %s with comments %s" % (dewarId, comments))
+
+    result = controller.update_comments(dewarId, comments)
+
+    if result is None:
+        result = {'location': comments,
+                  'dewarId': dewarId,
+                  'status': 'fail',
+                  'reason': 'Dewar not found'}
+        status_code = 404
+
+    return result, status_code

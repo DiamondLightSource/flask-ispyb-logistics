@@ -17,8 +17,8 @@ Emits an event 'clear-location' which should be handled by the parent component
             <span v-else-if="dewar.needsLN2" class="text-xs text-white bg-danger py-1 px-2 ">needs-refill</span>  
         </div>
         <div v-if="dewar.barcode" class="flex justify-between mt-1 pt-1 border-t border-gray-400">
-            <button @click.prevent="showDewarReport(dewar.barcode)" class="rounded text-sm text-white bg-success hover:bg-green-700 px-2 py-1"><i class="fa fa-pencil pr-2"></i>Edit</button>
-            <button @click.prevent="clearLocation(rack)" class="rounded text-sm text-white bg-danger hover:bg-red-700 px-2 py-1"><i class="fa fa-trash pr-2"></i>Clear</button>
+            <button @click.prevent="showDewarReport(dewar)" class="rounded text-sm text-gray-200 bg-green-500 hover:bg-green-700 px-2"><i class="fa fa-pencil pr-2"></i>Edit</button>
+            <button @click.prevent="clearLocation(rack)" class="rounded text-sm text-gray-200 bg-red-500 hover:bg-red-700 px-2"><i class="fa fa-trash pr-2"></i>Clear</button>
         </div>
     </div>
 </template>
@@ -36,9 +36,9 @@ export default {
             console.log("Clear Dewar from " + location)
             this.$emit('clear-location', location)
         },
-        showDewarReport: function(barcode) {
-            console.log("Update Dewar from " + barcode)
-            this.$emit('update-dewar', barcode)
+        showDewarReport: function(dewar) {
+            console.log("Update Dewar from " + dewar.dewarId)
+            this.$emit('update-dewar', dewar)
         }
     }
 }

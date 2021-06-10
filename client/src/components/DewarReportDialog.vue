@@ -14,14 +14,14 @@ Emits an event 'confirm-removal' with a boolean true/false if user confirmed act
             @click.prevent="onClose()">x</button>
       <div class="w-1/2 bg-white shadow-lg rounded-lg p-4">
         <header class="border-b-2">
-            <h1 class="text-xl">Dewar Report</h1>
+            <h1 class="text-xl">Dewar Report for dewar {{ dewarBarcode }} ({{ dewarId }})</h1>
             </header>
         <section class="p-4">
-          <p class="mb-2">Enter report information for dewar {{barcode}}</p>
+          <p class="mb-2">Enter report information for dewar</p>
           <form>
               <ul class="flex flex-col">
-                <li class="flex"><label class="w-1/3 px-2">Hard drive present?</label><input v-model="hddPresent" type="checkbox" /></li>
-                <li class="flex"><label class="w-1/3 px-2">Tools present?</label><input v-model="toolsPresent" type="checkbox" /></li>
+                <li class="flex"><label class="w-1/3 px-2">Hard drive present?</label><input v-model="hdd" type="checkbox" /></li>
+                <li class="flex"><label class="w-1/3 px-2">Tools present?</label><input v-model="tools" type="checkbox" /></li>
                 <li class="flex"><label class="w-1/3 px-2">T bar missing?</label><input v-model="tBarMissing" type="checkbox" /></li>
                 <li class="flex"><label class="w-1/3 px-2">Vent damaged?</label><input v-model="ventDamaged" type="checkbox" /></li>
                 <li class="flex"><label class="w-1/3 px-2">Foam plug missing?</label><input v-model="foamPlugMissing" type="checkbox" /></li>
@@ -31,8 +31,8 @@ Emits an event 'confirm-removal' with a boolean true/false if user confirmed act
           </form>
         </section>
         <footer class="flex border-t-2 justify-end">
-          <button class="text-white bg-success hover:bg-green-700 rounded p-1 m-2" v-on:click="onSave()">Save</button>
-          <button class="text-white bg-danger hover:bg-red-700 rounded p-1 m-2" v-on:click="onClose()">Cancel</button>
+          <button class="text-white bg-success hover:bg-green-700 rounded px-2 py-1 m-2" v-on:click="onSave()">Save Report</button>
+          <button class="text-white bg-danger hover:bg-red-700 rounded px-2 py-1 m-2" v-on:click="onClose()">Cancel</button>
         </footer>
       </div>
     </div>
@@ -40,50 +40,100 @@ Emits an event 'confirm-removal' with a boolean true/false if user confirmed act
 </template>
 
 <script>
+// Dewar.comments is tinytext = 255 characters
+const MAX_CONTENT_LENGTH = 255
 
 function initialState() {
     return {
-        hddPresent: false,
-        toolsPresent: false,
+        hdd: false,
+        tools: false,
         tBarMissing: false,
         ventDamaged: false,
         foamPlugMissing: false,
         dewarWarm: false,
-        comments: ''
+        comments: ""
     }
 }
 
 export default {
     name: 'DewarReportDialog',
-    props: ['isActive', 'barcode'],
+    props: {
+        isActive: {
+            type: Boolean,
+            default: false,
+        },
+        dewarBarcode: {
+            type: String,
+        },
+        dewarId: {
+            type: Number,
+            required: true,
+        },
+        dewarComments: {
+            type: String,
+        }
+    },
     data() {
         return initialState()
     },
+    watch: {
+        dewarComments: function(newVal) {
+            if (newVal) this.initialiseReport(newVal)
+        }
+    },
     methods: {
+        // To conserve characters save each boolean as 1 or 0
+        initialiseReport: function(comments) {
+            try {
+                let json = JSON.parse(comments)
+
+                this.hdd = parseInt(json.hdd) === 1,
+                this.tools = parseInt(json.tools) === 1,
+                this.tBarMissing = parseInt(json.tBarMissing) === 1,
+                this.ventDamaged = parseInt(json.ventDamaged) === 1,
+                this.foamPlugMissing = parseInt(json.foamPlugMissing) === 1,
+                this.dewarWarm = parseInt(json.warm) === 1,
+                this.comments = json.comments || ""
+            } catch (err) {
+                console.log("Error passed comments that had data in but were null: " + comments)
+                this.comments = comments
+            }
+        },
         // User has confirmed to remove the dewar from this location
         onSave: function() {
-            var report = []
-            report.push("---")
-            report.push("hdd: " + this.hddPresent)
-            report.push("tools: " + this.toolsPresent)
-            report.push("tbar: " + this.tBarMissing)
-            report.push("vent: " + this.ventDamaged)
-            report.push("foamPlug: " + this.foamPlugMissing)
-            report.push("warm: " + this.dewarWarm)
-            report.push("comments: " + this.comments)
-            report.push("---")
+            let content = this.buildReportAsJSON()
 
-            var output = report.join('\n')
-            console.log(output)
+            let result = this.checkLengthValid(content)
 
+            if (result == false) this.$store.dispatch('updateMessage', {text: 'Error report is too long, must be < 256 characters', isError: true})
+
+            this.$emit('confirm-update', {dewarId: this.dewarId, report: content, status: result})
+    
             Object.assign(this.$data, initialState())
-
-            this.$emit("confirm-update", true)
         },
         // User has cancelled        
         onClose: function() {
             Object.assign(this.$data, initialState())
-            this.$emit("confirm-update", false)
+            this.$emit('confirm-update', {status: false})
+        },
+        // Build a json format report
+        buildReportAsJSON: function() {
+            let report = {}
+
+            report['hdd'] = this.hdd ? 1 : 0
+            report['tools'] = this.tools ? 1 : 0
+            report['tBarMissing'] = this.tBarMissing ? 1 : 0
+            report['ventDamaged'] = this.ventDamaged ? 1 : 0
+            report['foamPlugMissing'] = this.foamPlugMissing ? 1 : 0
+            report['warm'] = this.dewarWarm ? 1 : 0
+
+            if (this.comments) report['comments'] = this.comments
+
+            return JSON.stringify(report)
+        },
+        checkLengthValid: function(comments) {
+            console.log("Comments length = " + comments.length)
+            return comments.length > MAX_CONTENT_LENGTH ? false : true
         }
     }
 }
