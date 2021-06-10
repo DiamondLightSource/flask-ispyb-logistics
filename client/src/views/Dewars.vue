@@ -37,7 +37,7 @@
       <div class="w-full md:w-1/6 p-2" v-for="(dewar, rack) in rack_locations" v-bind:key="rack" >
         <DewarCard
           v-on:clear-location="onClearLocation"
-          v-on:update-dewar="onUpdateDewar"
+          v-on:update-dewar="onShowDewarReport"
           v-bind:dewar="dewar"
           v-bind:rack="rack">
         </DewarCard>
@@ -69,9 +69,11 @@
     </ClearLocationDialog>
 
     <DewarReportDialog
-      v-on:confirm-update="onConfirmUpdate"
-      v-bind:isActive="isUpdateDialogActive"
-      v-bind:barcode="dewarBarcode">
+      v-bind:isActive="dewarId !== 0"
+      v-bind:dewarId="dewarId"
+      v-bind:dewarBarcode="dewarBarcode"
+      v-bind:dewarComments="dewarComments"
+      v-on:confirm-update="onConfirmUpdateDewarReport">
     </DewarReportDialog>
 
   </div>
@@ -109,14 +111,14 @@ export default {
       // Timeout handle - used to determine if we need to refresh page
       refresh: null,
       refreshInterval: 60000, // refresh interval in milliseconds
-      // Dewar Report fields
-      dewarBarcode: null,
-      isUpdateDialogActive: false,
+      // Dewar Report id
+      dewarId: 0,
+      dewarBarcode: '',
+      dewarComments: ''
     }
   },
   created: function() {
     // Get Valid Locations
-    console.log("Dewar Storage Zone Component Created")
     let self = this
 
     let url = this.$store.state.apiRoot + "beamlines/" + this.zone
@@ -146,13 +148,11 @@ export default {
   },
   methods: {
       handleDewarUpdate: function() {
-        console.log("Dewar updated OK")
         this.getBarcodes()
       },
       // Main method to retrieve dewar status for locations relevant to this zone
       getBarcodes: function() {
           let self = this
-          let rack_data = {} // Placeholder for new data
 
           if (self.refresh) {
             // If we have been triggered by a form post/update,
@@ -162,59 +162,73 @@ export default {
 
           let url = this.$store.state.apiRoot + "dewars/locations/" + this.zone
       
-          this.$http.get(url)
-          .then(function(response) {
-            let json = response.data
-
-            let racklist = Object.keys(json)
-            
-            racklist.forEach(function(rack) {
-              // Marshall the data into the format we want
-              let dewarInfo = json[rack]
-              let needsLN2 = false
-              // Flag to indicate dewar is on beamline (and therefore space is taken)...
-              let onBeamline = dewarInfo.onBeamline ? dewarInfo.onBeamline : false
-
-              // Check here if arrivalData > 5 days (and dewar is not on beamline being processed)
-              if (dewarInfo.arrivalDate !== "" && !onBeamline) {
-                let nowSecs = new Date().getTime()/1000;
-                let lastFillSeconds = Date.parse(dewarInfo.arrivalDate)/1000
-
-                let deltaTime = nowSecs - lastFillSeconds
-
-                if (deltaTime > 5*24*3600) {
-                  needsLN2 = true
-                }
-              }
-              rack_data[rack] = {
-                'barcode': dewarInfo.barcode,
-                'arrivalDate': dewarInfo.arrivalDate,
-                'facilityCode': dewarInfo.facilityCode,
-                'status': dewarInfo.status,
-                'needsLN2': needsLN2,
-                'onBeamline': onBeamline
-              }
-            })
+          this.$http.get(url).then(function(response) {
             // Re-assign rack_locations property to trigger reactivity
             // Otherwise Vue has a hard time running computed properties
-            self.rack_locations = rack_data
+            self.rack_locations = self.handleUpdateBarcodesOK(response)
           })
           .catch(function(error) {
+            self.rack_locations = self.handleUpdateBarcodesError(error)
+          })
+          // Now setup the next update
+          self.refresh = setTimeout(self.getBarcodes, self.refreshInterval)
+        },
+
+        handleUpdateBarcodesOK: function(response) {
+          let json = response.data
+          let rack_data = {} // Placeholder for new data
+
+          let racklist = Object.keys(json)
+          
+          racklist.forEach(function(rack) {
+            // Marshall the data into the format we want
+            let dewarInfo = json[rack]
+            let needsLN2 = false
+            // Flag to indicate dewar is on beamline (and therefore space is taken)...
+            let onBeamline = dewarInfo.onBeamline ? dewarInfo.onBeamline : false
+
+            // Check here if arrivalData > 5 days (and dewar is not on beamline being processed)
+            if (dewarInfo.arrivalDate !== "" && !onBeamline) {
+              let nowSecs = new Date().getTime()/1000;
+              let lastFillSeconds = Date.parse(dewarInfo.arrivalDate)/1000
+
+              let deltaTime = nowSecs - lastFillSeconds
+
+              if (deltaTime > 5*24*3600) {
+                needsLN2 = true
+              }
+            }
+
+            rack_data[rack] = {
+              'dewarId': dewarInfo.dewarId,
+              'comments': dewarInfo.comments,
+              'barcode': dewarInfo.barcode,
+              'arrivalDate': dewarInfo.arrivalDate,
+              'facilityCode': dewarInfo.facilityCode,
+              'status': dewarInfo.status,
+              'needsLN2': needsLN2,
+              'onBeamline': onBeamline
+            }
+          })
+
+          // Return rack data
+          return rack_data
+        },
+        handleUpdateBarcodesError: function(error) {
             let message = ""
             let isError = true
+            let rack_data = {} // Placeholder for new data
+
             if (error.response.status === 404) {
               // No dewars found - might be true
               message = "Warning no dewars found in these locations"
 
               // Set array to blank set so it shows placholders in page
               let racklist = Object.keys(error.response.data)
-              
-              console.log("Error but rack list = " + racklist)
-              
+                            
               racklist.forEach(function(rack) {
                 rack_data[rack] = {'barcode':'', 'arrivalDate':'', 'needsLN2': false, 'facilityCode': '', 'status': ''}
               })
-              self.rack_locations = rack_data
             } else if (error.response.status == 503) {
               message = "ISPyB database service unavailable"
               console.log("Caught 503 Service unavailable...")
@@ -222,15 +236,12 @@ export default {
               message = "Error retrieving dewar location information from database"
             }
             self.$store.commit('updateMessage', {text: message, isError: isError})
-          })
-          // Now setup the next update
-          self.refresh = setTimeout(self.getBarcodes, self.refreshInterval)
-        },
 
+            return rack_data
+        },
         // Handler for clear location event (rack location clicked)
         // This will trigger the confirm dialog box to show up
         onClearLocation: function(location) {
-          console.log("on Clear Location clicked")
           // This location will be upper case because we control how it is rendered
           this.isRemoveDialogActive = true
           this.locationToRemove = location
@@ -250,19 +261,37 @@ export default {
         },
         // Handler for clear location event (rack location clicked)
         // This will trigger the confirm dialog box to show up
-        onUpdateDewar: function(barcode) {
-          console.log("on Update Dewar clicked, barcode: " + barcode)
+        onShowDewarReport: function(dewar) {
           // This location will be upper case because we control how it is rendered
-          this.dewarBarcode = barcode
-          this.isUpdateDialogActive = true
+          this.dewarComments = dewar.comments
+          this.dewarId = dewar.dewarId
+          this.dewarBarcode = dewar.barcode
         },
         // User has either confirmed or cancelled
-        onConfirmUpdate: function(confirm) {
-          console.log("Confirm Update Dewar: " + confirm)
+        onConfirmUpdateDewarReport: function(payload) {
+          if (payload.status) {
+            this.updateDewarReport(payload.dewarId, payload.report)
+          }
           // Reset data that will disable dialog box
-          this.dewarBarcode = null;
-          this.isUpdateDialogActive = false
+          this.dewarId = 0;
+          this.dewarComments = '';
+          this.dewarBarcode = '';
         },
+        updateDewarReport: function(dewarId, comments) {
+          let url = this.$store.state.apiRoot + "dewars/comments"
+          
+          let formData = new FormData();
+          formData.append('dewarId', dewarId)
+          formData.append('comments', comments)
+
+          this.$http.post(url, formData).then( (result) => {
+            console.log(result)
+            // Trigger a refresh so we see the new comments
+            setTimeout(this.getBarcodes, 3000)
+          }).catch( (err) => {
+            console.log(err)
+          })
+        }
     }
 }
 </script>
