@@ -13,13 +13,13 @@ from flask_testing import TestCase
 # We are not a package and the intent is to run this from the parent dir
 sys.path.append('../')
 
-import ispyb_api
-from ispyb_api import db
-from ispyb_api import controller
-from ispyb_api.models import Dewar, DewarTransportHistory
-from ispyb_api.models import Shipping, LabContact, Person, Laboratory
+from api.ispyb_api import init_app
+from api.ispyb_api import db
+from api.ispyb_api import controller
+from api.ispyb_api.models import Dewar, DewarTransportHistory
+from api.ispyb_api.models import Shipping, LabContact, Person, Laboratory
 
-from dewars.zone6 import rack_locations
+from api.dewars.zone6 import rack_locations
 
 class MyTest(TestCase):
     def create_app(self):
@@ -29,7 +29,7 @@ class MyTest(TestCase):
         os.environ['ISPYB_CONFIG_FILE'] = 'tests/test.cfg'
         os.environ['ISPYB_CONFIG_SECTION'] = 'ispyb_dev'
 
-        ispyb_api.init_app(app)
+        init_app(app)
 
         self.barcodes = ['mx1005-0008799'] #sw19782-13-i03-0025656', 'SW19782-17-I24-0026897']
 
@@ -45,7 +45,7 @@ class MyTest(TestCase):
     def test_find_dewars_by_barcode(self):
         for barcode in self.barcodes:
             result = controller.get_dewar_by_barcode(barcode)
-            print result
+            print(result)
 
     def test_find_dewars_by_location(self):
         """
@@ -76,7 +76,7 @@ class MyTest(TestCase):
         except NoResultFound:
             logging.getLogger('ispyb-logistics').error("Error retrieving dewars")
 
-        print results
+        print(results)
 
     def test_find_shipping_return_address(self):
         # Get the return lab address for this dewar.
@@ -102,7 +102,7 @@ class MyTest(TestCase):
             logging.getLogger('ispyb-logistics').error('Database API Exception - no route to database host?')
 
         for r in results:
-            print r
+            print(r)
 
 if __name__ == "__main__":
     logger = logging.getLogger('ispyb-logistics')

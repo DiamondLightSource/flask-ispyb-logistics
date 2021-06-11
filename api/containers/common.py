@@ -6,7 +6,8 @@ The calling method will jsonify the result
 """
 import logging
 from collections import OrderedDict
-from ispyb_api import container_controller as controller
+from api.ispyb_api import container_controller as controller
+
 
 def results_to_list(result):
     return [ {"location": key, "containers": result[key]} for key in result.keys()]
