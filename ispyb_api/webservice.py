@@ -3,11 +3,11 @@ import logging
 import requests
 from urllib.parse import urljoin
 
-# Build the URL for the POST route (using env settings)
+# Build the URL for the routes (using env settings)
 synchweb_host = os.environ.get("SYNCHWEB_HOST", "https://192.168.33.10")
 dewar_history_url = urljoin(synchweb_host, "/api/shipment/dewars/history")
 container_history_url = urljoin(synchweb_host, "/api/shipment/containers/history")
-synchweb_dewar_comments_url = urljoin(synchweb_host, "/api/shipment/dewars/comments")
+dewar_comments_url = urljoin(synchweb_host, "/api/shipment/dewars/comments")
 # In production we want to use ssl and verify the certificate. 
 # Not for debug though so we can disable the ssl check via environment variable SYNCHWEB_SSL=0
 verify_ssl = True if os.environ.get("SYNCHWEB_SSL", "1") == "1" else False
@@ -104,18 +104,19 @@ def update_comments(dewarId, comments):
 
     This updates ISPyB with dewar comments and triggers e-mails
     """
-    global synchweb_dewar_comments_url
+    global dewar_comments_url
 
-    url = synchweb_dewar_comments_url
+    url = f"{dewar_comments_url}/{dewarId}"
     result = None
 
-    payload = {'DEWARID': dewarId, 'COMMENTS': comments}
-
-    logging.getLogger('ispyb-logistics').info("Try to Update dewar comments in ISPyB via SynchWeb payload: {}".format(payload))
+    # The comments payload is actually json for this use case
+    # Combination of posting to the patch endpoint works
+    payload = {'COMMENTS': comments}
+    headers = {'X-HTTP-Method-Override':'PATCH'}
 
     try:
         # Added timeout to request
-        r = requests.post(url, data=payload, timeout=5, verify=verify_ssl)
+        r = requests.post(url, data=payload, timeout=5, verify=verify_ssl, headers=headers)
 
         if r.status_code == requests.codes.ok:
             result = r.json()

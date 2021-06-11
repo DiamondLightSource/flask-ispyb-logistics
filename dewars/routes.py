@@ -141,9 +141,8 @@ def find():
 
     return __json_response(result, status_code)
 
-@api.route('/dewars/comments', methods=['POST'])
-def comments():
-    dewarId = request.form.get('dewarId')
+@api.route('/dewars/comments/<dewarId>', methods=['PATCH'])
+def comments(dewarId):
     comments = request.form.get('comments')
 
     result, status_code = common.update_dewar_comments(dewarId, comments)
