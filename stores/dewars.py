@@ -9,7 +9,7 @@ from flask import request
 import requests
 
 from ispyb_api import controller
-from .destinations import EBIC, MX, I14
+from .destinations import EBIC, MX, I14, SCM
 
 api = Blueprint('stores', __name__, url_prefix='/api/stores')
 
@@ -146,6 +146,8 @@ def get_destination_from_barcode(barcode):
             destination = EBIC.destination
         elif barcode_prefix in MX.proposal_codes or any('-{}'.format(b) in barcode.upper() for b in MX.instruments):
             destination = MX.destination
+        elif barcode_prefix in SCM.proposal_codes or any('-{}'.format(b) in barcode.upper() for b in SCM.instruments):
+            destination = SCM.destination
         else:
             # Try to derive the destination from proposal type
             session = controller.get_instrument_from_dewar(barcode)
@@ -158,6 +160,8 @@ def get_destination_from_barcode(barcode):
                 destination = MX.destination
             elif instrument in I14.instruments:
                 destination = I14.destination
+            elif instrument in SCM.instruments:
+                destination = SCM.destination
             else:
                 destination = 'Unknown'
     except:

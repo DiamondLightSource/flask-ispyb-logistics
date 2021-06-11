@@ -14,6 +14,11 @@ class I14:
     proposal_codes = ['SP']
     instruments = ['I14']
 
+class SCM:
+    destination = 'Lab 14'
+    proposal_codes = ['']
+    instruments = ['B21']
+
 #
 # Test logic to determine destination from barcode
 #

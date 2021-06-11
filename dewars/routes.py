@@ -17,14 +17,19 @@ from . import common
 from . import ebic
 from . import zone4
 from . import zone6
+from containers import lab14
 
 locations = {'zone6': zone6.rack_locations,
              'zone4': zone4.rack_locations,
-             'ebic': ebic.rack_locations}
+             'ebic': ebic.rack_locations,
+             'lab14': lab14.rack_locations
+             }
 
 beamlines = {'zone6': zone6.beamline_locations,
              'zone4': zone4.beamline_locations,
-             'ebic': ebic.beamline_locations}
+             'ebic': ebic.beamline_locations,
+             'lab14': lab14.beamline_locations
+             }
 
 
 api = Blueprint('zones', __name__, url_prefix='/api')
@@ -135,6 +140,7 @@ def find():
     result, status_code = common.find_dewar_history(facilitycode)
 
     return __json_response(result, status_code)
+
 
 def __json_response(result, code):
     """
