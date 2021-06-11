@@ -235,7 +235,7 @@ export default {
             } else {
               message = "Error retrieving dewar location information from database"
             }
-            self.$store.dispatch('updateMessage', {text: message, isError: isError})
+            this.$store.dispatch('updateMessage', {text: message, isError: isError})
 
             return rack_data
         },

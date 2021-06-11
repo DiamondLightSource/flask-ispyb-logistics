@@ -31,7 +31,7 @@ class MyTest(TestCase):
 
         init_app(app)
 
-        self.barcodes = ['mx1005-0008799'] #sw19782-13-i03-0025656', 'SW19782-17-I24-0026897']
+        self.barcodes = ['cm14451-0008630']
 
         return app
 
@@ -51,7 +51,7 @@ class MyTest(TestCase):
         """
         This method will find a dewar based on its location.
         """
-        locations = ['RACK-X1', 'RACK-D1', 'RACK-D2']
+        locations = ['TRAY-1A', 'TRAY-2A', 'TRAY-3A']
         results = {}
 
         logging.getLogger('ispyb-logistics').debug("find_dewars_by_location {}".format(','.join(locations)))
@@ -68,9 +68,9 @@ class MyTest(TestCase):
 
             for dewar in dewars:
                 if dewar.storageLocation in results:
-                    logging.getLogger('ispyb-logistics'),debug("Ignoring duplicate entry for dewar {} to location {} at time {}".format(dewar.barCode, dewar.storageLocation, dewar.arrivalDate))
+                    logging.getLogger('ispyb-logistics').debug("Ignoring duplicate entry for dewar {} to location {} at time {}".format(dewar.barCode, dewar.storageLocation, dewar.arrivalDate))
                 else:
-                    logging.getLogger('ispyb-logistics'),debug("Adding dewar {} to {} at time {}".format(dewar.barCode, dewar.storageLocation, dewar.arrivalDate))
+                    logging.getLogger('ispyb-logistics').debug("Adding dewar {} to {} at time {}".format(dewar.barCode, dewar.storageLocation, dewar.arrivalDate))
                     results[dewar.storageLocation] = [dewar.barCode, dewar.arrivalDate]
     
         except NoResultFound:

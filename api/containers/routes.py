@@ -13,7 +13,6 @@ from flask import make_response
 
 # Local imports
 from . import common
-
 from . import lab14
 
 locations = {'lab14': lab14.rack_locations

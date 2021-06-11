@@ -5,12 +5,11 @@ from flask import Flask
 from flask import render_template
 from flask import send_file
 
-# Simplified this down to two modules stores and dewar-zones
+# Import routes modules
+from api.beamlines.routes import api as beamlines_api
 from api.containers.routes import api as containers_api
-from api.stores.dewars import api as stores_api
+from api.stores.routes import api as stores_api
 from api.dewars.routes import api as dewars_api
-from api.dewars.routes import beamlines
-from api.dewars.routes import locations
 
 from api import ispyb_api
 
@@ -25,6 +24,7 @@ app = Flask(__name__, static_folder="client/dist/static", static_url_path='/stat
 app.register_blueprint(stores_api)
 app.register_blueprint(dewars_api)
 app.register_blueprint(containers_api)
+app.register_blueprint(beamlines_api)
 
 # Initialise flask sqla
 ispyb_api.init_app(app)

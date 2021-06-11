@@ -35,8 +35,8 @@ class MyTest(TestCase):
 
     def setUp(self):
         print("Setup")
-        self.facilitycode = 'DLS-MX-0001'
-        self.locations = ['RACK-A1', 'RACK-A2', 'RACK-A3']
+        self.facilitycode = 'DLS-MX-1001'
+        self.locations = ['TRAY-1A', 'TRAY-2A', 'TRAY-3A']
 
     def tearDown(self):
         print("TearDown")
