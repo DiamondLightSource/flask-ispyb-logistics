@@ -278,18 +278,17 @@ export default {
           this.dewarBarcode = '';
         },
         updateDewarReport: function(dewarId, comments) {
-          let url = this.$store.state.apiRoot + "dewars/comments"
+          let url = this.$store.state.apiRoot + "dewars/comments/" + dewarId
           
           let formData = new FormData();
-          formData.append('dewarId', dewarId)
           formData.append('comments', comments)
 
-          this.$http.post(url, formData).then( (result) => {
-            console.log(result)
+          this.$http.patch(url, formData).then( () => {
+            this.$store.dispatch('updateMessage', {text: 'Comments Updated OK', isError: false})
             // Trigger a refresh so we see the new comments
             setTimeout(this.getBarcodes, 3000)
-          }).catch( (err) => {
-            console.log(err)
+          }).catch( () => {
+            this.$store.dispatch('updateMessage', {text: 'Error updating dewar contents', isError: true})
           })
         }
     }

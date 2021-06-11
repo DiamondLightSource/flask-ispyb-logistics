@@ -3,11 +3,13 @@ import logging
 import requests
 from urllib.parse import urljoin
 
-# Build the URL for the POST route (using env settings)
+# Build the URL for the routes (using env settings)
 synchweb_host = os.environ.get("SYNCHWEB_HOST", "https://192.168.33.10")
-synchweb_url = urljoin(synchweb_host, "/api/shipment/dewars/history")
-synchweb_dewar_comments_url = urljoin(synchweb_host, "/api/shipment/dewars/comments")
-verify_ssl = True
+dewar_history_url = urljoin(synchweb_host, "/api/shipment/dewars/history")
+dewar_comments_url = urljoin(synchweb_host, "/api/shipment/dewars/comments")
+# In production we want to use ssl and verify the certificate. 
+# Not for debug though so we can disable the ssl check via environment variable SYNCHWEB_SSL=0
+verify_ssl = True if os.environ.get("SYNCHWEB_SSL", "1") == "1" else False
 
 def set_location(barcode, location, awb=None):
     """
@@ -15,7 +17,7 @@ def set_location(barcode, location, awb=None):
 
     This updates ISPyB with dewar history and triggers e-mails
     """
-    global synchweb_url
+    global dewar_history_url
     result = None
 
     payload = {'BARCODE': barcode, 'LOCATION': location}
@@ -25,7 +27,7 @@ def set_location(barcode, location, awb=None):
 
     try:
         # Added timeout to request
-        r = requests.post(synchweb_url, data=payload, timeout=5, verify=verify_ssl)
+        r = requests.post(dewar_history_url, data=payload, timeout=5, verify=verify_ssl)
 
         if r.status_code == requests.codes.ok:
             result = r.json()
@@ -33,9 +35,9 @@ def set_location(barcode, location, awb=None):
         else:
             logging.getLogger('ispyb-logistics').error("Error setting location in ISPyB via SynchWeb {} {}".format(r.status_code, r.text))
     except requests.ConnectionError:
-        logging.getLogger('ispyb-logistics').error("Error (connection) trying to post to {}".format(synchweb_url))
+        logging.getLogger('ispyb-logistics').error("Error (connection) trying to post to {}".format(dewar_history_url))
     except requests.Timeout:
-        logging.getLogger('ispyb-logistics').error("Error (timeout) trying to post to {}".format(synchweb_url))
+        logging.getLogger('ispyb-logistics').error("Error (timeout) trying to post to {}".format(dewar_history_url))
 
     return result
 
@@ -45,18 +47,19 @@ def update_comments(dewarId, comments):
 
     This updates ISPyB with dewar comments and triggers e-mails
     """
-    global synchweb_dewar_comments_url
+    global dewar_comments_url
 
-    url = synchweb_dewar_comments_url
+    url = f"{dewar_comments_url}/{dewarId}"
     result = None
 
-    payload = {'DEWARID': dewarId, 'COMMENTS': comments}
-
-    logging.getLogger('ispyb-logistics').info("Try to Update dewar comments in ISPyB via SynchWeb payload: {}".format(payload))
+    # The comments payload is actually json for this use case
+    # Combination of posting to the patch endpoint works
+    payload = {'COMMENTS': comments}
+    headers = {'X-HTTP-Method-Override':'PATCH'}
 
     try:
         # Added timeout to request
-        r = requests.post(url, data=payload, timeout=5, verify=verify_ssl)
+        r = requests.post(url, data=payload, timeout=5, verify=verify_ssl, headers=headers)
 
         if r.status_code == requests.codes.ok:
             result = r.json()
