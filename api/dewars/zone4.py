@@ -30,5 +30,6 @@ beamline_locations = ['I03',
                       'VMXM',
                       'USER-COLLECTION',
                       'STORES-OUT',
+                      'ZONE4-TO-STORES',
                       'EBIC'
                       ]

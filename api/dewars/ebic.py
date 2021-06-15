@@ -23,6 +23,8 @@ beamline_locations = ['{}-{}'.format(beamline_prefix, x.upper()) for x in beamli
 # Add the common locations on for the web ui
 beamline_locations.extend(['USER-COLLECTION',
                            'STORES-OUT',
+                           'ZONE-4-STORE',
                            'ZONE-6-STORE',
+                           'EBIC-TO-STORES',
                            ])
 
