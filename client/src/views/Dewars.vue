@@ -23,8 +23,9 @@
     
     <!-- Display the rack locations, four columns across If Zone 6 -->
     <div v-if="zone==='zone6'" class="flex flex-wrap">
-      <div class="w-full md:w-1/4 p-2" v-for="(dewar, rack) in rack_locations" v-bind:key="rack" v-on:click="onClearLocation(rack)">
-        <DewarCard 
+      <div class="w-full md:w-1/4 p-2" v-for="(dewar, rack) in rack_locations" v-bind:key="rack">
+        <DewarCard
+          v-on:clear-location="onClearLocation"
           v-bind:dewar="dewar"
           v-bind:rack="rack">
         </DewarCard>
@@ -33,8 +34,10 @@
 
     <!-- Display the rack locations, six columns across If Zone 4 -->
     <div v-else-if="zone === 'zone4'" class="flex flex-wrap">
-      <div class="w-full md:w-1/6 p-2" v-for="(dewar, rack) in rack_locations" v-bind:key="rack" v-on:click="onClearLocation(rack)">
-        <DewarCard 
+      <div class="w-full md:w-1/6 p-2" v-for="(dewar, rack) in rack_locations" v-bind:key="rack" >
+        <DewarCard
+          v-on:clear-location="onClearLocation"
+          v-on:update-dewar="onShowDewarReport"
           v-bind:dewar="dewar"
           v-bind:rack="rack">
         </DewarCard>
@@ -56,6 +59,7 @@
       <p>No known storage location</p>
     </div>
 
+
     <!-- This pops up to confirm the clear location action -->
     <ClearLocationDialog 
       v-on:confirm-removal="onConfirmClear" 
@@ -63,6 +67,15 @@
       v-bind:locationToRemove="locationToRemove"
       v-bind:rack_locations="rack_locations">
     </ClearLocationDialog>
+
+    <DewarReportDialog
+      v-bind:isActive="dewarId !== 0"
+      v-bind:dewarId="dewarId"
+      v-bind:dewarBarcode="dewarBarcode"
+      v-bind:dewarComments="dewarComments"
+      v-on:confirm-update="onConfirmUpdateDewarReport">
+    </DewarReportDialog>
+
   </div>
 
 </template>
@@ -73,6 +86,7 @@ import FindDewar from '@/components/FindDewar.vue';
 import DispatchDewars from '@/components/DispatchDewars.vue';
 import MessagePanel from '@/components/MessagePanel.vue';
 import ClearLocationDialog from '@/components/ClearLocationDialog.vue';
+import DewarReportDialog from '@/components/DewarReportDialog.vue';
 import DewarCard from '@/components/DewarCard.vue';
 
 export default {
@@ -84,7 +98,8 @@ export default {
     DispatchDewars,
     MessagePanel,
     ClearLocationDialog,
-    DewarCard
+    DewarCard,
+    DewarReportDialog
   },
   data() {
     return {
@@ -96,11 +111,14 @@ export default {
       // Timeout handle - used to determine if we need to refresh page
       refresh: null,
       refreshInterval: 60000, // refresh interval in milliseconds
+      // Dewar Report id
+      dewarId: 0,
+      dewarBarcode: '',
+      dewarComments: ''
     }
   },
   created: function() {
     // Get Valid Locations
-    console.log("Dewar Storage Zone Component Created")
     let self = this
 
     let url = this.$store.state.apiRoot + "beamlines/" + this.zone
@@ -130,13 +148,11 @@ export default {
   },
   methods: {
       handleDewarUpdate: function() {
-        console.log("Dewar updated OK")
         this.getBarcodes()
       },
       // Main method to retrieve dewar status for locations relevant to this zone
       getBarcodes: function() {
           let self = this
-          let rack_data = {} // Placeholder for new data
 
           if (self.refresh) {
             // If we have been triggered by a form post/update,
@@ -146,75 +162,86 @@ export default {
 
           let url = this.$store.state.apiRoot + "dewars/locations/" + this.zone
       
-          this.$http.get(url)
-          .then(function(response) {
-            let json = response.data
-
-            let racklist = Object.keys(json)
-            
-            racklist.forEach(function(rack) {
-              // Marshall the data into the format we want
-              let dewarInfo = json[rack]
-              let needsLN2 = false
-              // Flag to indicate dewar is on beamline (and therefore space is taken)...
-              let onBeamline = dewarInfo.onBeamline ? dewarInfo.onBeamline : false
-
-              // Check here if arrivalData > 5 days (and dewar is not on beamline being processed)
-              if (dewarInfo.arrivalDate !== "" && !onBeamline) {
-                let nowSecs = new Date().getTime()/1000;
-                let lastFillSeconds = Date.parse(dewarInfo.arrivalDate)/1000
-
-                let deltaTime = nowSecs - lastFillSeconds
-
-                if (deltaTime > 5*24*3600) {
-                  needsLN2 = true
-                }
-              }
-              rack_data[rack] = {
-                'barcode': dewarInfo.barcode,
-                'arrivalDate': dewarInfo.arrivalDate,
-                'facilityCode': dewarInfo.facilityCode,
-                'status': dewarInfo.status,
-                'needsLN2': needsLN2,
-                'onBeamline': onBeamline
-              }
-            })
+          this.$http.get(url).then(function(response) {
             // Re-assign rack_locations property to trigger reactivity
             // Otherwise Vue has a hard time running computed properties
-            self.rack_locations = rack_data
+            self.rack_locations = self.handleUpdateBarcodesOK(response)
           })
           .catch(function(error) {
+            self.rack_locations = self.handleUpdateBarcodesError(error)
+          })
+          // Now setup the next update
+          self.refresh = setTimeout(self.getBarcodes, self.refreshInterval)
+        },
+
+        handleUpdateBarcodesOK: function(response) {
+          let json = response.data
+          let rack_data = {} // Placeholder for new data
+
+          let racklist = Object.keys(json)
+          
+          racklist.forEach(function(rack) {
+            // Marshall the data into the format we want
+            let dewarInfo = json[rack]
+            let needsLN2 = false
+            // Flag to indicate dewar is on beamline (and therefore space is taken)...
+            let onBeamline = dewarInfo.onBeamline ? dewarInfo.onBeamline : false
+
+            // Check here if arrivalData > 5 days (and dewar is not on beamline being processed)
+            if (dewarInfo.arrivalDate !== "" && !onBeamline) {
+              let nowSecs = new Date().getTime()/1000;
+              let lastFillSeconds = Date.parse(dewarInfo.arrivalDate)/1000
+
+              let deltaTime = nowSecs - lastFillSeconds
+
+              if (deltaTime > 5*24*3600) {
+                needsLN2 = true
+              }
+            }
+
+            rack_data[rack] = {
+              'dewarId': dewarInfo.dewarId,
+              'comments': dewarInfo.comments,
+              'barcode': dewarInfo.barcode,
+              'arrivalDate': dewarInfo.arrivalDate,
+              'facilityCode': dewarInfo.facilityCode,
+              'status': dewarInfo.status,
+              'needsLN2': needsLN2,
+              'onBeamline': onBeamline
+            }
+          })
+
+          // Return rack data
+          return rack_data
+        },
+        handleUpdateBarcodesError: function(error) {
             let message = ""
             let isError = true
+            let rack_data = {} // Placeholder for new data
+
             if (error.response.status === 404) {
               // No dewars found - might be true
               message = "Warning no dewars found in these locations"
 
               // Set array to blank set so it shows placholders in page
               let racklist = Object.keys(error.response.data)
-              
-              console.log("Error but rack list = " + racklist)
-              
+                            
               racklist.forEach(function(rack) {
                 rack_data[rack] = {'barcode':'', 'arrivalDate':'', 'needsLN2': false, 'facilityCode': '', 'status': ''}
               })
-              self.rack_locations = rack_data
             } else if (error.response.status == 503) {
               message = "ISPyB database service unavailable"
               console.log("Caught 503 Service unavailable...")
             } else {
               message = "Error retrieving dewar location information from database"
             }
-            self.$store.dispatch('updateMessage', {text: message, isError: isError})
-          })
-          // Now setup the next update
-          self.refresh = setTimeout(self.getBarcodes, self.refreshInterval)
-        },
+            this.$store.dispatch('updateMessage', {text: message, isError: isError})
 
+            return rack_data
+        },
         // Handler for clear location event (rack location clicked)
         // This will trigger the confirm dialog box to show up
         onClearLocation: function(location) {
-          console.log("on Clear Location clicked")
           // This location will be upper case because we control how it is rendered
           this.isRemoveDialogActive = true
           this.locationToRemove = location
@@ -232,6 +259,38 @@ export default {
           this.locationToRemove = "";
           this.isRemoveDialogActive = false
         },
+        // Handler for clear location event (rack location clicked)
+        // This will trigger the confirm dialog box to show up
+        onShowDewarReport: function(dewar) {
+          // This location will be upper case because we control how it is rendered
+          this.dewarComments = dewar.comments
+          this.dewarId = dewar.dewarId
+          this.dewarBarcode = dewar.barcode
+        },
+        // User has either confirmed or cancelled
+        onConfirmUpdateDewarReport: function(payload) {
+          if (payload.status) {
+            this.updateDewarReport(payload.dewarId, payload.report)
+          }
+          // Reset data that will disable dialog box
+          this.dewarId = 0;
+          this.dewarComments = '';
+          this.dewarBarcode = '';
+        },
+        updateDewarReport: function(dewarId, comments) {
+          let url = this.$store.state.apiRoot + "dewars/comments/" + dewarId
+          
+          let formData = new FormData();
+          formData.append('comments', comments)
+
+          this.$http.patch(url, formData).then( () => {
+            this.$store.dispatch('updateMessage', {text: 'Comments Updated OK', isError: false})
+            // Trigger a refresh so we see the new comments
+            setTimeout(this.getBarcodes, 3000)
+          }).catch( () => {
+            this.$store.dispatch('updateMessage', {text: 'Error updating dewar contents', isError: true})
+          })
+        }
     }
 }
 </script>

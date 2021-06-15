@@ -1,5 +1,5 @@
-from ConfigParser import ConfigParser
-from ConfigParser import NoOptionError, NoSectionError
+from configparser import ConfigParser
+from configparser import NoOptionError, NoSectionError
 import sys
 
 def test(filename):

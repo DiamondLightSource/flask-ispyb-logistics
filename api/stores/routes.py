@@ -8,7 +8,7 @@ from flask import request
 
 import requests
 
-from ispyb_api import controller
+from api.ispyb_api import controller
 from .destinations import EBIC, MX, I14, SCM
 
 api = Blueprint('stores', __name__, url_prefix='/api/stores')

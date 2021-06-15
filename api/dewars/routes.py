@@ -20,41 +20,11 @@ from . import zone6
 
 locations = {'zone6': zone6.rack_locations,
              'zone4': zone4.rack_locations,
-             'ebic': ebic.rack_locations}
-
-beamlines = {'zone6': zone6.beamline_locations,
-             'zone4': zone4.beamline_locations,
-             'ebic': ebic.beamline_locations}
+             'ebic': ebic.rack_locations,
+             }
 
 
 api = Blueprint('zones', __name__, url_prefix='/api')
-
-@api.route('/beamlines/<zone>', methods=['GET'])
-def get_beamlines(zone='zone6'):
-    """
-    API route for dewar management
-    """
-    result = {}
-    status_code = 200
-
-    if zone not in locations:
-        result = {'status': 'fail',
-                   'message': 'Zone parameter not valid for this application'}
-        status_code = 400
-
-        return __json_response(result, status_code)
-
-    if request.method == 'GET':
-        # Get Rack Locations for this zone
-        result = beamlines.get(zone)
-    else:
-        result = {'location': '',
-                  'barcode': '',
-                  'status': 'fail',
-                  'reason': 'Method/route not implemented yet'}
-        status_code = 501
-
-    return __json_response(result, status_code)
 
 @api.route('/dewars/locations/<zone>', methods=['GET'])
 def get_location(zone='zone6'):
@@ -133,6 +103,14 @@ def find():
     # We actually accept a dewar barcode or a facility code.
     # The controller handles both instances...
     result, status_code = common.find_dewar_history(facilitycode)
+
+    return __json_response(result, status_code)
+
+@api.route('/dewars/comments/<dewarId>', methods=['PATCH'])
+def comments(dewarId):
+    comments = request.form.get('comments')
+
+    result, status_code = common.update_dewar_comments(dewarId, comments)
 
     return __json_response(result, status_code)
 

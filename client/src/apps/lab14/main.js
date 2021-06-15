@@ -1,18 +1,19 @@
 import Vue from 'vue'
-import App from './App.vue'
-import store from './store'
+import Lab14 from '../../views/Lab14.vue'
+import store from '../../store'
 
 import 'typeface-cantarell'
 import 'tailwindcss/tailwind.css'
 import axios from 'axios'
 
-import 'font-awesome/css/font-awesome.css'
-
 Vue.config.productionTip = false
 
 Vue.prototype.$http = axios
 
+// Initialise the store with our zone
+store.commit('setZone', 'lab14')
+
 new Vue({
   store,
-  render: h => h(App)
+  render: h => h(Lab14)
 }).$mount('#app')

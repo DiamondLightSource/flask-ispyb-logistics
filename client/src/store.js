@@ -8,7 +8,9 @@ export default new Vuex.Store({
   state: {
     message: {text: "", isError: false},
     apiRoot: '/api/',
-    location: ''
+    location: '',
+    beamlines: [] // Certain beamlines can be valid locations
+
   },
   mutations: {
     setZone(state, zone) {
@@ -22,6 +24,9 @@ export default new Vuex.Store({
       console.log("Setting API ROOT to " + api)
       state.apiRoot = api
     },
+    setBeamlines(state, beamlines) {
+      state.beamlines = beamlines
+    }
   },
   actions: {
     // Use this action to update the message text from any component

@@ -5,13 +5,13 @@ from flask import Flask
 from flask import render_template
 from flask import send_file
 
-# Simplified this down to two modules stores and dewar-zones
-from stores.dewars import api as stores_api
-from dewars.routes import api as dewars_api
-from dewars.routes import beamlines
-from dewars.routes import locations
+# Import routes modules
+from api.beamlines.routes import api as beamlines_api
+from api.containers.routes import api as containers_api
+from api.stores.routes import api as stores_api
+from api.dewars.routes import api as dewars_api
 
-import ispyb_api
+from api import ispyb_api
 
 logger = logging.getLogger('ispyb-logistics')
 handler = logging.handlers.RotatingFileHandler('logs/logistics.log', maxBytes=10000000, backupCount=5)
@@ -23,6 +23,8 @@ app = Flask(__name__, static_folder="client/dist/static", static_url_path='/stat
 
 app.register_blueprint(stores_api)
 app.register_blueprint(dewars_api)
+app.register_blueprint(containers_api)
+app.register_blueprint(beamlines_api)
 
 # Initialise flask sqla
 ispyb_api.init_app(app)
@@ -47,6 +49,10 @@ def zone4_page():
 @app.route("/zone6/")
 def zone6_page():
     return send_file('client/dist/zone6.html')
+
+@app.route("/lab14/")
+def lab14_page():
+    return send_file('client/dist/lab14.html')
 
 
 if __name__ == '__main__':

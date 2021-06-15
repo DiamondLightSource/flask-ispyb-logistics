@@ -13,13 +13,13 @@ from flask_testing import TestCase
 # We are not a package and the intent is to run this from the parent dir
 sys.path.append('../')
 
-import ispyb_api
-from ispyb_api import db
-from ispyb_api import controller
-from ispyb_api.models import Dewar, DewarTransportHistory
-from ispyb_api.models import Shipping, LabContact, Person, Laboratory
+from api.ispyb_api import init_app
+from api.ispyb_api import db
+from api.ispyb_api import controller
+from api.ispyb_api.models import Dewar, DewarTransportHistory
+from api.ispyb_api.models import Shipping, LabContact, Person, Laboratory
 
-from dewars.zone6 import rack_locations
+from api.dewars.zone6 import rack_locations
 
 class MyTest(TestCase):
     def create_app(self):
@@ -29,9 +29,9 @@ class MyTest(TestCase):
         os.environ['ISPYB_CONFIG_FILE'] = 'tests/test.cfg'
         os.environ['ISPYB_CONFIG_SECTION'] = 'ispyb_dev'
 
-        ispyb_api.init_app(app)
+        init_app(app)
 
-        self.barcodes = ['mx1005-0008799'] #sw19782-13-i03-0025656', 'SW19782-17-I24-0026897']
+        self.barcodes = ['cm14451-0008630']
 
         return app
 
@@ -45,13 +45,13 @@ class MyTest(TestCase):
     def test_find_dewars_by_barcode(self):
         for barcode in self.barcodes:
             result = controller.get_dewar_by_barcode(barcode)
-            print result
+            print(result)
 
     def test_find_dewars_by_location(self):
         """
         This method will find a dewar based on its location.
         """
-        locations = ['RACK-X1', 'RACK-D1', 'RACK-D2']
+        locations = ['TRAY-1A', 'TRAY-2A', 'TRAY-3A']
         results = {}
 
         logging.getLogger('ispyb-logistics').debug("find_dewars_by_location {}".format(','.join(locations)))
@@ -68,15 +68,15 @@ class MyTest(TestCase):
 
             for dewar in dewars:
                 if dewar.storageLocation in results:
-                    logging.getLogger('ispyb-logistics'),debug("Ignoring duplicate entry for dewar {} to location {} at time {}".format(dewar.barCode, dewar.storageLocation, dewar.arrivalDate))
+                    logging.getLogger('ispyb-logistics').debug("Ignoring duplicate entry for dewar {} to location {} at time {}".format(dewar.barCode, dewar.storageLocation, dewar.arrivalDate))
                 else:
-                    logging.getLogger('ispyb-logistics'),debug("Adding dewar {} to {} at time {}".format(dewar.barCode, dewar.storageLocation, dewar.arrivalDate))
+                    logging.getLogger('ispyb-logistics').debug("Adding dewar {} to {} at time {}".format(dewar.barCode, dewar.storageLocation, dewar.arrivalDate))
                     results[dewar.storageLocation] = [dewar.barCode, dewar.arrivalDate]
     
         except NoResultFound:
             logging.getLogger('ispyb-logistics').error("Error retrieving dewars")
 
-        print results
+        print(results)
 
     def test_find_shipping_return_address(self):
         # Get the return lab address for this dewar.
@@ -102,7 +102,7 @@ class MyTest(TestCase):
             logging.getLogger('ispyb-logistics').error('Database API Exception - no route to database host?')
 
         for r in results:
-            print r
+            print(r)
 
 if __name__ == "__main__":
     logger = logging.getLogger('ispyb-logistics')
