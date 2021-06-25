@@ -26,6 +26,7 @@
       <div class="w-full md:w-1/4 p-2" v-for="(dewar, rack) in rack_locations" v-bind:key="rack">
         <DewarCard
           v-on:clear-location="onClearLocation"
+          v-on:update-dewar="onShowDewarReport"
           v-bind:dewar="dewar"
           v-bind:rack="rack">
         </DewarCard>
@@ -46,8 +47,10 @@
 
     <!-- Display the rack locations, four columns across If Zone 6 -->
     <div v-else-if="zone==='ebic'" class="flex flex-wrap">
-      <div class="w-full md:w-1/4 p-2" v-for="(dewar, rack) in rack_locations" v-bind:key="rack" v-on:click="onClearLocation(rack)">
+      <div class="w-full md:w-1/4 p-2" v-for="(dewar, rack) in rack_locations" v-bind:key="rack">
         <DewarCard 
+          v-on:clear-location="onClearLocation"
+          v-on:update-dewar="onShowDewarReport"
           v-bind:dewar="dewar"
           v-bind:rack="rack">
         </DewarCard>
