@@ -291,7 +291,7 @@ export default {
             // Trigger a refresh so we see the new comments
             setTimeout(this.getBarcodes, 3000)
           }).catch( () => {
-            this.$store.dispatch('updateMessage', {text: 'Error updating dewar contents', isError: true})
+            this.$store.dispatch('updateMessage', {text: 'Error updating dewar comments', isError: true})
           })
         }
     }
