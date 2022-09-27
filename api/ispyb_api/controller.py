@@ -1,3 +1,4 @@
+import os
 import re
 import logging
 import itertools
@@ -10,10 +11,13 @@ from sqlalchemy.orm import aliased
 
 from . import db
 from . import webservice
+from . import send_email
 from .models import Dewar, DewarTransportHistory, LabContact, Laboratory, Shipping, Proposal, Person, BLSession
 
 # What age do we ignore container history entries
 CONTAINER_FILTER_DAYS_LIMIT = 30
+email_domain = os.environ.get('EMAIL_DOMAIN', '@diamond.ac.uk')
+
 
 def set_location(barcode, location, awb=None):
     """
@@ -32,7 +36,13 @@ def set_location(barcode, location, awb=None):
     else:
         actual_barcode = barcode
 
-    return webservice.set_location(actual_barcode, location, awb)
+    result = webservice.set_location(actual_barcode, location, awb)
+
+    if is_arriving_at_ebic(location):
+        lc_details = get_lc_from_dewar(actual_barcode)
+        send_email.email_lc(actual_barcode, lc_details)
+
+    return result
 
 def get_dewar_by_facilitycode(fc):
     """
@@ -407,6 +417,40 @@ def get_instrument_from_dewar(dewarBarCode):
 
     return results
 
+def get_lc_from_dewar(dewarBarCode):
+    """
+    Get the local contact name for a session associated with a dewar
+    """
+    results = None
+
+    records = Dewar.query.join(BLSession).\
+        filter(BLSession.sessionId == Dewar.firstExperimentId).\
+        filter(Dewar.barCode == dewarBarCode).\
+        limit(1).\
+        values(Dewar.barCode,
+               BLSession.beamLineOperator)
+
+    try:
+        firstRecord = next(records)
+
+        logging.getLogger('ispyb-logistics').debug('get_lc_from_dewar first: {}'.format(firstRecord))
+
+        lc1 = firstRecord.beamLineOperator.split(',')[0]
+        lc1_title = lc1.split()[0]
+        lc1_given_name = lc1.split()[1]
+        lc1_family_name = '-'.join(lc1.split()[2:])
+        lc1_email = lc1_given_name + '.' +lc1_family_name + email_domain
+        results = {
+            'barcode': firstRecord.barCode,
+            'lc1': lc1,
+            'email': lc1_email,
+            }
+    except:
+        logging.getLogger('ispyb-logistics').error('Could not get valid local contact from dewar {}'.format(dewarBarCode))
+
+    return results
+
+
 def update_comments(dewarId, comments):
     """
     Redirect this request to SynchWeb to trigger e-mail alerts etc
@@ -432,5 +476,19 @@ def is_facility_code(code):
     else:
         logging.getLogger('ispyb-logistics').debug('{} is NOT a facilitycode'.format(code))
         result = False
+
+    return result
+
+def is_arriving_at_ebic(location):
+    """
+    Utility method to check if the location is EBIC-IN-*
+    in which case we need to email LC
+    """
+    result = False
+
+    expr = re.compile(r'EBIC-IN-\d', re.IGNORECASE)
+    match = expr.match(location)
+    if match:
+        result = True
 
     return result
