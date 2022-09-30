@@ -38,9 +38,11 @@ def set_location(barcode, location, awb=None):
 
     result = webservice.set_location(actual_barcode, location, awb)
 
+    lc_details = get_lc_from_dewar(actual_barcode)
     if is_arriving_at_ebic(location):
-        lc_details = get_lc_from_dewar(actual_barcode)
-        send_email.email_lc(actual_barcode, lc_details)
+        send_email.email_lc_incoming(actual_barcode, lc_details)
+    elif is_leaving_ebic(location):
+        send_email.email_lc_outgoing(actual_barcode, lc_details)
 
     return result
 
@@ -492,3 +494,18 @@ def is_arriving_at_ebic(location):
         result = True
 
     return result
+
+def is_leaving_ebic(location):
+    """
+    Utility method to check if the location is EBIC-TO-STORES
+    in which case we need to email LC
+    """
+    result = False
+
+    expr = re.compile(r'EBIC-TO-STORES', re.IGNORECASE)
+    match = expr.match(location)
+    if match:
+        result = True
+
+    return result
+
