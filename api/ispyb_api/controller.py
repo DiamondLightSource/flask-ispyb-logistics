@@ -339,7 +339,7 @@ def get_shipping_return_address(barcode):
                 Laboratory.country
                 )
         # Get first item in generator list
-        shipment = records.next()
+        shipment = next(records)
 
         results = {
             "address" : shipment[0],
@@ -351,7 +351,7 @@ def get_shipping_return_address(barcode):
         logging.getLogger('ispyb-logistics').error('Database API Exception - no route to database host?')
 
     except Exception:
-        logging.getLogger('ispyb-logistics').error('No shipping record for this dewar')
+        logging.getLogger('ispyb-logistics').error('No shipping record for this dewar: '+barcode)
 
     return results
 
