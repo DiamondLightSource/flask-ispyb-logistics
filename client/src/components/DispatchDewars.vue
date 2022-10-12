@@ -44,11 +44,11 @@ export default {
     },  
     computed: {
         // This is used to display 5 dewars that need refilling
-        // If they have dispatch requested set ignore them (they are leaving the facility so don't need LN2)
+        // If they have dispatch requested show them anyway - SCI-10162
         refill_dewars: function() {
             const self = this
             let dewars = Object.keys(this.rack_locations).filter( function(rack) {
-                return self.rack_locations[rack].status !== 'dispatch-requested' && self.rack_locations[rack].needsLN2 === true
+                return self.rack_locations[rack].needsLN2 === true
             })
             return dewars
         },
