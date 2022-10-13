@@ -1,7 +1,7 @@
 <template>
     <section>
         <transition name="fade" mode="out-in">
-            <section v-if="show_dewars" key="1">
+            <section v-if="show_refill && page == 1" key="1">
                 <h2 class="text-3xl text-center font-bold py-2">Dewars that need refilling</h2>
                 <ul>
                     <li v-for="(dewar, index) in refill_dewars.slice(0, 5)" v-bind:key="index">
@@ -14,7 +14,46 @@
                     </div>
                 </footer>
             </section>
-            <section v-else key="2">
+            <section v-else-if="show_refill && page == 2" key="2">
+                <h2 class="text-3xl text-center font-bold py-2">Dewars that need refilling</h2>
+                <ul>
+                    <li v-for="(dewar, index) in refill_dewars.slice(5, 10)" v-bind:key="index">
+                        <p class="px-2 text-lg text-center text-black bg-danger mx-4"><b>{{dewar}}</b></p>
+                    </li>
+                </ul>
+                <footer class="">
+                    <div class="text-center py-2">
+                        <p>(Scan dewars back into the same position after refilling)</p>
+                    </div>
+                </footer>
+            </section>
+            <section v-else-if="show_refill && page == 3" key="3">
+                <h2 class="text-3xl text-center font-bold py-2">Dewars that need refilling</h2>
+                <ul>
+                    <li v-for="(dewar, index) in refill_dewars.slice(10, 15)" v-bind:key="index">
+                        <p class="px-2 text-lg text-center text-black bg-danger mx-4"><b>{{dewar}}</b></p>
+                    </li>
+                </ul>
+                <footer class="">
+                    <div class="text-center py-2">
+                        <p>(Scan dewars back into the same position after refilling)</p>
+                    </div>
+                </footer>
+            </section>
+            <section v-else-if="show_refill && page == 4" key="4">
+                <h2 class="text-3xl text-center font-bold py-2">Dewars that need refilling</h2>
+                <ul>
+                    <li v-for="(dewar, index) in refill_dewars.slice(15, 20)" v-bind:key="index">
+                        <p class="px-2 text-lg text-center text-black bg-danger mx-4"><b>{{dewar}}</b></p>
+                    </li>
+                </ul>
+                <footer class="">
+                    <div class="text-center py-2">
+                        <p>(Scan dewars back into the same position after refilling)</p>
+                    </div>
+                </footer>
+            </section>
+            <section v-else-if="show_dispatch && page == 1" key="5">
                 <h2 class="text-3xl text-center font-bold py-2">Dewars that need dispatching</h2>
                 <ul>
                     <li v-for="(dewar, index) in dispatch_dewars.slice(0, 5)" v-bind:key="index">
@@ -23,7 +62,46 @@
                 </ul>
                 <footer class="">
                     <div class="text-center py-2">
-                        <p>(Dewars in need of dispatch - clear once removed from rack)</p>
+                        <p>(Scan dewars to Stores when removed from rack)</p>
+                    </div>
+                </footer>
+            </section>
+            <section v-else-if="show_dispatch && page == 2" key="6">
+                <h2 class="text-3xl text-center font-bold py-2">Dewars that need dispatching</h2>
+                <ul>
+                    <li v-for="(dewar, index) in dispatch_dewars.slice(5, 10)" v-bind:key="index">
+                        <p class="px-2 text-lg text-center text-black bg-warning mx-4"><b>{{dewar}}</b></p>
+                    </li>
+                </ul>
+                <footer class="">
+                    <div class="text-center py-2">
+                        <p>(Scan dewars to Stores when removed from rack)</p>
+                    </div>
+                </footer>
+            </section>
+            <section v-else-if="show_dispatch && page == 3" key="7">
+                <h2 class="text-3xl text-center font-bold py-2">Dewars that need dispatching</h2>
+                <ul>
+                    <li v-for="(dewar, index) in dispatch_dewars.slice(10, 15)" v-bind:key="index">
+                        <p class="px-2 text-lg text-center text-black bg-warning mx-4"><b>{{dewar}}</b></p>
+                    </li>
+                </ul>
+                <footer class="">
+                    <div class="text-center py-2">
+                        <p>(Scan dewars to Stores when removed from rack)</p>
+                    </div>
+                </footer>
+            </section>
+            <section v-else-if="show_dispatch && page == 4" key="8">
+                <h2 class="text-3xl text-center font-bold py-2">Dewars that need dispatching</h2>
+                <ul>
+                    <li v-for="(dewar, index) in dispatch_dewars.slice(15, 20)" v-bind:key="index">
+                        <p class="px-2 text-lg text-center text-black bg-warning mx-4"><b>{{dewar}}</b></p>
+                    </li>
+                </ul>
+                <footer class="">
+                    <div class="text-center py-2">
+                        <p>(Scan dewars to Stores when removed from rack)</p>
                     </div>
                 </footer>
             </section>
@@ -39,7 +117,9 @@ export default {
     },
     data() {
       return {
-          show_dewars: true
+          show_refill: true,
+          show_dispatch: false,
+          page: 1
       }
     },  
     computed: {
@@ -63,12 +143,28 @@ export default {
         }
     },
     methods: {
-        swapDispatchDewarView: function() {
-            this.show_dewars = !this.show_dewars
+        cycleDispatchDewarView: function() {
+            if (this.show_refill) {
+                if (this.refill_dewars.length<this.page*5 || this.page == 4) {
+                    this.show_refill = false
+                    this.show_dispatch = true
+                    this.page = 1
+                } else {
+                    this.page = this.page+1
+                }
+            } else {
+                if (this.dispatch_dewars.length<this.page*5 || this.page == 4) {
+                    this.show_dispatch = false
+                    this.show_refill = true
+                    this.page = 1
+                } else {
+                    this.page = this.page+1
+                }
+            }
         }
     },
     mounted: function() {
-        setInterval(this.swapDispatchDewarView, 5000)
+        setInterval(this.cycleDispatchDewarView, 5000)
     }
 }
 </script>
