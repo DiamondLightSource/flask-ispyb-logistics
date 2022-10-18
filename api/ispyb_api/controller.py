@@ -36,12 +36,16 @@ def set_location(barcode, location, awb=None):
     else:
         actual_barcode = barcode
 
+    dewar_details = get_dewar_by_barcode(actual_barcode)
+    previous_location = dewar_details['storageLocation']
+
     result = webservice.set_location(actual_barcode, location, awb)
 
-    lc_details = get_lc_from_dewar(actual_barcode)
-    if is_arriving_at_ebic(location):
+    if is_arriving_at_ebic(location, previous_location):
+        lc_details = get_lc_from_dewar(actual_barcode)
         send_email.email_lc_incoming(actual_barcode, lc_details)
     elif is_leaving_ebic(location):
+        lc_details = get_lc_from_dewar(actual_barcode)
         send_email.email_lc_outgoing(actual_barcode, lc_details)
 
     return result
@@ -423,7 +427,12 @@ def get_lc_from_dewar(dewarBarCode):
     """
     Get the local contact name for a session associated with a dewar
     """
-    results = None
+    results = {
+            'barcode': dewarBarCode,
+            'lc1': '',
+            'email': '',
+            }
+
 
     records = Dewar.query.join(BLSession).\
         filter(BLSession.sessionId == Dewar.firstExperimentId).\
@@ -481,11 +490,15 @@ def is_facility_code(code):
 
     return result
 
-def is_arriving_at_ebic(location):
+def is_arriving_at_ebic(location, previous_location):
     """
     Utility method to check if the location is EBIC-IN-*
     in which case we need to email LC
+    Also check location has changed
     """
+    if location == previous_location:
+        return False
+
     result = False
 
     expr = re.compile(r'EBIC-IN-\d', re.IGNORECASE)
