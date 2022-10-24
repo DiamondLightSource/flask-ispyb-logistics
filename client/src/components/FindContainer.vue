@@ -56,7 +56,7 @@ export default {
         // Search backend for recent location of this container
         onFindContainer: function() {
             if (this.barcode) this.findContainer(this.barcode)
-            else setErrorMessage("No facility code provided")
+            else this.setErrorMessage("No facility code provided")
         },
         onClearForm: function() {
             this.barcode = ''
