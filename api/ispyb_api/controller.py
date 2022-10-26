@@ -2,7 +2,8 @@ import os
 import re
 import logging
 import itertools
-import datetime
+from datetime import datetime
+import json
 
 from sqlalchemy.orm.exc import NoResultFound, MultipleResultsFound
 from sqlalchemy.exc import DBAPIError
@@ -38,6 +39,11 @@ def set_location(barcode, location, awb=None):
 
     dewar_details = get_dewar_by_barcode(actual_barcode)
     previous_location = dewar_details['storageLocation']
+
+    if location = 'LN2TOPUP':
+        comments = json.loads(dewar_details['comments'])
+        comments['toppedUp'] = datetime.strftime(datetime.now(), '%Y-%m-%dT%H:%M:%S')
+        return update_comments(dewarId, comments)
 
     result = webservice.set_location(actual_barcode, location, awb)
 
@@ -85,6 +91,7 @@ def get_dewar_by_barcode(barcode):
         result['barCode'] = d.barCode
         result['storageLocation'] = d.storageLocation
         result['facilityCode'] = d.facilityCode
+        result['comments'] = d.comments
 
     except NoResultFound:
         logging.getLogger('ispyb-logistics').error("Error barcode {} does not exist in ISPyB".format(barcode))
