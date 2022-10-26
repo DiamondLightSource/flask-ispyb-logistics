@@ -45,7 +45,8 @@ def set_location(barcode, location, awb=None):
         comments = json.loads(dewar_details['comments'])
         now = datetime.strftime(datetime.now(), '%Y-%m-%dT%H:%M:%S')
         if 'toppedUp' in comments and type(comments['toppedUp']) == list:
-            comments['toppedUp'].append(now)
+            comments['toppedUp'].insert(0, now)
+            comments['toppedUp'] = comments['toppedUp'][:5]
         else:
             comments['toppedUp'] = [now]
         return update_comments(dewarId, json.dumps(comments))
