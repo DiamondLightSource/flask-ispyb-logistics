@@ -194,15 +194,11 @@ export default {
             if (dewarInfo.arrivalDate !== "" && !onBeamline) {
               let nowSecs = new Date().getTime()/1000;
               let lastFillSeconds = Date.parse(dewarInfo.arrivalDate)/1000
-              console.log('rack='+rack+' lastFillSeconds='+lastFillSeconds)
-              if ('comments' in dewarInfo) {
-                console.log('comments found: '+dewarInfo.comments)
+              // Topups can also be recorded in the comments field
+              if ('comments' in dewarInfo && dewarInfo.comments != null) {
                 let dewarComments = JSON.parse(dewarInfo.comments)
-                console.log('dewarComments='+dewarComments)
-                if (dewarComments != null && 'toppedUp' in dewarComments) {
-                  console.log('toppedUp found for dewarId '+dewarInfo.dewarId)
+                if ('toppedUp' in dewarComments) {
                   let lastTopupSeconds = Date.parse(dewarComments.toppedUp[0])/1000
-                  console.log('lastTopupSeconds='+lastTopupSeconds)
                   if (lastTopupSeconds > lastFillSeconds) {
                     lastFillSeconds = lastTopupSeconds
                   }
