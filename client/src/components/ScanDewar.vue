@@ -109,9 +109,9 @@ export default {
                     let message = ""
                     let isError = false
 
-                    // Changed because we don't get the dewar id back from synchweb
-                    // We get a DEWARHISTORYID instead
-                    if ( json['DEWARHISTORYID'] > 0 ) {
+                    // If we update the location, we get a DEWARHISTORYID
+                    // If we update the comment (eg LN2TOPUP), then we get a DEWARID
+                    if ( json['DEWARHISTORYID'] > 0 || json['DEWARID'] > 0 ) {
                         message = "Updating " + barcode + " to " + location
                         self.isError = false
                         self.playSuccess();
