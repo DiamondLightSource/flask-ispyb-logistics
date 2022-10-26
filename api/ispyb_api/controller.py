@@ -43,8 +43,12 @@ def set_location(barcode, location, awb=None):
     if location == 'LN2TOPUP':
         dewarId = dewar_details['dewarId']
         comments = json.loads(dewar_details['comments'])
-        comments['toppedUp'] = datetime.strftime(datetime.now(), '%Y-%m-%dT%H:%M:%S')
-        return update_comments(dewarId, comments)
+        now = datetime.strftime(datetime.now(), '%Y-%m-%dT%H:%M:%S')
+        if 'toppedUp' in comments and type(comments['toppedUp']) == list:
+            comments['toppedUp'].append(now)
+        else:
+            comments['toppedUp'] = [now]
+        return update_comments(dewarId, json.dumps(comments))
 
     result = webservice.set_location(actual_barcode, location, awb)
 
