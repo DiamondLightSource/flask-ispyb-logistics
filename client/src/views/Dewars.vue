@@ -195,12 +195,17 @@ export default {
               let nowSecs = new Date().getTime()/1000;
               let lastFillSeconds = Date.parse(dewarInfo.arrivalDate)/1000
               console.log('lastFillSeconds='+lastFillSeconds)
-              if ('comments' in dewarInfo && 'toppedUp' in dewarInfo.comments) {
-                console.log('toppedUp found for dewarId '+dewarInfo.dewarId)
-                let lastTopupSeconds = Date.parse(dewarInfo.comments.toppedUp[0])/1000
-                console.log('lastTopupSeconds='+lastTopupSeconds)
-                if (lastTopupSeconds > lastFillSeconds) {
-                  lastFillSeconds = lastTopupSeconds
+              if ('comments' in dewarInfo) {
+                console.log('comments found')
+                let dewarComments = JSON.parse(dewarInfo.comments)
+                console.log('dewarComments='+dewarComments)
+                if ('toppedUp' in dewarComments) {
+                  console.log('toppedUp found for dewarId '+dewarInfo.dewarId)
+                  let lastTopupSeconds = Date.parse(dewarComments.toppedUp[0])/1000
+                  console.log('lastTopupSeconds='+lastTopupSeconds)
+                  if (lastTopupSeconds > lastFillSeconds) {
+                    lastFillSeconds = lastTopupSeconds
+                  }
                 }
               }
 
