@@ -40,7 +40,7 @@ def set_location(barcode, location, awb=None):
     dewar_details = get_dewar_by_barcode(actual_barcode)
     previous_location = dewar_details['storageLocation']
 
-    if location = 'LN2TOPUP':
+    if location == 'LN2TOPUP':
         comments = json.loads(dewar_details['comments'])
         comments['toppedUp'] = datetime.strftime(datetime.now(), '%Y-%m-%dT%H:%M:%S')
         return update_comments(dewarId, comments)
