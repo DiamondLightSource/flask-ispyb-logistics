@@ -69,6 +69,10 @@ def update_location():
     if request.method == 'POST':
         location = request.form['location']
         barcode = request.form['barcode']
+        if location == 'LN2TOPUP':
+            comments = request.form.get('comments')
+            comments['toppedUp'] = datetime.strftime(datetime.now(), '%Y-%m-%dT%H:%M:%S')
+            return __update_dewar_comments(dewarId, comments)
 
         result, status_code = common.update_dewar_location(barcode, location)
 
@@ -109,10 +113,14 @@ def find():
 @api.route('/dewars/comments/<dewarId>', methods=['PATCH'])
 def comments(dewarId):
     comments = request.form.get('comments')
+    return __update_dewar_comments(dewarId, comments)
 
+
+def __update_dewar_comments(dewarId, comments):
     result, status_code = common.update_dewar_comments(dewarId, comments)
 
     return __json_response(result, status_code)
+
 
 def __json_response(result, code):
     """

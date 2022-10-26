@@ -36,5 +36,6 @@ beamline_locations = ['I03',
                       'USER-COLLECTION',
                       'STORES-OUT',
                       'ZONE6-TO-STORES',
-                      'EBIC'
+                      'EBIC',
+                      'LN2TOPUP',
                       ]

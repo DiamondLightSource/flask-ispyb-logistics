@@ -26,6 +26,7 @@ Emits an event 'confirm-removal' with a boolean true/false if user confirmed act
                 <li class="flex"><label class="w-1/3 px-2">Vent damaged?</label><input v-model="ventDamaged" type="checkbox" /></li>
                 <li class="flex"><label class="w-1/3 px-2">Foam plug missing?</label><input v-model="foamPlugMissing" type="checkbox" /></li>
                 <li class="flex"><label class="w-1/3 px-2">Dewar warm?</label><input v-model="dewarWarm" type="checkbox" /></li>
+                <li class="flex"><label class="w-1/3 px-2">LN2 topups</label><input v-model="toppedUp" type="text" class="w-2/3 leading-tight p-2" readonly/></li>
                 <li class="flex"><label class="w-1/3 px-2">Dewar checked?</label><input v-model="checked" type="text" class="w-2/3 leading-tight p-2" readonly/></li>
                 <li class="flex mt-2"><label class="w-1/3 px-2">Comments: </label><textarea v-model="comments" class="w-2/3 border border-gray-500 rounded leading-tight p-2" /></li>
               </ul>
@@ -52,6 +53,7 @@ function initialState() {
         ventDamaged: false,
         foamPlugMissing: false,
         dewarWarm: false,
+        toppedUp: "",
         checked: "",
         comments: ""
     }
@@ -95,6 +97,7 @@ export default {
                 this.ventDamaged = parseInt(json.ventDamaged) === 1,
                 this.foamPlugMissing = parseInt(json.foamPlugMissing) === 1,
                 this.dewarWarm = parseInt(json.warm) === 1,
+                this.toppedUp = json.toppedUp || "",
                 this.checked = json.checked || "",
                 this.comments = json.comments || ""
             } catch (err) {
@@ -130,6 +133,7 @@ export default {
             report['foamPlugMissing'] = this.foamPlugMissing ? 1 : 0
             report['warm'] = this.dewarWarm ? 1 : 0
 
+            if (this.toppedUp) report['toppedUp'] = this.toppedUp
             if (this.checked) report['checked'] = this.checked
 
             if (this.comments) report['comments'] = this.comments
