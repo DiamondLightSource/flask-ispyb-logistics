@@ -190,14 +190,23 @@ export default {
             // Flag to indicate dewar is on beamline (and therefore space is taken)...
             let onBeamline = dewarInfo.onBeamline ? dewarInfo.onBeamline : false
 
-            // Check here if arrivalData > 5 days (and dewar is not on beamline being processed)
+            // Check here if arrivalDate > 5 days ago (and dewar is not on beamline being processed)
             if (dewarInfo.arrivalDate !== "" && !onBeamline) {
               let nowSecs = new Date().getTime()/1000;
               let lastFillSeconds = Date.parse(dewarInfo.arrivalDate)/1000
+              console.log('lastFillSeconds='+lastFillSeconds)
+              if ('toppedUp' in dewarInfo.comments) {
+                console.log('toppedUp found for dewarId '+dewarInfo.dewarId)
+                let lastTopupSeconds = Date.parse(dewarInfo.comments.toppedUp[0])/1000
+                console.log('lastTopupSeconds='+lastTopupSeconds)
+                if (lastTopupSeconds > lastFillSeconds) {
+                  lastFillSeconds = lastTopupSeconds
+                }
+              }
 
               let deltaTime = nowSecs - lastFillSeconds
 
-              if (deltaTime > 5*24*3600) {
+              if (deltaTime > 5*24*60*60) {
                 needsLN2 = true
               }
             }
