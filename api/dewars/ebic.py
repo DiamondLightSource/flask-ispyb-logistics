@@ -23,5 +23,6 @@ beamline_locations.extend(['USER-COLLECTION',
                            'ZONE-4-STORE',
                            'ZONE-6-STORE',
                            'EBIC-TO-STORES',
+                           'LN2TOPUP',
                            ])
 
