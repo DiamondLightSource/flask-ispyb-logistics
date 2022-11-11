@@ -14,10 +14,14 @@ Emits an event 'confirm-removal' with a boolean true/false if user confirmed act
             @click.prevent="onClose()">x</button>
       <div class="w-1/2 bg-white shadow-lg rounded-lg p-4">
         <header class="border-b-2">
-            <h1 class="text-xl">Dewar Report for dewar {{ dewarBarcode }} ({{ dewarId }})</h1>
+            <h1 class="text-xl">Dewar Report for dewar {{ dewarBarcode }}</h1>
             </header>
         <section class="p-4">
-          <p class="mb-2">Enter report information for dewar</p>
+              <ul class="flex flex-col">
+                <li class="flex mt-2"><label class="w-1/3 px-2">Containers in dewar: </label>
+                  <span v-html="dewarContainers" class="w-2/3 leading-tight pb-2">{{ dewarContainers }}</span>
+                </li>
+              </ul>
           <form>
               <ul class="flex flex-col">
                 <li class="flex"><label class="w-1/3 px-2">Hard drive present?</label><input v-model="hdd" type="checkbox" /></li>
@@ -26,8 +30,8 @@ Emits an event 'confirm-removal' with a boolean true/false if user confirmed act
                 <li class="flex"><label class="w-1/3 px-2">Vent damaged?</label><input v-model="ventDamaged" type="checkbox" /></li>
                 <li class="flex"><label class="w-1/3 px-2">Foam plug missing?</label><input v-model="foamPlugMissing" type="checkbox" /></li>
                 <li class="flex"><label class="w-1/3 px-2">Dewar warm?</label><input v-model="dewarWarm" type="checkbox" /></li>
-                <li class="flex"><label class="w-1/3 px-2">LN2 topups</label><input v-model="toppedUp" type="text" class="w-2/3 leading-tight p-2" readonly/></li>
-                <li class="flex"><label class="w-1/3 px-2">Dewar checked?</label><input v-model="checked" type="text" class="w-2/3 leading-tight p-2" readonly/></li>
+                <li class="flex"><label class="w-1/3 px-2">LN2 topups</label><input v-model="toppedUp" type="text" class="w-2/3 leading-tight py-2" readonly/></li>
+                <li class="flex"><label class="w-1/3 px-2">Dewar checked?</label><input v-model="checked" type="text" class="w-2/3 leading-tight py-2" readonly/></li>
                 <li class="flex mt-2"><label class="w-1/3 px-2">Comments: </label><textarea v-model="comments" class="w-2/3 border border-gray-500 rounded leading-tight p-2" /></li>
               </ul>
           </form>
@@ -55,7 +59,8 @@ function initialState() {
         dewarWarm: false,
         toppedUp: "",
         checked: "",
-        comments: ""
+        comments: "",
+        dewarContainers: "",
     }
 }
 
@@ -75,7 +80,10 @@ export default {
         },
         dewarComments: {
             type: String,
-        }
+        },
+        dewarContainers: {
+            type: String,
+        },
     },
     data() {
         return initialState()
@@ -83,7 +91,10 @@ export default {
     watch: {
         dewarComments: function(newVal) {
             if (newVal) this.initialiseReport(newVal)
-        }
+        },
+        dewarContainers: function(newVal) {
+            if (newVal) this.dewarContainers = newVal.join("<br />")
+        },
     },
     methods: {
         // To conserve characters save each boolean as 1 or 0
