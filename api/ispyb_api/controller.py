@@ -122,10 +122,9 @@ def find_dewars_by_location(locations):
         # Order so we get the most recent first...
         # The Dewar storageLocation does not always match the transport history
         dewars = Dewar.query.join(DewarTransportHistory).\
-            join(Container).\
+            join(Container, Dewar.dewarId == Container.dewarId, isouter=True).\
             filter(func.lower(Dewar.storageLocation).in_(locations)).\
             filter(Dewar.dewarId == DewarTransportHistory.dewarId).\
-            filter(Dewar.dewarId == Container.dewarId).\
             filter(func.lower(Dewar.storageLocation) == func.lower(DewarTransportHistory.storageLocation)).\
             order_by(desc(DewarTransportHistory.arrivalDate)).\
             values(Dewar.dewarId,
