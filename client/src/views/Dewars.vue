@@ -76,6 +76,7 @@
       v-bind:dewarId="dewarId"
       v-bind:dewarBarcode="dewarBarcode"
       v-bind:dewarComments="dewarComments"
+      v-bind:dewarContainers="dewarContainers"
       v-on:confirm-update="onConfirmUpdateDewarReport">
     </DewarReportDialog>
 
@@ -117,7 +118,8 @@ export default {
       // Dewar Report id
       dewarId: 0,
       dewarBarcode: '',
-      dewarComments: ''
+      dewarComments: '',
+      dewarContainers: '',
     }
   },
   created: function() {
@@ -215,6 +217,7 @@ export default {
             rack_data[rack] = {
               'dewarId': dewarInfo.dewarId,
               'comments': dewarInfo.comments,
+              'dewarContainers': dewarInfo.dewarContainers,
               'barcode': dewarInfo.barcode,
               'arrivalDate': dewarInfo.arrivalDate,
               'facilityCode': dewarInfo.facilityCode,
@@ -279,6 +282,7 @@ export default {
           this.dewarComments = dewar.comments
           this.dewarId = dewar.dewarId
           this.dewarBarcode = dewar.barcode
+          this.dewarContainers = dewar.dewarContainers
         },
         // User has either confirmed or cancelled
         onConfirmUpdateDewarReport: function(payload) {
@@ -289,6 +293,7 @@ export default {
           this.dewarId = 0;
           this.dewarComments = '';
           this.dewarBarcode = '';
+          this.dewarContainers = '';
         },
         updateDewarReport: function(dewarId, comments) {
           let url = this.$store.state.apiRoot + "dewars/comments/" + dewarId

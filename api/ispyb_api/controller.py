@@ -13,7 +13,7 @@ from sqlalchemy.orm import aliased
 from . import db
 from . import webservice
 from . import send_email
-from .models import Dewar, DewarTransportHistory, LabContact, Laboratory, Shipping, Proposal, Person, BLSession
+from .models import Dewar, DewarTransportHistory, LabContact, Laboratory, Shipping, Proposal, Person, BLSession, Container
 
 # What age do we ignore container history entries
 CONTAINER_FILTER_DAYS_LIMIT = 30
@@ -122,8 +122,10 @@ def find_dewars_by_location(locations):
         # Order so we get the most recent first...
         # The Dewar storageLocation does not always match the transport history
         dewars = Dewar.query.join(DewarTransportHistory).\
+            join(Container).\
             filter(func.lower(Dewar.storageLocation).in_(locations)).\
             filter(Dewar.dewarId == DewarTransportHistory.dewarId).\
+            filter(Dewar.dewarId == Container.dewarId).\
             filter(func.lower(Dewar.storageLocation) == func.lower(DewarTransportHistory.storageLocation)).\
             order_by(desc(DewarTransportHistory.arrivalDate)).\
             values(Dewar.dewarId,
@@ -134,16 +136,17 @@ def find_dewars_by_location(locations):
                    Dewar.comments,
                    DewarTransportHistory.arrivalDate,
                    DewarTransportHistory.dewarStatus,
+                   Container.code,
                    )
 
         for dewar in dewars:
             # If we already have an entry, it means there is a more recent change for a dewar in this location
             # Note we store the data in upper case - SynchWeb uses lower case while the UI requests data in upper case...
             if dewar.storageLocation.upper() in results:
-                logging.getLogger('ispyb-logistics').debug('Ignoring older entry for dewar {} location {} at {}'.format(dewar.barCode, dewar.storageLocation, dewar.arrivalDate))
+                if dewar.code not in results[dewar.storageLocation.upper()]['dewarContainers']:
+                    results[dewar.storageLocation.upper()]['dewarContainers'].append(dewar.code)
             else:
                 logging.getLogger('ispyb-logistics').debug('Found entry for this dewar {} in {} at {}'.format(dewar.barCode, dewar.storageLocation, dewar.arrivalDate))
-                # Returning three items per location [barcode, arrivalDate and FacilityCode]
                 results[dewar.storageLocation.upper()] = {
                     'dewarId': dewar.dewarId,
                     'barcode': dewar.barCode,
@@ -152,7 +155,8 @@ def find_dewars_by_location(locations):
                     'status': dewar.dewarStatus,
                     'comments': dewar.comments,
                     'onBeamline': False,
-                    'dewarLocation': dewar.storageLocation # In this case it matches the dewar
+                    'dewarLocation': dewar.storageLocation,
+                    'dewarContainers': [dewar.code],
                 }
 
     except NoResultFound:
