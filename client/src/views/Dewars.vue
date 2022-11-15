@@ -25,7 +25,6 @@
     <div v-if="zone==='zone6'" class="flex flex-wrap">
       <div class="w-full md:w-1/4 p-2" v-for="(dewar, rack) in rack_locations" v-bind:key="rack">
         <DewarCard
-          v-on:clear-location="onClearLocation"
           v-on:update-dewar="onShowDewarReport"
           v-bind:dewar="dewar"
           v-bind:rack="rack">
@@ -37,7 +36,6 @@
     <div v-else-if="zone === 'zone4'" class="flex flex-wrap">
       <div class="w-full md:w-1/6 p-2" v-for="(dewar, rack) in rack_locations" v-bind:key="rack" >
         <DewarCard
-          v-on:clear-location="onClearLocation"
           v-on:update-dewar="onShowDewarReport"
           v-bind:dewar="dewar"
           v-bind:rack="rack">
@@ -49,7 +47,6 @@
     <div v-else-if="zone==='ebic'" class="flex flex-wrap">
       <div class="w-full md:w-1/4 p-2" v-for="(dewar, rack) in rack_locations" v-bind:key="rack">
         <DewarCard 
-          v-on:clear-location="onClearLocation"
           v-on:update-dewar="onShowDewarReport"
           v-bind:dewar="dewar"
           v-bind:rack="rack">
@@ -77,7 +74,8 @@
       v-bind:dewarBarcode="dewarBarcode"
       v-bind:dewarComments="dewarComments"
       v-bind:dewarContainers="dewarContainers"
-      v-on:confirm-update="onConfirmUpdateDewarReport">
+      v-on:confirm-update="onConfirmUpdateDewarReport"
+      v-on:clear-location="onClearLocation">
     </DewarReportDialog>
 
   </div>

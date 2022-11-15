@@ -41,7 +41,7 @@ Emits an event 'confirm-removal' with a boolean true/false if user confirmed act
             <button class="text-white bg-success hover:bg-green-700 rounded px-2 py-1 m-2" v-on:click="onSave()">Save Report</button>
             <button class="text-white bg-danger hover:bg-red-700 rounded px-2 py-1 m-2" v-on:click="onClose()">Cancel</button>
           </div>
-          <button class="rounded text-sm text-gray-200 bg-red-500 hover:bg-red-700 px-2 py-1" v-on:click.prevent="clearLocation(dewarBarcode)"><i class="fa fa-trash pr-2"></i>Clear Dewar</button>
+          <button class="text-white bg-red-700 hover:bg-red-900 rounded px-2 py-1 m-2" v-on:click.prevent="clearLocation(dewarBarcode)"><i class="fa fa-trash pr-2"></i>Clear Dewar</button>
         </footer>
       </div>
     </div>
