@@ -96,7 +96,7 @@ export default {
             if (newVal) this.initialiseReport(newVal)
         },
         dewarContainers: function(newVal) {
-            if (newVal) this.dewarContainers = newVal.join("<br />")
+            if (Array.isArray(newVal)) this.dewarContainers = newVal.join("<br />")
         },
     },
     methods: {
