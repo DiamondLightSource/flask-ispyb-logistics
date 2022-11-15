@@ -25,7 +25,6 @@
     <div v-if="zone==='zone6'" class="flex flex-wrap">
       <div class="w-full md:w-1/4 p-2" v-for="(dewar, rack) in rack_locations" v-bind:key="rack">
         <DewarCard
-          v-on:clear-location="onClearLocation"
           v-on:update-dewar="onShowDewarReport"
           v-bind:dewar="dewar"
           v-bind:rack="rack">
@@ -37,7 +36,6 @@
     <div v-else-if="zone === 'zone4'" class="flex flex-wrap">
       <div class="w-full md:w-1/6 p-2" v-for="(dewar, rack) in rack_locations" v-bind:key="rack" >
         <DewarCard
-          v-on:clear-location="onClearLocation"
           v-on:update-dewar="onShowDewarReport"
           v-bind:dewar="dewar"
           v-bind:rack="rack">
@@ -49,7 +47,6 @@
     <div v-else-if="zone==='ebic'" class="flex flex-wrap">
       <div class="w-full md:w-1/4 p-2" v-for="(dewar, rack) in rack_locations" v-bind:key="rack">
         <DewarCard 
-          v-on:clear-location="onClearLocation"
           v-on:update-dewar="onShowDewarReport"
           v-bind:dewar="dewar"
           v-bind:rack="rack">
@@ -67,7 +64,7 @@
     <ClearLocationDialog 
       v-on:confirm-removal="onConfirmClear" 
       v-bind:isActive="isRemoveDialogActive"
-      v-bind:locationToRemove="locationToRemove"
+      v-bind:barcodeToRemove="barcodeToRemove"
       v-bind:rack_locations="rack_locations">
     </ClearLocationDialog>
 
@@ -77,7 +74,8 @@
       v-bind:dewarBarcode="dewarBarcode"
       v-bind:dewarComments="dewarComments"
       v-bind:dewarContainers="dewarContainers"
-      v-on:confirm-update="onConfirmUpdateDewarReport">
+      v-on:confirm-update="onConfirmUpdateDewarReport"
+      v-on:clear-location="onClearLocation">
     </DewarReportDialog>
 
   </div>
@@ -107,7 +105,7 @@ export default {
   },
   data() {
     return {
-      locationToRemove: null,
+      barcodeToRemove: null,
       isRemoveDialogActive: false,
       beamlines: [],
 
@@ -257,10 +255,10 @@ export default {
         },
         // Handler for clear location event (rack location clicked)
         // This will trigger the confirm dialog box to show up
-        onClearLocation: function(location) {
+        onClearLocation: function(barcode) {
           // This location will be upper case because we control how it is rendered
           this.isRemoveDialogActive = true
-          this.locationToRemove = location
+          this.barcodeToRemove = barcode
         },
         // User has either confirmed or cancelled
         onConfirmClear: function(confirm) {
@@ -272,7 +270,7 @@ export default {
             // window.location.reload()
           }
           // Reset data that will disable dialog box
-          this.locationToRemove = "";
+          this.barcodeToRemove = "";
           this.isRemoveDialogActive = false
         },
         // Handler for clear location event (rack location clicked)

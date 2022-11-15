@@ -36,9 +36,12 @@ Emits an event 'confirm-removal' with a boolean true/false if user confirmed act
               </ul>
           </form>
         </section>
-        <footer class="flex border-t-2 justify-end">
-          <button class="text-white bg-success hover:bg-green-700 rounded px-2 py-1 m-2" v-on:click="onSave()">Save Report</button>
-          <button class="text-white bg-danger hover:bg-red-700 rounded px-2 py-1 m-2" v-on:click="onClose()">Cancel</button>
+        <footer class="flex border-t-2 justify-between">
+          <div>
+            <button class="text-white bg-success hover:bg-green-700 rounded px-2 py-1 m-2" v-on:click="onSave()">Save Report</button>
+            <button class="text-white bg-danger hover:bg-red-700 rounded px-2 py-1 m-2" v-on:click="onClose()">Cancel</button>
+          </div>
+          <button class="text-white bg-red-700 hover:bg-red-900 rounded px-2 py-1 m-2" v-on:click.prevent="clearLocation(dewarBarcode)"><i class="fa fa-trash pr-2"></i>Clear Dewar</button>
         </footer>
       </div>
     </div>
@@ -154,7 +157,12 @@ export default {
         checkLengthValid: function(comments) {
             console.log("Comments length = " + comments.length)
             return comments.length > MAX_CONTENT_LENGTH ? false : true
-        }
+        },
+        clearLocation: function(barcode) {
+            this.onClose()
+            console.log("Clear Dewar " + barcode)
+            this.$emit('clear-location', barcode)
+        },
     }
 }
 </script>

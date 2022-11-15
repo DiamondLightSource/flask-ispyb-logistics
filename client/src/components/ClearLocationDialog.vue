@@ -17,7 +17,7 @@ Emits an event 'confirm-removal' with a boolean true/false if user confirmed act
             <h1 class="text-xl">Confirm Clear</h1>
             </header>
         <section class="p-4">
-          <p>Confirm removal of dewar from location {{locationToRemove}}?</p>
+          <p>Confirm removal of dewar {{barcodeToRemove}}?</p>
         </section>
         <footer class="flex border-t-2">
           <button class="w-1/2 text-white bg-success hover:bg-green-700 rounded p-1 m-2" v-on:click="onConfirm()">Confirm</button>
@@ -31,34 +31,38 @@ Emits an event 'confirm-removal' with a boolean true/false if user confirmed act
 <script>
 export default {
     name: 'ClearLocationDialog',
-    props: ['isActive', 'locationToRemove', 'rack_locations'],
+    props: ['isActive', 'barcodeToRemove', 'rack_locations'],
     methods: {
         // User has confirmed to remove the dewar from this location
         onConfirm: function() {
-            // Extra check to ensure this is a valid location
-            let hasLocation = this.rack_locations.hasOwnProperty(this.locationToRemove)
 
-            if (hasLocation) {
-                // Store variables for use within axios handler functions
-                let self = this
-                let location = this.locationToRemove
-                let barcode = this.rack_locations[location]['barcode']
-                let url = this.$store.state.apiRoot + "dewars/locations"
-
-                this.$http.delete(url, {params: {'location': location}})
-                .then(function(response) {
-                    console.log(response)
-                    let message = "Removing dewar " + barcode + " from location " + location + "..."
-
-                    self.$store.dispatch("updateMessage", {text: message, isError: false})
-                })
-                .catch(function() {
-                    console.log("Error removing dewar")
-                    let message = "Error removing dewar " + barcode + " from location " + location
-
-                    self.$store.dispatch("updateMessage", {text: message, isError: true})
-                })
+            // Store variables for use within axios handler functions
+            let self = this
+            let barcode = this.barcodeToRemove
+            let location = ""
+            let loc = ""
+            for (loc in this.rack_locations) {
+                if (this.rack_locations[loc]['barcode'] == barcode) {
+                    location = loc
+                    break
+                }
             }
+            let url = this.$store.state.apiRoot + "dewars/locations"
+
+            this.$http.delete(url, {params: {'location': location}})
+            .then(function(response) {
+                console.log(response)
+                let message = "Removing dewar " + barcode + " from location " + location + "..."
+
+                self.$store.dispatch("updateMessage", {text: message, isError: false})
+            })
+            .catch(function() {
+                console.log("Error removing dewar")
+                let message = "Error removing dewar " + barcode + " from location " + location
+
+                self.$store.dispatch("updateMessage", {text: message, isError: true})
+            })
+
             this.$emit("confirm-removal", true)
         },
         // User has cancelled        
