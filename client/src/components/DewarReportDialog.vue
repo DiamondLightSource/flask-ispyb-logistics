@@ -159,6 +159,7 @@ export default {
             return comments.length > MAX_CONTENT_LENGTH ? false : true
         },
         clearLocation: function(barcode) {
+            this.onClose()
             console.log("Clear Dewar " + barcode)
             this.$emit('clear-location', barcode)
         },

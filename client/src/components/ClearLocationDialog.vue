@@ -35,36 +35,33 @@ export default {
     methods: {
         // User has confirmed to remove the dewar from this location
         onConfirm: function() {
-            // Extra check to ensure this is a valid location
-            let hasLocation = this.rack_locations.hasOwnProperty(this.barcodeToRemove)
 
-            if (hasLocation) {
-                // Store variables for use within axios handler functions
-                let self = this
-                let barcode = this.barcodeToRemove
-                let location = ""
-                for (loc in this.rack_locations) {
-                    if (this.rack_locations[loc]['barcode'] == barcode) {
-                        location = loc
-                        break
-                    }
+            // Store variables for use within axios handler functions
+            let self = this
+            let barcode = this.barcodeToRemove
+            let location = ""
+            for (loc in this.rack_locations) {
+                if (this.rack_locations[loc]['barcode'] == barcode) {
+                    location = loc
+                    break
                 }
-                let url = this.$store.state.apiRoot + "dewars/locations"
-
-                this.$http.delete(url, {params: {'location': location}})
-                .then(function(response) {
-                    console.log(response)
-                    let message = "Removing dewar " + barcode + " from location " + location + "..."
-
-                    self.$store.dispatch("updateMessage", {text: message, isError: false})
-                })
-                .catch(function() {
-                    console.log("Error removing dewar")
-                    let message = "Error removing dewar " + barcode + " from location " + location
-
-                    self.$store.dispatch("updateMessage", {text: message, isError: true})
-                })
             }
+            let url = this.$store.state.apiRoot + "dewars/locations"
+
+            this.$http.delete(url, {params: {'location': location}})
+            .then(function(response) {
+                console.log(response)
+                let message = "Removing dewar " + barcode + " from location " + location + "..."
+
+                self.$store.dispatch("updateMessage", {text: message, isError: false})
+            })
+            .catch(function() {
+                console.log("Error removing dewar")
+                let message = "Error removing dewar " + barcode + " from location " + location
+
+                self.$store.dispatch("updateMessage", {text: message, isError: true})
+            })
+
             this.$emit("confirm-removal", true)
         },
         // User has cancelled        
