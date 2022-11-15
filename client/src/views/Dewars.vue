@@ -67,7 +67,7 @@
     <ClearLocationDialog 
       v-on:confirm-removal="onConfirmClear" 
       v-bind:isActive="isRemoveDialogActive"
-      v-bind:locationToRemove="locationToRemove"
+      v-bind:barcodeToRemove="barcodeToRemove"
       v-bind:rack_locations="rack_locations">
     </ClearLocationDialog>
 
@@ -107,7 +107,7 @@ export default {
   },
   data() {
     return {
-      locationToRemove: null,
+      barcodeToRemove: null,
       isRemoveDialogActive: false,
       beamlines: [],
 
@@ -257,10 +257,10 @@ export default {
         },
         // Handler for clear location event (rack location clicked)
         // This will trigger the confirm dialog box to show up
-        onClearLocation: function(location) {
+        onClearLocation: function(barcode) {
           // This location will be upper case because we control how it is rendered
           this.isRemoveDialogActive = true
-          this.locationToRemove = location
+          this.barcodeToRemove = barcode
         },
         // User has either confirmed or cancelled
         onConfirmClear: function(confirm) {
@@ -272,7 +272,7 @@ export default {
             // window.location.reload()
           }
           // Reset data that will disable dialog box
-          this.locationToRemove = "";
+          this.barcodeToRemove = "";
           this.isRemoveDialogActive = false
         },
         // Handler for clear location event (rack location clicked)
