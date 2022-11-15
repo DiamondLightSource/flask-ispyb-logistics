@@ -40,6 +40,7 @@ export default {
             let self = this
             let barcode = this.barcodeToRemove
             let location = ""
+            let loc = ""
             for (loc in this.rack_locations) {
                 if (this.rack_locations[loc]['barcode'] == barcode) {
                     location = loc
