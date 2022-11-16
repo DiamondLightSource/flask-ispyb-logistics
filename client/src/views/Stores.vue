@@ -301,7 +301,8 @@ export default {
                 // It's possible we have moved off the dewar link, in which case ignore the response
                 if (theDewar.hover) {
                     let json = response.data
-                    theDewar.courierDestination = json.value
+                    console.log(json)
+                    theDewar.courierDestination = json.address.addressLocality
                 }
             }).catch(function(error) {
                 console.log(error)
