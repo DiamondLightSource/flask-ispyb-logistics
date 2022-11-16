@@ -1,5 +1,6 @@
 import time
 import logging
+import os
 
 from flask import Blueprint
 from flask import render_template
@@ -76,18 +77,20 @@ def location():
 @api.route('/dewars/courier/destination', methods=["GET"])
 def destination():
     awb = request.args.get('awb')
-    url = 'https://www.dhl.com/shipmentTracking?AWB={}'.format(awb)
+    url = 'https://api-eu.dhl.com/track/shipments?trackingNumber={}'.format(awb)
+    dhl_key = os.environ.get('DHL_KEY', 'demo-key')
+    headers = {'DHL-API-Key': dhl_key}
 
     result = {}
     status_code = 200
 
     try:
         # Added timeout to request
-        r = requests.get(url, timeout=5)
+        r = requests.get(url, timeout=5, headers=headers)
 
         if r.status_code == requests.codes.ok:
             data = r.json()
-            result = data['results'][0]['destination']
+            result = data['shipments'][0]['destination']
             logging.getLogger('ispyb-logistics').info("Got Destination from DHL {}".format(result))
         else:
             logging.getLogger('ispyb-logistics').error("Error getting dewar destination from DHL {} {}".format(r.status_code, r.text))
