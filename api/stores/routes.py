@@ -146,6 +146,7 @@ def get_destination_from_barcode(barcode):
             # Try to derive the destination from proposal type
             session = controller.get_instrument_from_dewar(barcode)
             instrument = session.get('instrument', '').upper()
+            logging.getLogger('ispyb-logistics').error('Barcode {}: Instrument {}'.format(barcode, instrument))
             destination = get_destination_from_instrument(instrument)
     except:
         logging.getLogger('ispyb-logistics').error('Could not get destination from barcode {}'.format(barcode))

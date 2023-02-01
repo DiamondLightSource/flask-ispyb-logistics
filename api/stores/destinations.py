@@ -19,13 +19,20 @@ class I14:
     proposal_codes = ['SP']
     instruments = ['I14']
 
+class I19:
+    destination = 'I19'
+    proposal_codes = ['CY']
+    instruments = ['I19']
+
 class SCM:
     destination = 'Lab 14'
     proposal_codes = []
     instruments = ['B21']
 
 
-ALLDESTINATIONS = [I14, ZONE1, EBIC, SCM, MX]  # order is important
+
+
+ALLDESTINATIONS = [I14, ZONE1, EBIC, SCM, I19, MX]  # order is important
 
 def get_destination_from_barcode(barcode):
     barcode_prefix = barcode.upper()[0:2]
