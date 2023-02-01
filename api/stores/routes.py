@@ -10,7 +10,7 @@ from flask import request
 import requests
 
 from api.ispyb_api import controller
-from .destinations import EBIC, MX, I14, SCM
+from . import destinations
 
 api = Blueprint('stores', __name__, url_prefix='/api/stores')
 
@@ -141,32 +141,12 @@ def get_destination_from_barcode(barcode):
     destination = None
 
     try:
-        barcode_prefix = barcode.upper()[0:2]
-
-        if barcode_prefix in I14.proposal_codes or any('-{}'.format(b) in barcode.upper() for b in I14.instruments):
-            destination = I14.destination
-        elif barcode_prefix in EBIC.proposal_codes or any('-{}'.format(b) in barcode.upper() for b in EBIC.instruments):
-            destination = EBIC.destination
-        elif barcode_prefix in MX.proposal_codes or any('-{}'.format(b) in barcode.upper() for b in MX.instruments):
-            destination = MX.destination
-        elif barcode_prefix in SCM.proposal_codes or any('-{}'.format(b) in barcode.upper() for b in SCM.instruments):
-            destination = SCM.destination
-        else:
+        destination = destinations.get_destination_from_barcode(barcode)
+        if destination == 'Unknown':
             # Try to derive the destination from proposal type
             session = controller.get_instrument_from_dewar(barcode)
-
             instrument = session.get('instrument', '').upper()
-
-            if instrument in EBIC.instruments:
-                destination = EBIC.destination
-            elif instrument in MX.instruments:
-                destination = MX.destination
-            elif instrument in I14.instruments:
-                destination = I14.destination
-            elif instrument in SCM.instruments:
-                destination = SCM.destination
-            else:
-                destination = 'Unknown'
+            destination = destinations.get_destination_from_instrument(instrument)
     except:
         logging.getLogger('ispyb-logistics').error('Could not get destination from barcode {}'.format(barcode))
 
