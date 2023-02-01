@@ -10,7 +10,7 @@ from flask import request
 import requests
 
 from ispyb_api import controller
-import destinations
+from . import destinations
 
 api = Blueprint('stores', __name__, url_prefix='/api/stores')
 
