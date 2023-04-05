@@ -191,7 +191,7 @@ export default {
             let onBeamline = dewarInfo.onBeamline ? dewarInfo.onBeamline : false
 
             // Check here if topup > 5 days ago (and dewar is not on beamline being processed)
-            if (!onBeamline) {
+            if (dewarInfo.arrivalDate !== "" && !onBeamline) {
               let nowSecs = new Date().getTime()/1000;
               // Topups are now recorded in the comments field
               if ('comments' in dewarInfo && dewarInfo.comments != null) {
