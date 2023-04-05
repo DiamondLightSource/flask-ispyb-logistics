@@ -10,7 +10,7 @@
                 </ul>
                 <footer class="">
                     <div class="text-center py-2">
-                        <p>(Scan dewars back into the same position after refilling)</p>
+                        <p>(Scan dewars with location LN2TOPUP after refilling)</p>
                     </div>
                 </footer>
             </section>
@@ -23,7 +23,7 @@
                 </ul>
                 <footer class="">
                     <div class="text-center py-2">
-                        <p>(Scan dewars back into the same position after refilling)</p>
+                        <p>(Scan dewars with location LN2TOPUP after refilling)</p>
                     </div>
                 </footer>
             </section>
@@ -36,7 +36,7 @@
                 </ul>
                 <footer class="">
                     <div class="text-center py-2">
-                        <p>(Scan dewars back into the same position after refilling)</p>
+                        <p>(Scan dewars with location LN2TOPUP after refilling)</p>
                     </div>
                 </footer>
             </section>
@@ -49,7 +49,7 @@
                 </ul>
                 <footer class="">
                     <div class="text-center py-2">
-                        <p>(Scan dewars back into the same position after refilling)</p>
+                        <p>(Scan dewars with location LN2TOPUP after refilling)</p>
                     </div>
                 </footer>
             </section>
