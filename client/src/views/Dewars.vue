@@ -190,18 +190,15 @@ export default {
             // Flag to indicate dewar is on beamline (and therefore space is taken)...
             let onBeamline = dewarInfo.onBeamline ? dewarInfo.onBeamline : false
 
-            // Check here if arrivalDate > 5 days ago (and dewar is not on beamline being processed)
+            // Check here if topup > 5 days ago (and dewar is not on beamline being processed)
             if (dewarInfo.arrivalDate !== "" && !onBeamline) {
               let nowSecs = new Date().getTime()/1000;
-              let lastFillSeconds = Date.parse(dewarInfo.arrivalDate)/1000
-              // Topups can also be recorded in the comments field
+              let lastFillSeconds = 0;
+              // Topups are now recorded in the comments field
               if ('comments' in dewarInfo && dewarInfo.comments != null) {
                 let dewarComments = JSON.parse(dewarInfo.comments)
                 if ('toppedUp' in dewarComments) {
-                  let lastTopupSeconds = Date.parse(dewarComments.toppedUp[0])/1000
-                  if (lastTopupSeconds > lastFillSeconds) {
-                    lastFillSeconds = lastTopupSeconds
-                  }
+                  lastFillSeconds = Date.parse(dewarComments.toppedUp[0])/1000
                 }
               }
 
