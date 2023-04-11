@@ -198,7 +198,7 @@ export default {
               if ('comments' in dewarInfo && dewarInfo.comments != null) {
                 let dewarComments = JSON.parse(dewarInfo.comments)
                 if ('toppedUp' in dewarComments) {
-                  lastFillSeconds = Date.parse(dewarComments.toppedUp[0])/1000
+                  lastFillSeconds = Date.parse(dewarComments.toppedUp.slice(-1)[0])/1000
                 }
               }
 
