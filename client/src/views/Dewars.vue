@@ -4,7 +4,8 @@
       <div class="w-full md:w-1/3 border border-solid border-black m-2">
         <ScanDewar 
           v-bind:allowed_locations="allowed_locations"
-          v-on:dewars-updated="handleDewarUpdate">
+          v-on:dewars-updated="handleDewarUpdate"
+          ref="ScanDewar">
           </ScanDewar>
       </div>
       <div class="w-full md:w-1/3 border border-solid border-black m-2">
@@ -74,6 +75,9 @@
       v-bind:dewarBarcode="dewarBarcode"
       v-bind:dewarComments="dewarComments"
       v-bind:dewarContainers="dewarContainers"
+      v-bind:beamline="beamline || ''"
+      v-bind:visit="visit || ''"
+      v-bind:startDate="startDate || ''"
       v-on:confirm-update="onConfirmUpdateDewarReport"
       v-on:clear-location="onClearLocation">
     </DewarReportDialog>
@@ -118,6 +122,9 @@ export default {
       dewarBarcode: '',
       dewarComments: '',
       dewarContainers: '',
+      beamline: '',
+      visit: '',
+      startDate: '',
     }
   },
   created: function() {
@@ -213,6 +220,9 @@ export default {
               'dewarId': dewarInfo.dewarId,
               'comments': dewarInfo.comments,
               'dewarContainers': dewarInfo.dewarContainers,
+              'beamline': dewarInfo.beamline,
+              'visit': dewarInfo.visit,
+              'startDate': dewarInfo.startDate,
               'barcode': dewarInfo.barcode,
               'arrivalDate': dewarInfo.arrivalDate,
               'facilityCode': dewarInfo.facilityCode,
@@ -278,6 +288,9 @@ export default {
           this.dewarId = dewar.dewarId
           this.dewarBarcode = dewar.barcode
           this.dewarContainers = dewar.dewarContainers
+          this.beamline = dewar.beamline
+          this.visit = dewar.visit
+          this.startDate = dewar.startDate
         },
         // User has either confirmed or cancelled
         onConfirmUpdateDewarReport: function(payload) {
@@ -289,6 +302,10 @@ export default {
           this.dewarComments = '';
           this.dewarBarcode = '';
           this.dewarContainers = '';
+          this.beamline = '';
+          this.visit = '';
+          this.startDate = '';
+          this.$refs.ScanDewar.$refs.barcode.focus();
         },
         updateDewarReport: function(dewarId, comments) {
           let url = this.$store.state.apiRoot + "dewars/comments/" + dewarId

@@ -19,11 +19,15 @@ Emits an event 'confirm-removal' with a boolean true/false if user confirmed act
         <section class="p-4">
               <ul class="flex flex-col">
                 <li class="flex mt-2"><label class="w-1/3 px-2">Containers in dewar: </label>
-                  <span v-html="dewarContainers" class="w-2/3 leading-tight pb-2">{{ dewarContainers }}</span>
+                  <span v-html="dewarContainers" class="w-2/3 leading-tight pb-2"></span>
                 </li>
               </ul>
           <form>
               <ul class="flex flex-col">
+                <li class="flex" v-if="visit">
+                  <label class="w-1/3 px-2">Visit</label>
+                  <span class="w-2/3 leading-tight pb-2">{{ visit + ' - ' + beamline + ' - ' + startDateString }}</span>
+                </li>
                 <li class="flex"><label class="w-1/3 px-2">Hard drive present?</label><input v-model="hdd" type="checkbox" /></li>
                 <li class="flex"><label class="w-1/3 px-2">Tools present?</label><input v-model="tools" type="checkbox" /></li>
                 <li class="flex"><label class="w-1/3 px-2">T bar missing?</label><input v-model="tBarMissing" type="checkbox" /></li>
@@ -64,6 +68,10 @@ function initialState() {
         checked: "",
         comments: "",
         dewarContainers: "",
+        visit: "",
+        beamline: "",
+        startDate: "",
+        startDateString: "",
     }
 }
 
@@ -87,6 +95,18 @@ export default {
         dewarContainers: {
             type: String,
         },
+        visit: {
+            type: String,
+        },
+        beamline: {
+            type: String,
+        },
+        startDate: {
+            type: String,
+        },
+        startDateString: {
+            type: String,
+        },
     },
     data() {
         return initialState()
@@ -98,6 +118,9 @@ export default {
         dewarContainers: function(newVal) {
             if (Array.isArray(newVal)) this.dewarContainers = newVal.join("<br />")
         },
+        startDate: function(newVal) {
+            if (newVal) this.startDateString = new Date(newVal).toLocaleString("en-GB", {weekday:"short", month:"short", day:"numeric", hour:"numeric", minute:"numeric"})
+        }
     },
     methods: {
         // To conserve characters save each boolean as 1 or 0

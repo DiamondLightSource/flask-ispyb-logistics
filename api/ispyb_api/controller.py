@@ -125,6 +125,9 @@ def find_dewars_by_location(locations):
         # The Dewar storageLocation does not always match the transport history
         dewars = Dewar.query.join(DewarTransportHistory).\
             join(Container, Dewar.dewarId == Container.dewarId, isouter=True).\
+            join(BLSession, Dewar.firstExperimentId == BLSession.sessionId, isouter=True).\
+            join(Shipping, Dewar.shippingId == Shipping.shippingId).\
+            join(Proposal, Shipping.proposalId == Proposal.proposalId).\
             filter(func.lower(Dewar.storageLocation).in_(locations)).\
             filter(Dewar.dewarId == DewarTransportHistory.dewarId).\
             filter(func.lower(Dewar.storageLocation) == func.lower(DewarTransportHistory.storageLocation)).\
@@ -138,6 +141,11 @@ def find_dewars_by_location(locations):
                    DewarTransportHistory.arrivalDate,
                    DewarTransportHistory.dewarStatus,
                    Container.code,
+                   Proposal.proposalCode,
+                   Proposal.proposalNumber,
+                   BLSession.visit_number,
+                   BLSession.beamLineName,
+                   BLSession.startDate,
                    )
 
         for dewar in dewars:
@@ -159,6 +167,11 @@ def find_dewars_by_location(locations):
                     'dewarLocation': dewar.storageLocation,
                     'dewarContainers': [dewar.code],
                 }
+                if dewar.visit_number is not None:
+                    visit = f'{dewar.proposalCode}{dewar.proposalNumber}-{dewar.visit_number}'
+                    results[dewar.storageLocation.upper()]['visit'] = visit
+                    results[dewar.storageLocation.upper()]['beamline'] = dewar.beamLineName
+                    results[dewar.storageLocation.upper()]['startDate'] = dewar.startDate.isoformat()
 
     except NoResultFound:
         logging.getLogger('ispyb-logistics').error("Error retrieving dewars")

@@ -20,7 +20,7 @@ Also updates the error/info messages held in the stores
 
             <div class="flex">
                 <button type="submit" class="text-white bg-link hover:bg-blue-800 rounded p-1 m-2 w-1/2" v-on:click="onSetLocation">Submit</button>              
-                <button type="cancel" class="text-white bg-info hover:bg-blue-600 rounded p-1 m-2 w-1/2"  v-on:click="onClearLocationForm">Cancel</button>
+                <button type="cancel" class="text-white bg-info hover:bg-blue-600 rounded p-1 m-2 w-1/2" v-on:click="onClearLocationForm">Cancel</button>
             </div>
         </form>
     </section>
