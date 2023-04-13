@@ -167,11 +167,11 @@ def find_dewars_by_location(locations):
                     'dewarLocation': dewar.storageLocation,
                     'dewarContainers': [dewar.code],
                 }
-                if BLSession.visit_number is not None:
+                if dewar.visit_number is not None:
                     visit = f'{dewar.proposalCode}{dewar.proposalNumber}-{dewar.visit_number}'
                     results[dewar.storageLocation.upper()]['visit'] = visit
                     results[dewar.storageLocation.upper()]['beamline'] = dewar.beamLineName
-                    results[dewar.storageLocation.upper()]['startDate'] = dewar.startDate
+                    results[dewar.storageLocation.upper()]['startDate'] = dewar.startDate.isoformat()
 
     except NoResultFound:
         logging.getLogger('ispyb-logistics').error("Error retrieving dewars")
