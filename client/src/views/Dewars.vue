@@ -74,9 +74,9 @@
       v-bind:dewarBarcode="dewarBarcode"
       v-bind:dewarComments="dewarComments"
       v-bind:dewarContainers="dewarContainers"
-      v-bind:beamline="beamline"
-      v-bind:visit="visit"
-      v-bind:startDate="startDate"
+      v-bind:beamline="beamline || ''"
+      v-bind:visit="visit || ''"
+      v-bind:startDate="startDate || ''"
       v-on:confirm-update="onConfirmUpdateDewarReport"
       v-on:clear-location="onClearLocation">
     </DewarReportDialog>

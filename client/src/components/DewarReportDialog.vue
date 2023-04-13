@@ -24,7 +24,10 @@ Emits an event 'confirm-removal' with a boolean true/false if user confirmed act
               </ul>
           <form>
               <ul class="flex flex-col">
-                <li class="flex"><label class="w-1/3 px-2">Visit</label><span class="w-2/3 leading-tight pb-2">{{ visit + '-' + beamline + '-' + startDateString }}</span></li>
+                <li class="flex">
+                  <label class="w-1/3 px-2">Visit</label>
+                  <span class="w-2/3 leading-tight pb-2">{{ visit + ' - ' + beamline + ' - ' + startDateString }}</span>
+                </li>
                 <li class="flex"><label class="w-1/3 px-2">Hard drive present?</label><input v-model="hdd" type="checkbox" /></li>
                 <li class="flex"><label class="w-1/3 px-2">Tools present?</label><input v-model="tools" type="checkbox" /></li>
                 <li class="flex"><label class="w-1/3 px-2">T bar missing?</label><input v-model="tBarMissing" type="checkbox" /></li>
