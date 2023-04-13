@@ -304,7 +304,7 @@ export default {
           this.beamline = '';
           this.visit = '';
           this.startDate = '';
-          this.$refs.barcode.focus();
+          console.log(this.$refs);
         },
         updateDewarReport: function(dewarId, comments) {
           let url = this.$store.state.apiRoot + "dewars/comments/" + dewarId
