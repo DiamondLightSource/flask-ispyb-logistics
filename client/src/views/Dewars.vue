@@ -4,7 +4,8 @@
       <div class="w-full md:w-1/3 border border-solid border-black m-2">
         <ScanDewar 
           v-bind:allowed_locations="allowed_locations"
-          v-on:dewars-updated="handleDewarUpdate">
+          v-on:dewars-updated="handleDewarUpdate"
+          ref="ScanDewar">
           </ScanDewar>
       </div>
       <div class="w-full md:w-1/3 border border-solid border-black m-2">
@@ -304,7 +305,7 @@ export default {
           this.beamline = '';
           this.visit = '';
           this.startDate = '';
-          console.log(this.$refs);
+          this.$refs.ScanDewar.$refs.barcode.focus();
         },
         updateDewarReport: function(dewarId, comments) {
           let url = this.$store.state.apiRoot + "dewars/comments/" + dewarId
