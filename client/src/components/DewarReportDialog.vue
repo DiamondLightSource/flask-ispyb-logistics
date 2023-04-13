@@ -24,9 +24,9 @@ Emits an event 'confirm-removal' with a boolean true/false if user confirmed act
               </ul>
           <form>
               <ul class="flex flex-col">
-                <li class="flex"><label class="w-1/3 px-2">Visit</label><input v-model="visit" type="text" class="w-2/3 leading-tight py-2" readonly/></li>
-                <li class="flex"><label class="w-1/3 px-2">Beamline</label><input v-model="beamline" type="text" class="w-2/3 leading-tight py-2" readonly/></li>
-                <li class="flex"><label class="w-1/3 px-2">Start Date</label><input v-model="startDate" type="text" class="w-2/3 leading-tight py-2" readonly/></li>
+                <li class="flex"><label class="w-1/3 px-2">Visit</label><span class="w-2/3 leading-tight pb-2">{{ visit }}</span></li>
+                <li class="flex"><label class="w-1/3 px-2">Beamline</label><span class="w-2/3 leading-tight pb-2">{{ beamline }}</span></li>
+                <li class="flex"><label class="w-1/3 px-2">Start Date</label><span class="w-2/3 leading-tight pb-2">{{ startDate }}</span></li>
                 <li class="flex"><label class="w-1/3 px-2">Hard drive present?</label><input v-model="hdd" type="checkbox" /></li>
                 <li class="flex"><label class="w-1/3 px-2">Tools present?</label><input v-model="tools" type="checkbox" /></li>
                 <li class="flex"><label class="w-1/3 px-2">T bar missing?</label><input v-model="tBarMissing" type="checkbox" /></li>
@@ -93,6 +93,15 @@ export default {
         dewarContainers: {
             type: String,
         },
+        visit: {
+            type: String,
+        },
+        beamline: {
+            type: String,
+        },
+        startDate: {
+            type: String,
+        },
     },
     data() {
         return initialState()
@@ -119,10 +128,7 @@ export default {
                 this.dewarWarm = parseInt(json.warm) === 1,
                 this.toppedUp = json.toppedUp || "",
                 this.checked = json.checked || "",
-                this.comments = json.comments || "",
-                this.visit = json.visit || "",
-                this.beamline = json.beamline || "",
-                this.startDate = json.startDate || ""
+                this.comments = json.comments || ""
             } catch (err) {
                 console.log("Error passed comments that had data in but were null: " + comments)
                 this.comments = comments
@@ -160,9 +166,6 @@ export default {
             if (this.checked) report['checked'] = this.checked
 
             if (this.comments) report['comments'] = this.comments
-            if (this.visit) report['visit'] = this.visit
-            if (this.beamline) report['beamline'] = this.beamline
-            if (this.startDate) report['startDate'] = this.startDate
 
             return JSON.stringify(report)
         },
