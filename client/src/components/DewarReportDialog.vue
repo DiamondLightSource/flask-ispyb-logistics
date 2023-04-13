@@ -122,7 +122,7 @@ export default {
                 this.comments = json.comments || "",
                 this.visit = json.visit || "",
                 this.beamline = json.beamline || "",
-                this.startDate = json.startDate || "",
+                this.startDate = json.startDate || ""
             } catch (err) {
                 console.log("Error passed comments that had data in but were null: " + comments)
                 this.comments = comments
