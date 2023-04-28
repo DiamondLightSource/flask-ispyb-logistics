@@ -206,6 +206,8 @@ export default {
                 let dewarComments = {}
                 try {
                   dewarComments = JSON.parse(dewarInfo.comments)
+                } catch(err) {
+                  console.log("Error parsing JSON for dewar in "+rack)
                 }
                 if ('toppedUp' in dewarComments) {
                   lastFillSeconds = Date.parse(dewarComments.toppedUp.slice(-1)[0])/1000
