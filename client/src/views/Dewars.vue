@@ -203,7 +203,10 @@ export default {
               let lastFillSeconds = 0;
               // Topups are now recorded in the comments field
               if ('comments' in dewarInfo && dewarInfo.comments != null) {
-                let dewarComments = JSON.parse(dewarInfo.comments)
+                let dewarComments = {}
+                try {
+                  dewarComments = JSON.parse(dewarInfo.comments)
+                }
                 if ('toppedUp' in dewarComments) {
                   lastFillSeconds = Date.parse(dewarComments.toppedUp.slice(-1)[0])/1000
                 }
