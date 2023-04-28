@@ -243,7 +243,7 @@ export default {
             let isError = true
             let rack_data = {} // Placeholder for new data
 
-            if (error.response.status === 404) {
+            if (error.response && error.response.status === 404) {
               // No dewars found - might be true
               message = "Warning no dewars found in these locations"
 
@@ -253,7 +253,7 @@ export default {
               racklist.forEach(function(rack) {
                 rack_data[rack] = {'barcode':'', 'arrivalDate':'', 'needsLN2': false, 'facilityCode': '', 'status': ''}
               })
-            } else if (error.response.status == 503) {
+            } else if (error.response && error.response.status == 503) {
               message = "ISPyB database service unavailable"
               console.log("Caught 503 Service unavailable...")
             } else {
