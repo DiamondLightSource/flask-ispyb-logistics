@@ -537,6 +537,11 @@ def is_arriving_at_ebic(location, previous_location):
     if match:
         result = True
 
+    expr = re.compile(r'EBIC-M02-[A-F]', re.IGNORECASE)
+    match = expr.match(location)
+    if match:
+        result = True
+
     return result
 
 def is_leaving_ebic(location):
