@@ -54,11 +54,11 @@
         </DewarCard>
       </div>
       <div class="w-full"><hr class="h-1 bg-black"></div>
-      <div class="w-full md:w-1/4 p-2" v-for="(dewar, rack) in extra_rack_locations" v-bind:key="rack">
+      <div class="w-full md:w-1/4 p-2" v-for="(dewar2, rack2) in extra_rack_locations" v-bind:key="rack">
         <DewarCard 
           v-on:update-dewar="onShowDewarReport"
-          v-bind:dewar="dewar"
-          v-bind:rack="rack">
+          v-bind:dewar="dewar2"
+          v-bind:rack="rack2">
         </DewarCard>
       </div>
     </div>
