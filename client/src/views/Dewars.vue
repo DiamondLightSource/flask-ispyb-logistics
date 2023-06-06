@@ -54,7 +54,7 @@
         </DewarCard>
       </div>
       <div class="w-full"><hr class="h-1 bg-black"></div>
-      <div class="w-full md:w-1/4 p-2" v-for="(dewar, rack) in rack_locations" v-bind:key="rack">
+      <div class="w-full md:w-1/4 p-2" v-for="(dewar, rack) in extra_rack_locations" v-bind:key="rack">
         <DewarCard 
           v-on:update-dewar="onShowDewarReport"
           v-bind:dewar="dewar"
@@ -122,6 +122,7 @@ export default {
       beamlines: [],
 
       rack_locations: {},
+      extra_rack_locations: {},
       // Timeout handle - used to determine if we need to refresh page
       refresh: null,
       refreshInterval: 60000, // refresh interval in milliseconds

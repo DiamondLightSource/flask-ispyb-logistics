@@ -20,7 +20,7 @@ from . import zone6
 
 locations = {'zone6': zone6.rack_locations,
              'zone4': zone4.rack_locations,
-             'ebic': ebic.rack_locations,
+             'ebic': ebic.rack_locations + ebic.extra_rack_locations,
              }
 
 
