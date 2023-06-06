@@ -60,16 +60,7 @@
       <p>No known storage location</p>
     </div>
     
-    <div v-if="zone==='ebic'" class="w-full"><hr class="h-1 bg-black"></div>
-    <div v-if="zone==='ebic'" class="flex flex-wrap">
-      <div class="w-full md:w-1/4 p-2" v-for="(dewar2, rack2) in extra_rack_locations" v-bind:key="rack2">
-        <DewarCard 
-          v-on:update-dewar="onShowDewarReport"
-          v-bind:dewar="dewar2"
-          v-bind:rack="rack2">
-        </DewarCard>
-      </div>
-    </div>
+
 
 
     <!-- This pops up to confirm the clear location action -->
