@@ -62,11 +62,11 @@
     
     <div v-if="zone==='ebic'" class="w-full"><hr class="h-1 bg-black"></div>
     <div v-if="zone==='ebic'" class="flex flex-wrap">
-      <div class="w-full md:w-1/4 p-2" v-for="(dewar, rack) in extra_rack_locations" v-bind:key="rack">
+      <div class="w-full md:w-1/4 p-2" v-for="(dewar2, rack2) in extra_rack_locations" v-bind:key="rack2">
         <DewarCard 
           v-on:update-dewar="onShowDewarReport"
-          v-bind:dewar="dewar"
-          v-bind:rack="rack">
+          v-bind:dewar="dewar2"
+          v-bind:rack="rack2">
         </DewarCard>
       </div>
     </div>
@@ -192,6 +192,8 @@ export default {
           .catch(function(error) {
             self.rack_locations, self.extra_rack_locations = self.handleUpdateBarcodesError(error)
           })
+          console.log("self.rack_locations: ")
+          console.log(self.rack_locations)
           // Now setup the next update
           self.refresh = setTimeout(self.getBarcodes, self.refreshInterval)
         },
@@ -268,6 +270,8 @@ export default {
           })
 
           // Return rack data
+          console.log("rack_data: ")
+          console.log(rack_data)
           return rack_data, extra_rack_data
         },
         handleUpdateBarcodesError: function(error) {
