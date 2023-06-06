@@ -187,10 +187,10 @@ export default {
           this.$http.get(url).then(function(response) {
             // Re-assign rack_locations property to trigger reactivity
             // Otherwise Vue has a hard time running computed properties
-            self.rack_locations = self.handleUpdateBarcodesOK(response)
+            self.rack_locations, self.extra_rack_locations = self.handleUpdateBarcodesOK(response)
           })
           .catch(function(error) {
-            self.rack_locations = self.handleUpdateBarcodesError(error)
+            self.rack_locations, self.extra_rack_locations = self.handleUpdateBarcodesError(error)
           })
           // Now setup the next update
           self.refresh = setTimeout(self.getBarcodes, self.refreshInterval)
@@ -199,6 +199,7 @@ export default {
         handleUpdateBarcodesOK: function(response) {
           let json = response.data
           let rack_data = {} // Placeholder for new data
+          let extra_rack_data = {}
 
           let racklist = Object.keys(json)
           
@@ -233,29 +234,47 @@ export default {
               }
             }
 
-            rack_data[rack] = {
-              'dewarId': dewarInfo.dewarId,
-              'comments': dewarInfo.comments,
-              'dewarContainers': dewarInfo.dewarContainers,
-              'beamline': dewarInfo.beamline,
-              'visit': dewarInfo.visit,
-              'startDate': dewarInfo.startDate,
-              'barcode': dewarInfo.barcode,
-              'arrivalDate': dewarInfo.arrivalDate,
-              'facilityCode': dewarInfo.facilityCode,
-              'status': dewarInfo.status,
-              'needsLN2': needsLN2,
-              'onBeamline': onBeamline
+            if (rack.startsWith('EBIC-M02')) {
+              extra_rack_data[rack] = {
+                'dewarId': dewarInfo.dewarId,
+                'comments': dewarInfo.comments,
+                'dewarContainers': dewarInfo.dewarContainers,
+                'beamline': dewarInfo.beamline,
+                'visit': dewarInfo.visit,
+                'startDate': dewarInfo.startDate,
+                'barcode': dewarInfo.barcode,
+                'arrivalDate': dewarInfo.arrivalDate,
+                'facilityCode': dewarInfo.facilityCode,
+                'status': dewarInfo.status,
+                'needsLN2': needsLN2,
+                'onBeamline': onBeamline
+              }
+            } else {
+              rack_data[rack] = {
+                'dewarId': dewarInfo.dewarId,
+                'comments': dewarInfo.comments,
+                'dewarContainers': dewarInfo.dewarContainers,
+                'beamline': dewarInfo.beamline,
+                'visit': dewarInfo.visit,
+                'startDate': dewarInfo.startDate,
+                'barcode': dewarInfo.barcode,
+                'arrivalDate': dewarInfo.arrivalDate,
+                'facilityCode': dewarInfo.facilityCode,
+                'status': dewarInfo.status,
+                'needsLN2': needsLN2,
+                'onBeamline': onBeamline
+              }
             }
           })
 
           // Return rack data
-          return rack_data
+          return rack_data, extra_rack_data
         },
         handleUpdateBarcodesError: function(error) {
             let message = ""
             let isError = true
             let rack_data = {} // Placeholder for new data
+            let extra_rack_data = {}
 
             if (error.response && error.response.status === 404) {
               // No dewars found - might be true
@@ -275,7 +294,7 @@ export default {
             }
             this.$store.dispatch('updateMessage', {text: message, isError: isError})
 
-            return rack_data
+            return rack_data, extra_rack_data
         },
         // Handler for clear location event (rack location clicked)
         // This will trigger the confirm dialog box to show up
