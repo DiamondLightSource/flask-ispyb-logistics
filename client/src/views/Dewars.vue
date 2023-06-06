@@ -46,16 +46,21 @@
 
     <!-- Display the rack locations, four columns across If ebic -->
     <div v-else-if="zone==='ebic'" class="flex flex-wrap">
-     <div class="w-full md:w-1/4 p-2" v-for="(dewar, rack) in rack_locations" v-bind:key="rack">
-      <div v-if="rack==='EBIC-M02-A'" class="w-full"><hr class="h-1 bg-black"></div>
-      <div>
+      <div class="w-full md:w-1/4 p-2" v-for="(dewar, rack) in rack_locations" v-bind:key="rack">
         <DewarCard 
           v-on:update-dewar="onShowDewarReport"
           v-bind:dewar="dewar"
           v-bind:rack="rack">
         </DewarCard>
       </div>
-     </div>
+      <div class="w-full"><hr class="h-1 bg-black"></div>
+      <div class="w-full md:w-1/4 p-2" v-for="(dewar, rack) in rack_locations" v-bind:key="rack">
+        <DewarCard 
+          v-on:update-dewar="onShowDewarReport"
+          v-bind:dewar="dewar"
+          v-bind:rack="rack">
+        </DewarCard>
+      </div>
     </div>
 
     <!-- Default display if unknown location requested -->
