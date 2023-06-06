@@ -60,7 +60,16 @@
       <p>No known storage location</p>
     </div>
     
-
+    <div v-if="zone==='ebic'" class="w-full"><hr class="h-1 bg-black"></div>
+    <div v-if="zone==='ebic'" class="flex flex-wrap">
+      <div class="w-full md:w-1/4 p-2" v-for="(dewar, rack) in extra_rack_locations" v-bind:key="rack">
+        <DewarCard 
+          v-on:update-dewar="onShowDewarReport"
+          v-bind:dewar="dewar"
+          v-bind:rack="rack">
+        </DewarCard>
+      </div>
+    </div>
 
 
     <!-- This pops up to confirm the clear location action -->
@@ -178,10 +187,10 @@ export default {
           this.$http.get(url).then(function(response) {
             // Re-assign rack_locations property to trigger reactivity
             // Otherwise Vue has a hard time running computed properties
-            self.rack_locations, self.extra_rack_locations = self.handleUpdateBarcodesOK(response)
+            [self.rack_locations, self.extra_rack_locations] = self.handleUpdateBarcodesOK(response)
           })
           .catch(function(error) {
-            self.rack_locations, self.extra_rack_locations = self.handleUpdateBarcodesError(error)
+            [self.rack_locations, self.extra_rack_locations] = self.handleUpdateBarcodesError(error)
           })
           console.log("self.rack_locations: ")
           console.log(self.rack_locations)
@@ -263,7 +272,7 @@ export default {
           // Return rack data
           console.log("rack_data: ")
           console.log(rack_data)
-          return rack_data, extra_rack_data
+          return [rack_data, extra_rack_data]
         },
         handleUpdateBarcodesError: function(error) {
             let message = ""
@@ -289,7 +298,7 @@ export default {
             }
             this.$store.dispatch('updateMessage', {text: message, isError: isError})
 
-            return rack_data, extra_rack_data
+            return [rack_data, extra_rack_data]
         },
         // Handler for clear location event (rack location clicked)
         // This will trigger the confirm dialog box to show up
