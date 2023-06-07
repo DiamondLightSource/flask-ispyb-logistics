@@ -157,6 +157,18 @@ class ContainerHistory(Base):
     Container = relationship('Container')
 
 
+class ContainerQueue(Base):
+    __tablename__ = 'ContainerQueue'
+
+    containerQueueId = Column(Integer, primary_key=True)
+    containerId = Column(ForeignKey('Container.containerId', ondelete='CASCADE', onupdate='CASCADE'), index=True)
+    personId = Column(ForeignKey('Person.personId', ondelete='CASCADE', onupdate='CASCADE'))
+    createdTimestamp = Column(DateTime, nullable=False, server_default=text("current_timestamp()"))
+    completedTimestamp = Column(DateTime)
+
+    Container = relationship('Container')
+
+
 class ContainerRegistry(Base):
     __tablename__ = 'ContainerRegistry'
 

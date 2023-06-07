@@ -13,7 +13,7 @@ from sqlalchemy.orm import aliased
 from . import db
 from . import webservice
 from . import send_email
-from .models import Dewar, DewarTransportHistory, LabContact, Laboratory, Shipping, Proposal, Person, BLSession, Container
+from .models import Dewar, DewarTransportHistory, LabContact, Laboratory, Shipping, Proposal, Person, BLSession, Container, ContainerQueue
 
 from ..dewars import ebic
 
@@ -128,6 +128,7 @@ def find_dewars_by_location(locations):
         dewars = Dewar.query.join(DewarTransportHistory).\
             join(Container, Dewar.dewarId == Container.dewarId, isouter=True).\
             join(BLSession, Dewar.firstExperimentId == BLSession.sessionId, isouter=True).\
+            join(ContainerQueue, Container.containerId == ContainerQueue.containerId, isouter=True).\
             join(Shipping, Dewar.shippingId == Shipping.shippingId).\
             join(Proposal, Shipping.proposalId == Proposal.proposalId).\
             filter(func.lower(Dewar.storageLocation).in_(locations)).\
@@ -148,6 +149,7 @@ def find_dewars_by_location(locations):
                    BLSession.visit_number,
                    BLSession.beamLineName,
                    BLSession.startDate,
+                   ContainerQueue.containerQueueId,
                    )
 
         for dewar in dewars:
@@ -168,6 +170,7 @@ def find_dewars_by_location(locations):
                     'onBeamline': False,
                     'dewarLocation': dewar.storageLocation,
                     'dewarContainers': [dewar.code],
+                    'containerQueueIds': [dewar.containerQueueId],
                 }
                 if dewar.visit_number is not None:
                     visit = f'{dewar.proposalCode}{dewar.proposalNumber}-{dewar.visit_number}'
