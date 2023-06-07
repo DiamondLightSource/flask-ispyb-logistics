@@ -60,8 +60,8 @@
       <p>No known storage location</p>
     </div>
     
-    <div v-if="zone==='ebic'" class="w-full"><hr class="h-1 bg-black"></div>
-    <div v-if="zone==='ebic'" class="flex flex-wrap">
+    <div v-if="Object.keys(extra_rack_locations).length" class="w-full"><hr class="h-1 bg-black"></div>
+    <div v-if="Object.keys(extra_rack_locations).length" class="flex flex-wrap">
       <div class="w-full md:w-1/4 p-2" v-for="(dewar, rack) in extra_rack_locations" v-bind:key="rack">
         <DewarCard 
           v-on:update-dewar="onShowDewarReport"
@@ -157,7 +157,7 @@ export default {
   computed: {
     // We allow users to set the location for 'rack' and 'beamline' locations
       allowed_locations: function() {
-        return this.beamlines.concat(Object.keys(this.rack_locations))
+        return this.beamlines.concat(Object.keys(this.rack_locations)).concat(Object.keys(this.extra_rack_locations))
       },
       // Get the zone from the Vuex Store
       zone: function() {
@@ -192,8 +192,6 @@ export default {
           .catch(function(error) {
             [self.rack_locations, self.extra_rack_locations] = self.handleUpdateBarcodesError(error)
           })
-          console.log("self.rack_locations: ")
-          console.log(self.rack_locations)
           // Now setup the next update
           self.refresh = setTimeout(self.getBarcodes, self.refreshInterval)
         },
@@ -202,6 +200,7 @@ export default {
           let json = response.data
           let rack_data = {} // Placeholder for new data
           let extra_rack_data = {}
+          let rack_prefix = null
 
           let racklist = Object.keys(json)
           
@@ -236,42 +235,28 @@ export default {
               }
             }
 
+            this_rack = {
+              'dewarId': dewarInfo.dewarId,
+              'comments': dewarInfo.comments,
+              'dewarContainers': dewarInfo.dewarContainers,
+              'beamline': dewarInfo.beamline,
+              'visit': dewarInfo.visit,
+              'startDate': dewarInfo.startDate,
+              'barcode': dewarInfo.barcode,
+              'arrivalDate': dewarInfo.arrivalDate,
+              'facilityCode': dewarInfo.facilityCode,
+              'status': dewarInfo.status,
+              'needsLN2': needsLN2,
+              'onBeamline': onBeamline
+            }
             if (rack.startsWith('EBIC-M02')) {
-              extra_rack_data[rack] = {
-                'dewarId': dewarInfo.dewarId,
-                'comments': dewarInfo.comments,
-                'dewarContainers': dewarInfo.dewarContainers,
-                'beamline': dewarInfo.beamline,
-                'visit': dewarInfo.visit,
-                'startDate': dewarInfo.startDate,
-                'barcode': dewarInfo.barcode,
-                'arrivalDate': dewarInfo.arrivalDate,
-                'facilityCode': dewarInfo.facilityCode,
-                'status': dewarInfo.status,
-                'needsLN2': needsLN2,
-                'onBeamline': onBeamline
-              }
+              extra_rack_data[rack] = this_rack
             } else {
-              rack_data[rack] = {
-                'dewarId': dewarInfo.dewarId,
-                'comments': dewarInfo.comments,
-                'dewarContainers': dewarInfo.dewarContainers,
-                'beamline': dewarInfo.beamline,
-                'visit': dewarInfo.visit,
-                'startDate': dewarInfo.startDate,
-                'barcode': dewarInfo.barcode,
-                'arrivalDate': dewarInfo.arrivalDate,
-                'facilityCode': dewarInfo.facilityCode,
-                'status': dewarInfo.status,
-                'needsLN2': needsLN2,
-                'onBeamline': onBeamline
-              }
+              rack_data[rack] = this_rack
             }
           })
 
           // Return rack data
-          console.log("rack_data: ")
-          console.log(rack_data)
           return [rack_data, extra_rack_data]
         },
         handleUpdateBarcodesError: function(error) {

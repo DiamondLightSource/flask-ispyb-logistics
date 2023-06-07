@@ -3,7 +3,7 @@
 #
 # # Build list of rack locations e.g. EBIC-IN-[1..27]
 rack_locations = ['EBIC-IN-{}'.format(i) for i in range(1,28)]
-extra_rack_locations = ['EBIC-M02-{}'.format(i) for i in [chr(alpha+65) for alpha in range(0,6)]]
+rack_locations.extend(['EBIC-M02-{}'.format(i) for i in [chr(alpha+65) for alpha in range(0,6)]])
 
 beamlines = ['m01',
              'm02',
