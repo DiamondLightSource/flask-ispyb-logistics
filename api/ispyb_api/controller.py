@@ -532,7 +532,7 @@ def is_arriving_at_ebic(location, previous_location):
     if location == previous_location:
         return False
 
-    if location.upper() in ebic.rack_locations():
+    if location.upper() in ebic.rack_locations:
         return True
 
     return False
