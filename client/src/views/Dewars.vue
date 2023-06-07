@@ -6,13 +6,16 @@
           v-bind:allowed_locations="allowed_locations"
           v-on:dewars-updated="handleDewarUpdate"
           ref="ScanDewar">
-          </ScanDewar>
+        </ScanDewar>
       </div>
       <div class="w-full md:w-1/3 border border-solid border-black m-2">
         <FindDewar></FindDewar>
       </div>
       <div class="w-full md:w-1/3 border border-solid border-black m-2">
-        <DispatchDewars v-bind:rack_locations="rack_locations"></DispatchDewars>
+        <DispatchDewars
+          v-bind:rack_locations="rack_locations"
+          v-bind:extra_rack_locations="extra_rack_locations">
+        </DispatchDewars>
       </div>
     </div>
 
@@ -47,7 +50,7 @@
     <!-- Display the rack locations, four columns across If ebic -->
     <div v-else-if="zone==='ebic'" class="flex flex-wrap">
       <div class="w-full md:w-1/4 p-2" v-for="(dewar, rack) in rack_locations" v-bind:key="rack">
-        <DewarCard 
+        <DewarCard
           v-on:update-dewar="onShowDewarReport"
           v-bind:dewar="dewar"
           v-bind:rack="rack">
@@ -59,11 +62,11 @@
     <div v-else>
       <p>No known storage location</p>
     </div>
-    
+
     <div v-if="Object.keys(extra_rack_locations).length" class="w-full"><hr class="h-1 bg-black"></div>
     <div v-if="Object.keys(extra_rack_locations).length" class="flex flex-wrap">
       <div class="w-full md:w-1/4 p-2" v-for="(dewar, rack) in extra_rack_locations" v-bind:key="rack">
-        <DewarCard 
+        <DewarCard
           v-on:update-dewar="onShowDewarReport"
           v-bind:dewar="dewar"
           v-bind:rack="rack">

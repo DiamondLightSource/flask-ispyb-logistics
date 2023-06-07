@@ -15,6 +15,8 @@ from . import webservice
 from . import send_email
 from .models import Dewar, DewarTransportHistory, LabContact, Laboratory, Shipping, Proposal, Person, BLSession, Container
 
+from ..dewars import ebic
+
 # What age do we ignore container history entries
 CONTAINER_FILTER_DAYS_LIMIT = 30
 email_domain = os.environ.get('EMAIL_DOMAIN', '@diamond.ac.uk')
@@ -530,31 +532,19 @@ def is_arriving_at_ebic(location, previous_location):
     if location == previous_location:
         return False
 
-    result = False
+    if location.upper() in ebic.rack_locations():
+        return True
 
-    expr = re.compile(r'EBIC-IN-\d', re.IGNORECASE)
-    match = expr.match(location)
-    if match:
-        result = True
-
-    expr = re.compile(r'EBIC-M02-[A-F]', re.IGNORECASE)
-    match = expr.match(location)
-    if match:
-        result = True
-
-    return result
+    return False
 
 def is_leaving_ebic(location):
     """
     Utility method to check if the location is EBIC-TO-STORES
     in which case we need to email LC
     """
-    result = False
 
-    expr = re.compile(r'EBIC-TO-STORES', re.IGNORECASE)
-    match = expr.match(location)
-    if match:
-        result = True
+    if location.upper() == 'EBIC-TO-STORES':
+        return True
 
-    return result
+    return False
 
