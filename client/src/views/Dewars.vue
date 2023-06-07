@@ -77,7 +77,8 @@
       v-on:confirm-removal="onConfirmClear" 
       v-bind:isActive="isRemoveDialogActive"
       v-bind:barcodeToRemove="barcodeToRemove"
-      v-bind:rack_locations="rack_locations">
+      v-bind:rack_locations="rack_locations"
+      v-bind:extra_rack_locations="extra_rack_locations">
     </ClearLocationDialog>
 
     <DewarReportDialog
@@ -201,6 +202,7 @@ export default {
           let rack_data = {} // Placeholder for new data
           let extra_rack_data = {}
           let this_rack = {}
+          let rack_prefix = null
 
           let racklist = Object.keys(json)
           
@@ -249,7 +251,8 @@ export default {
               'needsLN2': needsLN2,
               'onBeamline': onBeamline
             }
-            if (rack.startsWith('EBIC-M02')) {
+            if (!rack_prefix) {rack_prefix = rack.split("-").slice(0,-1).join("-")}
+            if (rack_prefix != rack.split("-").slice(0,-1).join("-")) {
               extra_rack_data[rack] = this_rack
             } else {
               rack_data[rack] = this_rack
