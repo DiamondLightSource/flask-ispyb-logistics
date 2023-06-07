@@ -252,7 +252,8 @@ export default {
               'facilityCode': dewarInfo.facilityCode,
               'status': dewarInfo.status,
               'needsLN2': needsLN2,
-              'onBeamline': onBeamline
+              'onBeamline': onBeamline,
+              'UDC': dewarInfo.UDC,
             }
             if (!rack_prefix) {rack_prefix = rack.split("-").slice(0,-1).join("-")}
             if (rack_prefix != rack.split("-").slice(0,-1).join("-")) {
