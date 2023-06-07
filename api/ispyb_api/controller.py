@@ -13,7 +13,7 @@ from sqlalchemy.orm import aliased
 from . import db
 from . import webservice
 from . import send_email
-from .models import Dewar, DewarTransportHistory, LabContact, Laboratory, Shipping, Proposal, Person, BLSession, Container
+from .models import Dewar, DewarTransportHistory, LabContact, Laboratory, Shipping, Proposal, Person, BLSession, Container, ContainerQueue
 
 from ..dewars import ebic
 
@@ -128,6 +128,7 @@ def find_dewars_by_location(locations):
         dewars = Dewar.query.join(DewarTransportHistory).\
             join(Container, Dewar.dewarId == Container.dewarId, isouter=True).\
             join(BLSession, Dewar.firstExperimentId == BLSession.sessionId, isouter=True).\
+            join(ContainerQueue, Container.containerId == ContainerQueue.containerId, isouter=True).\
             join(Shipping, Dewar.shippingId == Shipping.shippingId).\
             join(Proposal, Shipping.proposalId == Proposal.proposalId).\
             filter(func.lower(Dewar.storageLocation).in_(locations)).\
@@ -148,6 +149,7 @@ def find_dewars_by_location(locations):
                    BLSession.visit_number,
                    BLSession.beamLineName,
                    BLSession.startDate,
+                   ContainerQueue.containerQueueId,
                    )
 
         for dewar in dewars:
@@ -156,6 +158,8 @@ def find_dewars_by_location(locations):
             if dewar.storageLocation.upper() in results:
                 if dewar.code not in results[dewar.storageLocation.upper()]['dewarContainers']:
                     results[dewar.storageLocation.upper()]['dewarContainers'].append(dewar.code)
+                if dewar.containerQueueId is not None:
+                    results[dewar.storageLocation.upper()]['UDC'] = True
             else:
                 logging.getLogger('ispyb-logistics').debug('Found entry for this dewar {} in {} at {}'.format(dewar.barCode, dewar.storageLocation, dewar.arrivalDate))
                 results[dewar.storageLocation.upper()] = {
@@ -168,6 +172,7 @@ def find_dewars_by_location(locations):
                     'onBeamline': False,
                     'dewarLocation': dewar.storageLocation,
                     'dewarContainers': [dewar.code],
+                    'UDC': dewar.containerQueueId is not None,
                 }
                 if dewar.visit_number is not None:
                     visit = f'{dewar.proposalCode}{dewar.proposalNumber}-{dewar.visit_number}'

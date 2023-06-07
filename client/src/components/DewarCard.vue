@@ -17,6 +17,7 @@ Emits an event 'clear-location' which should be handled by the parent component
             <span v-if="dewar.status == 'dispatch-requested'" class="text-xs bg-warning py-1 px-2 ">{{dewar.status}}</span>
             <span v-if="dewar.needsLN2" class="text-xs text-white bg-danger py-1 px-2 ">needs-refill</span>
             <span v-if="dewar.beamline" class="text-xs text-white bg-success py-1 px-2 ">{{dewar.beamline}}</span>
+            <span v-if="dewar.UDC" class="text-xs text-white bg-primary py-1 px-2 ">UDC</span>
         </div>
     </div>
 </template>
