@@ -200,7 +200,7 @@ export default {
           let json = response.data
           let rack_data = {} // Placeholder for new data
           let extra_rack_data = {}
-          let rack_prefix = null
+          let this_rack = {}
 
           let racklist = Object.keys(json)
           
@@ -280,6 +280,7 @@ export default {
               console.log("Caught 503 Service unavailable...")
             } else {
               message = "Error retrieving dewar location information from database"
+              console.log(error)
             }
             this.$store.dispatch('updateMessage', {text: message, isError: isError})
 
