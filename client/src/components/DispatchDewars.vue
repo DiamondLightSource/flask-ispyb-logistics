@@ -113,7 +113,8 @@
 export default {
     name: 'DispatchDewars',
     props: {
-        rack_locations: Object
+        rack_locations: Object,
+        extra_rack_location: Object,
     },
     data() {
       return {
@@ -123,21 +124,21 @@ export default {
       }
     },  
     computed: {
-        // This is used to display 5 dewars that need refilling
+        // This is used to display dewars that need refilling
         // If they have dispatch requested show them anyway - SCI-10162
         refill_dewars: function() {
-            const self = this
-            let dewars = Object.keys(this.rack_locations).filter( function(rack) {
-                return self.rack_locations[rack].needsLN2 === true
+            let all_locations = {...this.rack_locations, ...this.extra_rack_locations}
+            let dewars = Object.keys(all_locations).filter( function(rack) {
+                return all_locations[rack].needsLN2 === true
             })
             return dewars
         },
 
-        // This is used to display 5 dewars that need to be dispatched
+        // This is used to display dewars that need to be dispatched
         dispatch_dewars: function() {
-            const self = this
-            let dewars = Object.keys(this.rack_locations).filter( function(rack) {
-                return self.rack_locations[rack].status === 'dispatch-requested'
+            let all_locations = {...this.rack_locations, ...this.extra_rack_locations}
+            let dewars = Object.keys(all_locations).filter( function(rack) {
+                return all_locations[rack].status === 'dispatch-requested'
             })
             return dewars
         }

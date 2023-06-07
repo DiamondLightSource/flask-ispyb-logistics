@@ -6,13 +6,16 @@
           v-bind:allowed_locations="allowed_locations"
           v-on:dewars-updated="handleDewarUpdate"
           ref="ScanDewar">
-          </ScanDewar>
+        </ScanDewar>
       </div>
       <div class="w-full md:w-1/3 border border-solid border-black m-2">
         <FindDewar></FindDewar>
       </div>
       <div class="w-full md:w-1/3 border border-solid border-black m-2">
-        <DispatchDewars v-bind:rack_locations="rack_locations"></DispatchDewars>
+        <DispatchDewars
+          v-bind:rack_locations="rack_locations"
+          v-bind:extra_rack_locations="extra_rack_locations">
+        </DispatchDewars>
       </div>
     </div>
 
@@ -44,10 +47,10 @@
       </div>
     </div>
 
-    <!-- Display the rack locations, four columns across If Zone 6 -->
+    <!-- Display the rack locations, four columns across If ebic -->
     <div v-else-if="zone==='ebic'" class="flex flex-wrap">
       <div class="w-full md:w-1/4 p-2" v-for="(dewar, rack) in rack_locations" v-bind:key="rack">
-        <DewarCard 
+        <DewarCard
           v-on:update-dewar="onShowDewarReport"
           v-bind:dewar="dewar"
           v-bind:rack="rack">
@@ -60,13 +63,25 @@
       <p>No known storage location</p>
     </div>
 
+    <div v-if="Object.keys(extra_rack_locations).length" class="w-full"><hr class="h-1 bg-black"></div>
+    <div v-if="Object.keys(extra_rack_locations).length" class="flex flex-wrap">
+      <div class="w-full md:w-1/4 p-2" v-for="(dewar, rack) in extra_rack_locations" v-bind:key="rack">
+        <DewarCard
+          v-on:update-dewar="onShowDewarReport"
+          v-bind:dewar="dewar"
+          v-bind:rack="rack">
+        </DewarCard>
+      </div>
+    </div>
+
 
     <!-- This pops up to confirm the clear location action -->
     <ClearLocationDialog 
       v-on:confirm-removal="onConfirmClear" 
       v-bind:isActive="isRemoveDialogActive"
       v-bind:barcodeToRemove="barcodeToRemove"
-      v-bind:rack_locations="rack_locations">
+      v-bind:rack_locations="rack_locations"
+      v-bind:extra_rack_locations="extra_rack_locations">
     </ClearLocationDialog>
 
     <DewarReportDialog
@@ -114,6 +129,7 @@ export default {
       beamlines: [],
 
       rack_locations: {},
+      extra_rack_locations: {},
       // Timeout handle - used to determine if we need to refresh page
       refresh: null,
       refreshInterval: 60000, // refresh interval in milliseconds
@@ -145,7 +161,7 @@ export default {
   computed: {
     // We allow users to set the location for 'rack' and 'beamline' locations
       allowed_locations: function() {
-        return this.beamlines.concat(Object.keys(this.rack_locations))
+        return this.beamlines.concat(Object.keys(this.rack_locations)).concat(Object.keys(this.extra_rack_locations))
       },
       // Get the zone from the Vuex Store
       zone: function() {
@@ -175,10 +191,10 @@ export default {
           this.$http.get(url).then(function(response) {
             // Re-assign rack_locations property to trigger reactivity
             // Otherwise Vue has a hard time running computed properties
-            self.rack_locations = self.handleUpdateBarcodesOK(response)
+            [self.rack_locations, self.extra_rack_locations] = self.handleUpdateBarcodesOK(response)
           })
           .catch(function(error) {
-            self.rack_locations = self.handleUpdateBarcodesError(error)
+            [self.rack_locations, self.extra_rack_locations] = self.handleUpdateBarcodesError(error)
           })
           // Now setup the next update
           self.refresh = setTimeout(self.getBarcodes, self.refreshInterval)
@@ -187,6 +203,9 @@ export default {
         handleUpdateBarcodesOK: function(response) {
           let json = response.data
           let rack_data = {} // Placeholder for new data
+          let extra_rack_data = {}
+          let this_rack = {}
+          let rack_prefix = null
 
           let racklist = Object.keys(json)
           
@@ -221,7 +240,7 @@ export default {
               }
             }
 
-            rack_data[rack] = {
+            this_rack = {
               'dewarId': dewarInfo.dewarId,
               'comments': dewarInfo.comments,
               'dewarContainers': dewarInfo.dewarContainers,
@@ -235,15 +254,22 @@ export default {
               'needsLN2': needsLN2,
               'onBeamline': onBeamline
             }
+            if (!rack_prefix) {rack_prefix = rack.split("-").slice(0,-1).join("-")}
+            if (rack_prefix != rack.split("-").slice(0,-1).join("-")) {
+              extra_rack_data[rack] = this_rack
+            } else {
+              rack_data[rack] = this_rack
+            }
           })
 
           // Return rack data
-          return rack_data
+          return [rack_data, extra_rack_data]
         },
         handleUpdateBarcodesError: function(error) {
             let message = ""
             let isError = true
             let rack_data = {} // Placeholder for new data
+            let extra_rack_data = {}
 
             if (error.response && error.response.status === 404) {
               // No dewars found - might be true
@@ -260,10 +286,11 @@ export default {
               console.log("Caught 503 Service unavailable...")
             } else {
               message = "Error retrieving dewar location information from database"
+              console.log(error)
             }
             this.$store.dispatch('updateMessage', {text: message, isError: isError})
 
-            return rack_data
+            return [rack_data, extra_rack_data]
         },
         // Handler for clear location event (rack location clicked)
         // This will trigger the confirm dialog box to show up

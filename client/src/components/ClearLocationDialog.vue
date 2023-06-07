@@ -31,7 +31,7 @@ Emits an event 'confirm-removal' with a boolean true/false if user confirmed act
 <script>
 export default {
     name: 'ClearLocationDialog',
-    props: ['isActive', 'barcodeToRemove', 'rack_locations'],
+    props: ['isActive', 'barcodeToRemove', 'rack_locations', 'extra_rack_locations'],
     methods: {
         // User has confirmed to remove the dewar from this location
         onConfirm: function() {
@@ -41,8 +41,9 @@ export default {
             let barcode = this.barcodeToRemove
             let location = ""
             let loc = ""
-            for (loc in this.rack_locations) {
-                if (this.rack_locations[loc]['barcode'] == barcode) {
+            let all_locations = {...this.rack_locations, ...this.extra_rack_locations}
+            for (loc in all_locations) {
+                if (all_locations[loc]['barcode'] == barcode) {
                     location = loc
                     break
                 }
