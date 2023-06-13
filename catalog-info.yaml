@@ -2,9 +2,16 @@ apiVersion: backstage.io/v1alpha1
 kind: Component
 metadata:
   name: dewar-logistics
+  description: Website to scan and track dewars as they move into, around and out of Diamond
   annotations:
     github.com/project-slug: DiamondLightSource/flask-ispyb-logistics
+  links:
+    - url: https://dewar-logistics.diamond.ac.uk
+      title: Live website
 spec:
   type: other
   lifecycle: unknown
   owner: lims
+  dependsOn:
+  - resource:ispyb-database
+  - component:SynchWeb
