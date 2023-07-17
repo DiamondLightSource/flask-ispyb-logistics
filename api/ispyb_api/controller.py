@@ -280,9 +280,9 @@ def find_recent_storage_history(locations):
             # - if the dewarStatus is 'processing...' then show as still occupied
             # - if the location begins with i then its at a beamline, show as still occupied
             onBeamline = False
-            if dewar.dewarStatus.lower().startswith('processing'):
+            if dewar.dewarStatus is not None and dewar.dewarStatus.lower().startswith('processing'):
                 onBeamline = True
-            elif any(b in dewar.dewarLocation.lower() for b in ['i02', 'i03', 'i04', 'i04-1', 'i19', 'i23', 'i24']):
+            elif dewar.dewarLocation is not None and any(b in dewar.dewarLocation.lower() for b in ['i02', 'i03', 'i04', 'i04-1', 'i19', 'i23', 'i24']):
                 onBeamline = True
 
             results[dewar.storageLocation] = {
