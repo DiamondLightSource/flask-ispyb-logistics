@@ -14,7 +14,7 @@ mysql-connector==2.2.9
 requests==2.25.1
 sqlacodegen==2.3.0
 SQLAlchemy==2.0.23
-typing-extensions==3.10.0.0
+typing-extensions==4.8.0
 urllib3==1.26.17
 Werkzeug==3.0.1
 zipp==3.4.1
