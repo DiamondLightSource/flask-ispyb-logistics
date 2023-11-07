@@ -16,5 +16,5 @@ sqlacodegen==2.3.0
 SQLAlchemy==2.0.23
 typing-extensions==4.8.0
 urllib3==1.26.17
-Werkzeug==3.0.1
+Werkzeug==2.3.7
 zipp==3.4.1
