@@ -25,7 +25,7 @@ def read_db_config(filename, section):
         config = ConfigParser()
         config.read(filename)
 
-        db_url = URL(drivername='mysql+mysqlconnector',
+        db_url = URL.create(drivername='mysql+mysqlconnector',
                      username=config.get(section, 'user'),
                      password=config.get(section, 'pw'),
                      host=config.get(section, 'host'),
