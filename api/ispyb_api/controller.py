@@ -201,7 +201,9 @@ def find_dewar_history_for_locations(locations, max_entries=20):
         # Get the timestamp and location from the transport history
         # Order so we get the most recent first...
         # Check if the locations match between dewar and transport history
-        dewars = DewarTransportHistory.query.select_from(Dewar).join(Dewar).join(Shipping).\
+        dewars = DewarTransportHistory.query.select_from(Dewar).\
+            join(Dewar, Dewar.dewarId == DewarTransportHistory.dewarId).\
+            join(Shipping, Dewar.shippingId == Shipping.shippingId).\
             filter(func.lower(DewarTransportHistory.storageLocation).in_(locations)).\
             filter(Dewar.dewarId == DewarTransportHistory.dewarId).\
             filter(Dewar.shippingId == Shipping.shippingId).\
