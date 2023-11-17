@@ -11,7 +11,7 @@ class ZONE1:
 
 class MX:
     destination = 'Zone 4 Store'
-    proposal_codes = ['MX', 'LB']
+    proposal_codes = ['MX', 'LB', 'AU']
     instruments = ['I03', 'I04', 'I04-1', 'I19', 'I23', 'I24']
 
 class I14:
@@ -65,6 +65,7 @@ if __name__ == "__main__":
         'mx1234-i03-1001',
         'cm1234-m01-1001',
         'cm1234-m02-1001',
+        'au1234-1001',
         'em1234-1001',
         'cm1234-i14-1001',
         'sp1234-1001',
