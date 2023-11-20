@@ -2,7 +2,7 @@ import Vue from 'vue'
 import Dewars from '../../views/Dewars.vue'
 import store from '../../store'
 
-import 'fontsource-cantarell/latin.css'
+import '@fontsource/cantarell'
 import 'tailwindcss/tailwind.css'
 import axios from 'axios'
 
