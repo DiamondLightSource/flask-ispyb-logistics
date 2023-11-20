@@ -13,7 +13,7 @@
     "font-awesome": "^4.7.0",
     "howler": "^2.1.2",
     "tailwindcss": "^1.1.2",
-    "typeface-cantarell": "0.0.72",
+    "@fontsource/cantarell": "^5.0.8",
     "vue": "^2.6.10",
     "vue-router": "^3.0.3",
     "vuex": "^3.0.1"
