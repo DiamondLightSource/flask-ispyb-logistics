@@ -2,7 +2,7 @@ import Vue from 'vue'
 import App from './App.vue'
 import store from './store'
 
-import 'typeface-cantarell'
+import 'fontsource-cantarell/latin.css'
 import 'tailwindcss/tailwind.css'
 import axios from 'axios'
 
