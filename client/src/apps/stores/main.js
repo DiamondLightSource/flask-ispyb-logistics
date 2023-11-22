@@ -1,6 +1,6 @@
 import Vue from 'vue'
 import Stores from '../../views/Stores.vue'
-import store from '../../store'
+import { store } from '../../store'
 
 import '@fontsource/cantarell'
 import 'tailwindcss/tailwind.css'
