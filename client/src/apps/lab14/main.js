@@ -9,7 +9,7 @@ import axios from 'axios'
 // Initialise the store with our zone
 store.commit('setZone', 'lab14')
 
-const app = createApp(App)
+const app = createApp(Lab14)
 
 app.use(store)
 

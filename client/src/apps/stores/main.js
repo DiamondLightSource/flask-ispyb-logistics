@@ -6,7 +6,7 @@ import '@fontsource/cantarell'
 import 'tailwindcss/tailwind.css'
 import axios from 'axios'
 
-const app = createApp(App)
+const app = createApp(Stores)
 
 app.use(store)
 

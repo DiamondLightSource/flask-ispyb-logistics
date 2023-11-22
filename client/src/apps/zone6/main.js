@@ -9,7 +9,7 @@ import axios from 'axios'
 // Initialise the store with our zone
 store.commit('setZone', 'zone6')
 
-const app = createApp(App)
+const app = createApp(Dewars)
 
 app.use(store)
 

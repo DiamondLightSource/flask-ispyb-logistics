@@ -11,7 +11,7 @@ import 'font-awesome/css/font-awesome.css'
 // Initialise the store with our zone
 store.commit('setZone', 'zone4')
 
-const app = createApp(App)
+const app = createApp(Dewars)
 
 app.use(store)
 
