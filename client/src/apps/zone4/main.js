@@ -8,14 +8,11 @@ import axios from 'axios'
 
 import 'font-awesome/css/font-awesome.css'
 
-Vue.config.productionTip = false
-
-Vue.prototype.$http = axios
-
 // Initialise the store with our zone
 store.commit('setZone', 'zone4')
 
-new Vue({
-  store,
-  render: h => h(Dewars)
-}).$mount('#app')
+const app = createApp(App)
+
+app.use(store)
+
+app.mount('#app')

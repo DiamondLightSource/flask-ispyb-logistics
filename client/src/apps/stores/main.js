@@ -6,11 +6,8 @@ import '@fontsource/cantarell'
 import 'tailwindcss/tailwind.css'
 import axios from 'axios'
 
-Vue.config.productionTip = false
+const app = createApp(App)
 
-Vue.prototype.$http = axios
+app.use(store)
 
-new Vue({
-  store,
-  render: h => h(Stores)
-}).$mount('#app')
+app.mount('#app')
