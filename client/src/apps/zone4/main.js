@@ -1,4 +1,4 @@
-import Vue from 'vue'
+import { createApp } from 'vue'
 import Dewars from '../../views/Dewars.vue'
 import { store } from '../../store'
 
