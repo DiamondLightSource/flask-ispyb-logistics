@@ -12,5 +12,6 @@ store.commit('setZone', 'ebic')
 const app = createApp(Dewars)
 
 app.use(store)
+app.use(axios)
 
 app.mount('#app')

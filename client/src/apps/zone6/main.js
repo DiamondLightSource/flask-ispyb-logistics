@@ -12,5 +12,6 @@ store.commit('setZone', 'zone6')
 const app = createApp(Dewars)
 
 app.use(store)
+app.use(axios)
 
 app.mount('#app')

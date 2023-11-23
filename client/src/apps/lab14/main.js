@@ -12,5 +12,6 @@ store.commit('setZone', 'lab14')
 const app = createApp(Lab14)
 
 app.use(store)
+app.use(axios)
 
 app.mount('#app')
