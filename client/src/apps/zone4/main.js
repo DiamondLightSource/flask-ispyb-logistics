@@ -14,6 +14,6 @@ store.commit('setZone', 'zone4')
 const app = createApp(Dewars)
 
 app.use(store)
-app.config.globalProperties.$axios = axios
+app.config.globalProperties.$http = axios
 
 app.mount('#app')

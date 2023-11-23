@@ -12,6 +12,6 @@ store.commit('setZone', 'lab14')
 const app = createApp(Lab14)
 
 app.use(store)
-app.config.globalProperties.$axios = axios
+app.config.globalProperties.$http = axios
 
 app.mount('#app')
