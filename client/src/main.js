@@ -11,6 +11,6 @@ import 'font-awesome/css/font-awesome.css'
 const app = createApp(App)
 
 app.use(store)
-app.use(axios)
+app.config.globalProperties.$axios = axios
 
 app.mount('#app')
