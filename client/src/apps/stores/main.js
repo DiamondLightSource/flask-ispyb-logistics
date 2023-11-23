@@ -9,5 +9,6 @@ import axios from 'axios'
 const app = createApp(Stores)
 
 app.use(store)
+app.use(axios)
 
 app.mount('#app')

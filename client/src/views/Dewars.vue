@@ -149,7 +149,7 @@ export default {
 
     let url = this.$store.state.apiRoot + "beamlines/" + this.zone
 
-    this.$http.get(url)
+    this.$axios.get(url)
     .then(function(response) {
       let json = response.data
       self.beamlines = json
@@ -188,7 +188,7 @@ export default {
 
           let url = this.$store.state.apiRoot + "dewars/locations/" + this.zone
       
-          this.$http.get(url).then(function(response) {
+          this.$axios.get(url).then(function(response) {
             // Re-assign rack_locations property to trigger reactivity
             // Otherwise Vue has a hard time running computed properties
             [self.rack_locations, self.extra_rack_locations] = self.handleUpdateBarcodesOK(response)
@@ -346,7 +346,7 @@ export default {
           let formData = new FormData();
           formData.append('comments', comments)
 
-          this.$http.patch(url, formData).then( () => {
+          this.$axios.patch(url, formData).then( () => {
             this.$store.dispatch('updateMessage', {text: 'Comments Updated OK', isError: false})
             // Trigger a refresh so we see the new comments
             setTimeout(this.getBarcodes, 3000)
