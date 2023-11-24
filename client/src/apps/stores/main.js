@@ -1,16 +1,14 @@
-import Vue from 'vue'
+import { createApp } from 'vue'
 import Stores from '../../views/Stores.vue'
-import store from '../../store'
+import { store } from '../../store'
 
 import '@fontsource/cantarell'
 import 'tailwindcss/tailwind.css'
 import axios from 'axios'
 
-Vue.config.productionTip = false
+const app = createApp(Stores)
 
-Vue.prototype.$http = axios
+app.use(store)
+app.config.globalProperties.$http = axios
 
-new Vue({
-  store,
-  render: h => h(Stores)
-}).$mount('#app')
+app.mount('#app')
