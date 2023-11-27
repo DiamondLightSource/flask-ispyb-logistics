@@ -9,7 +9,6 @@
   },
   "dependencies": {
     "axios": "^1.6.2",
-    "core-js": "^2.6.5",
     "font-awesome": "^4.7.0",
     "howler": "^2.1.2",
     "tailwindcss": "^1.1.2",
