@@ -2,6 +2,31 @@
 // Colors from Bulma
 module.exports = {
     theme: {
+        colors: {
+          gray: {
+            100: '#f7fafc',
+            200: '#edf2f7',
+            300: '#e2e8f0',
+            400: '#cbd5e0',
+            900: '#1a202c',
+          },
+          red: {
+            100: '#fff5f5',
+            500: '#f56565',
+            600: '#e53e3e',
+            700: '#c53030',
+            900: '#742a2a',
+          },
+          green: {
+            700: '#2f855a',
+          },
+          blue: {
+            100: '#ebf8ff',
+            200: '#bee3f8',
+            600: '#3182ce',
+            800: '#2c5282',
+          },
+        },
         screens: {
           sm: '640px',
           md: '768px',
