@@ -11,12 +11,12 @@
     "axios": "^1.6.2",
     "font-awesome": "^4.7.0",
     "howler": "^2.1.2",
-    "@tailwindcss/postcss7-compat": "^2.0.0",
+    "tailwindcss": "^2.0.0",
     "@fontsource/cantarell": "^5.0.8",
     "vue": "^3.0.0",
     "vue-router": "^4.0.0",
     "vuex": "^4.0.0",
-    "@vue/cli-service": "^4.5.19",
+    "@vue/cli-service": "^5.0.8",
     "vue-template-compiler": "^2.6.10"
   }
 }
