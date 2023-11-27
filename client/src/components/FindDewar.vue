@@ -4,7 +4,7 @@
         <form>
           <div class="mb-3 px-2">
             <label class="block text-gray-700">BarCode or FacilityCode</label>
-            <input type="text" class="shadow appearance-none border rounded w-full py-1 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" v-model="facilitycode" placeholder="e.g. DLS-MX-####">
+            <input type="text" class="shadow appearance-none border rounded w-full py-1 px-3 text-gray-700 leading-tight focus:outline-none focus:ring" v-model="facilitycode" placeholder="e.g. DLS-MX-####">
           </div>
           <div class="flex">
             <button type="submit" class="text-white bg-link hover:bg-blue-800 rounded p-1 m-2 w-1/2" v-on:click="onFindDewar">Search</button>            
