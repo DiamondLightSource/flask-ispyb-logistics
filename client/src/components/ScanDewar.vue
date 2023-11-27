@@ -10,12 +10,12 @@ Also updates the error/info messages held in the stores
         <form>
             <div class="mb-3 px-2">
                 <label class="block text-gray-700">Barcode or FacilityCode</label>
-                <input ref="barcode" type="text" class="shadow appearance-none border rounded w-full py-1 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" v-model="barcode" v-on:keydown.enter="onBarcodeEnter" placeholder="Scan the long barcode from the dewar case">        
+                <input ref="barcode" type="text" class="shadow appearance-none border rounded w-full py-1 px-3 text-gray-700 leading-tight focus:outline-none focus:ring" v-model="barcode" v-on:keydown.enter="onBarcodeEnter" placeholder="Scan the long barcode from the dewar case">        
             </div>
 
             <div class="mb-3 px-2">
                 <label class="block text-gray-700">Location</label>
-                <input ref="location" type="text" class="shadow appearance-none border rounded w-full py-1 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" v-model="location" v-on:keydown.enter="onLocationEnter" placeholder="Scan the location e.g. RACK-A1">        
+                <input ref="location" type="text" class="shadow appearance-none border rounded w-full py-1 px-3 text-gray-700 leading-tight focus:outline-none focus:ring" v-model="location" v-on:keydown.enter="onLocationEnter" placeholder="Scan the location e.g. RACK-A1">        
             </div>
 
             <div class="flex">

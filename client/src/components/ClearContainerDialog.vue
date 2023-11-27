@@ -25,7 +25,7 @@ Emits an event 'confirm-removal' with a boolean true/false if user confirmed act
             </div>
             <div v-if="toBeamline">
                 <label for="beamline" class="mr-2">Select Beamline if container will be moved there</label>
-                <input type="text" list="beamlines" id="beamline" v-model="beamline" class="shadow appearance-none border rounded px-1 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"/>
+                <input type="text" list="beamlines" id="beamline" v-model="beamline" class="shadow appearance-none border rounded px-1 text-gray-700 leading-tight focus:outline-none focus:ring"/>
                 <datalist id="beamlines">
                     <option v-for="bl in beamlines" :key="bl">{{bl}}</option>
                 </datalist>
