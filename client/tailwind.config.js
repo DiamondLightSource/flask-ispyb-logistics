@@ -1,6 +1,10 @@
 // tailwind.config.js
 // Colors from Bulma
 module.exports = {
+    content: [
+        './public/index.html',
+        './src/**/*.{html,js,vue}',
+    ],
     theme: {
         colors: {
           transparent: 'transparent',
