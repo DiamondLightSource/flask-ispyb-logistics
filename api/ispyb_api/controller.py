@@ -42,7 +42,7 @@ def set_location(barcode, location, awb=None):
     dewar_details = get_dewar_by_barcode(actual_barcode)
     previous_location = dewar_details['storageLocation']
 
-    if location == 'LN2TOPUP':
+    if location.upper() == 'LN2TOPUP':
         dewarId = dewar_details['dewarId']
         comments = {}
         if dewar_details['comments'] is not None:
