@@ -433,7 +433,8 @@ def get_instrument_from_dewar(dewarBarCode):
     """
     results = None
 
-    records = Dewar.query.join(Shipping).join(Proposal).join(BLSession).\
+    records = Dewar.query.select_from(Dewar).\
+        join(Shipping).join(Proposal).join(BLSession).\
         filter(Shipping.shippingId == Dewar.shippingId).\
         filter(Proposal.proposalId == Shipping.proposalId).\
         filter(BLSession.proposalId == Proposal.proposalId).\
