@@ -43,15 +43,6 @@ export default {
             }
         },
     },
-    filters: {
-        format_date: function (value) {
-            if (!value) return ''
-
-            let d = new Date(value)
-        
-            return d.toUTCString()
-        }
-    },
     methods: {
         // Search backend for recent location of this container
         onFindContainer: function() {
