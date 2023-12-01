@@ -17,7 +17,7 @@
                   <div class="timeline-content">
                       <p>{{ item.location }}</p>
                       <!-- Arrival Date uses filter defined in this component -->
-                      <p class="tag">{{item.arrivalDate | format_date}}</p>
+                      <p class="tag">{{ format_date(item.arrivalDate) }}</p>
                   </div>
                 </li>
               </ul>
@@ -49,17 +49,13 @@ export default {
             }
         },
     },
-    filters: {
-        format_date: function (value) {
+    methods: {
+        format_date: function(value) {
             if (!value) 
                 return ''
-
             let d = new Date(value)
-        
             return d.toUTCString()
-        }
-    },
-    methods: {
+        },
         // Search the database for a dewar with the specified facility code (DLS-MX-1234)
         // Some values in the history can be null so we need to handle those
         onFindDewar: function(event) {
