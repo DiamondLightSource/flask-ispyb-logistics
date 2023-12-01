@@ -370,10 +370,10 @@ def get_shipping_return_address(barcode):
     # Dewar=>Shipping=>LabContact=>Laboratory
     results = None
     try:
-        records = Dewar.query.join(Shipping, Dewar.shippingId == Shipping.shippingId).\
-            join(LabContact, Shipping.returnLabContactId == LabContact.labContactId).\
-            join(Person, LabContact.personId == Person.personId).\
-            join(Laboratory, Person.laboratoryId == Laboratory.laboratoryId).\
+        records = Laboratory.query.join(Person, Person.laboratoryId == Laboratory.laboratoryId).\
+            join(LabContact, LabContact.personId == Person.personId).\
+            join(Shipping, Shipping.returnLabContactId == LabContact.labContactId).\
+            join(Dewar, Dewar.shippingId == Shipping.shippingId).\
             filter(Dewar.barCode == barcode).\
             order_by(desc(Dewar.dewarId)).\
             limit(1).\
