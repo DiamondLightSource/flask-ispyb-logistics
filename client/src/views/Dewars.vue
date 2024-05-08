@@ -93,6 +93,7 @@
       v-bind:beamline="beamline || ''"
       v-bind:visit="visit || ''"
       v-bind:startDate="startDate || ''"
+      v-bind:startDateString="startDateString || ''"
       v-on:confirm-update="onConfirmUpdateDewarReport"
       v-on:clear-location="onClearLocation">
     </DewarReportDialog>
@@ -141,6 +142,7 @@ export default {
       beamline: '',
       visit: '',
       startDate: '',
+      startDateString: '',
     }
   },
   created: function() {
@@ -247,6 +249,7 @@ export default {
               'beamline': dewarInfo.beamline,
               'visit': dewarInfo.visit,
               'startDate': dewarInfo.startDate,
+              'startDateString': dewarInfo.startDateString,
               'barcode': dewarInfo.barcode,
               'arrivalDate': dewarInfo.arrivalDate,
               'facilityCode': dewarInfo.facilityCode,
@@ -324,6 +327,7 @@ export default {
           this.beamline = dewar.beamline
           this.visit = dewar.visit
           this.startDate = dewar.startDate
+          this.startDateString = dewar.startDateString
         },
         // User has either confirmed or cancelled
         onConfirmUpdateDewarReport: function(payload) {
@@ -338,6 +342,7 @@ export default {
           this.beamline = '';
           this.visit = '';
           this.startDate = '';
+          this.startDateString = '';
           this.$refs.ScanDewar.$refs.barcode.focus();
         },
         updateDewarReport: function(dewarId, comments) {

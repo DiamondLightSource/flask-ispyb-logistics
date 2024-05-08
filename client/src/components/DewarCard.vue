@@ -32,6 +32,9 @@ export default {
     },
     methods: {
         showDewarReport: function(dewar) {
+            if (dewar.startDate) {
+                dewar.startDateString = new Date(dewar.startDate).toLocaleString("en-GB", {weekday:"short", month:"short", day:"numeric", hour:"numeric", minute:"numeric"})
+            }
             if (dewar.dewarId) {
                 console.log("Update Dewar from " + dewar.dewarId)
                 this.$emit('update-dewar', dewar)

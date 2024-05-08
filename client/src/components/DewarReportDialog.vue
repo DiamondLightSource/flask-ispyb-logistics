@@ -118,9 +118,6 @@ export default {
         dewarContainers: function(newVal) {
             if (Array.isArray(newVal)) this.dewarContainers = newVal.join("<br />")
         },
-        startDate: function(newVal) {
-            if (newVal) this.startDateString = new Date(newVal).toLocaleString("en-GB", {weekday:"short", month:"short", day:"numeric", hour:"numeric", minute:"numeric"})
-        }
     },
     methods: {
         // To conserve characters save each boolean as 1 or 0
