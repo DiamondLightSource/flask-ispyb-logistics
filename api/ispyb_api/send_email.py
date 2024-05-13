@@ -8,7 +8,7 @@ email_domain = os.environ.get('EMAIL_DOMAIN', '@diamond.ac.uk')
 smtp_server = os.environ.get('SMTP_SERVER', 'localhost')
 
 def get_cc_addresses(barcode):
-	if barcode[0:2].lower() == 'in' or barcode[0:2].lower() == 'sw':
+	if barcode[0:2].lower() in ('in', 'sw', 'ic'):
 		return ebic_industry_emails
 	else:
 		return ebic_academic_emails
