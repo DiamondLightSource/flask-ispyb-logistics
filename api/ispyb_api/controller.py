@@ -262,6 +262,10 @@ def find_recent_storage_history(locations):
 
     Returns {'<location>': {'barcode':barcode, 'dewarLocation': dewarLocation, 'date':arrivalDate...}, }
     """
+
+    if rest_api:
+        return {}
+
     results = {}
 
     try:
