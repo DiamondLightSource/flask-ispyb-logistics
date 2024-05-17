@@ -314,7 +314,25 @@ def find_recent_storage_history(locations):
     """
 
     if rest_api:
-        return {}
+        results = {
+            "tray-1b": {
+                "barcode": "mx35324-0070644",
+                "facilityCode": "DLS-MX-0818",
+                "dewarStatus": "processing",
+                "arrivalDate": "2024-05-15T12:34:25",
+                "onBeamline": true,
+                "dewarLocation": "i04"
+            },
+            "tray-3c": {
+                "barcode": "mx34438-0070845",
+                "facilityCode": "DLS-MX-1135",
+                "dewarStatus": "dispatch-requested",
+                "arrivalDate": "2024-05-14T19:14:48",
+                "onBeamline": false,
+                "dewarLocation": "stores-out"
+            },
+        }
+        return results
 
     results = {}
 
