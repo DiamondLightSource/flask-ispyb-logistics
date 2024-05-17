@@ -22,7 +22,7 @@ from ..dewars import ebic
 # What age do we ignore container history entries
 CONTAINER_FILTER_DAYS_LIMIT = 30
 email_domain = os.environ.get('EMAIL_DOMAIN', '@diamond.ac.uk')
-rest_api = True if os.environ.get("REST_API", "1") == "1" else False
+rest_api = True if os.environ.get("REST_API", "0") == "1" else False
 rest_api_host = os.environ.get("REST_API_HOST", "http://172.23.168.164")
 dewar_location_endpoint = os.environ.get("DEWAR_LOCATION_ENDPOINT", "/api/beamlines/zone4")
 dewar_location_url = urljoin(rest_api_host, dewar_location_endpoint)
@@ -204,9 +204,56 @@ def find_dewar_history_for_locations(locations, max_entries=20):
     This method will find 'n' entries from the dewar transport history table filtered by location.
     Returns {'1', {'barcode':barcode, 'awb':awb, 'date':arrivalDate...}, }
     """
-
     if rest_api:
-        return {}
+        results = {
+            "0": {
+                "barcode": "mx31353-0071382",
+                "date": "2024-05-16T09:31:51",
+                "storageLocation": "stores-in",
+                "facilitycode": "DLS-MX-1159",
+                "status": "at facility",
+                "awb": None,
+                "sid": 63258
+            },
+            "1": {
+                "barcode": "mx35324-0071448",
+                "date": "2024-05-16T09:13:45",
+                "storageLocation": "stores-in",
+                "facilitycode": "DLS-MX-1264",
+                "status": "at facility",
+                "awb": None,
+                "sid": 63318
+            },
+            "2": {
+                "barcode": "mx35324-0071445",
+                "date": "2024-05-16T09:13:43",
+                "storageLocation": "stores-in",
+                "facilitycode": "DLS-MX-1263",
+                "status": "at facility",
+                "awb": None,
+                "sid": 63318
+            },
+            "3": {
+                "barcode": "in34271-0071505",
+                "date": "2024-05-16T09:13:39",
+                "storageLocation": "stores-in",
+                "facilitycode": "DLS-IN-0470",
+                "status": "at facility",
+                "awb": None,
+                "sid": 63375
+            },
+            "4": {
+                "barcode": "mx31353-0070929",
+                "date": "2024-05-15T13:59:38",
+                "storageLocation": "stores-out",
+                "facilitycode": "DLS-MX-0989",
+                "status": "dispatch-requested",
+                "awb": "5990156270",
+                "sid": 62850
+            },
+        }
+        return results
+
 
     results = {}
 
