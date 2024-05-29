@@ -82,6 +82,9 @@ def get_dewar_by_facilitycode(fc):
     """
     result = None
 
+    if rest_api:
+        return result
+
     # Facility codes are reused, so we want the most recent version
     # We work that out based on the newest (highest) dewarId
     # Could also specify that its a dewar on site, at-facility perhaps?
@@ -103,6 +106,9 @@ def get_dewar_by_barcode(barcode):
     """
     logging.getLogger('ispyb-logistics').debug("get_dewar_by_barcode {}".format(barcode))
     result = {}
+
+    if rest_api:
+        return result
 
     try:
         d = Dewar.query.filter_by(barCode = barcode).one()
@@ -131,7 +137,6 @@ def find_dewars_by_location(locations):
         r = requests.get(dewar_location_url)
         results = r.json()
         return results
-
 
     results = {}
 
@@ -229,24 +234,6 @@ def find_dewar_history_for_locations(locations, max_entries=20):
                 "sid": 63318
             },
             "2": {
-                "barcode": "mx35324-0071445",
-                "date": "2024-05-16T09:13:43",
-                "storageLocation": "stores-in",
-                "facilitycode": "DLS-MX-1263",
-                "status": "at facility",
-                "awb": None,
-                "sid": 63318
-            },
-            "3": {
-                "barcode": "in34271-0071505",
-                "date": "2024-05-16T09:13:39",
-                "storageLocation": "stores-in",
-                "facilitycode": "DLS-IN-0470",
-                "status": "at facility",
-                "awb": None,
-                "sid": 63375
-            },
-            "4": {
                 "barcode": "mx31353-0070929",
                 "date": "2024-05-15T13:59:38",
                 "storageLocation": "stores-out",
@@ -262,7 +249,6 @@ def find_dewar_history_for_locations(locations, max_entries=20):
         r = requests.get(dewar_history_url, params=payload)
         results = r.json()
         return results
-
 
     results = {}
 
@@ -413,6 +399,9 @@ def find_dewar_history_for_dewar(dewarCode, max_entries=3):
     """
     results = None
 
+    if rest_api:
+        return results
+
     try:
         # Query for dewar transporthistory for specific dewarId
         # Get the timestamp and location from the transport history
@@ -466,6 +455,10 @@ def get_shipping_return_address(barcode):
     # Get the return lab address for this dewar.
     # Dewar=>Shipping=>LabContact=>Laboratory
     results = None
+
+    if rest_api:
+        return results
+
     try:
         records = Laboratory.query.join(Person, Person.laboratoryId == Laboratory.laboratoryId).\
             join(LabContact, LabContact.personId == Person.personId).\
@@ -500,6 +493,10 @@ def find_dewars_by_proposal(proposal_code, proposal_number):
     """
     Example of retrieving all dewars for a given proposal...
     """
+
+    if rest_api:
+        return None
+
     results = Dewar.query.join(Shipping).join(Proposal).\
         filter(Proposal.proposalCode == proposal_code, Proposal.proposalNumber == proposal_number).\
         filter(Proposal.proposalId == Shipping.proposalId).\
@@ -529,6 +526,9 @@ def get_instrument_from_dewar(dewarBarCode):
     This looks at the dewar => sessions and picks the most recent session with a beamline
     """
     results = None
+
+    if rest_api:
+        return results
 
     records = Dewar.query.select_from(Dewar).\
         join(Shipping).join(Proposal).join(BLSession).\
@@ -571,6 +571,8 @@ def get_lc_from_dewar(dewarBarCode):
             'email': '',
             }
 
+    if rest_api:
+        return results
 
     records = Dewar.query.join(BLSession).\
         filter(BLSession.sessionId == Dewar.firstExperimentId).\
