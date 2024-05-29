@@ -26,6 +26,11 @@ rest_api = True if os.environ.get("REST_API", "0") == "1" else False
 rest_api_host = os.environ.get("REST_API_HOST", "http://172.23.168.164")
 dewar_location_endpoint = os.environ.get("DEWAR_LOCATION_ENDPOINT", "/api/beamlines/zone4")
 dewar_location_url = urljoin(rest_api_host, dewar_location_endpoint)
+recent_storage_history_endpoint = os.environ.get("RECENT_STORAGE_HISTORY_ENDPOINT", "/api/dewars/recent")
+recent_storage_history_url = urljoin(rest_api_host, recent_storage_history_endpoint)
+dewar_history_endpoint = os.environ.get("DEWAR_HISTORY_ENDPOINT", "/api/dewars/history")
+dewar_history_url = urljoin(rest_api_host, dewar_history_endpoint)
+
 
 def set_location(barcode, location, awb=None):
     """
@@ -203,8 +208,7 @@ def find_dewar_history_for_locations(locations, max_entries=20):
     """
     This method will find 'n' entries from the dewar transport history table filtered by location.
     Returns {'1', {'barcode':barcode, 'awb':awb, 'date':arrivalDate...}, }
-    """
-    if rest_api:
+    eg
         results = {
             "0": {
                 "barcode": "mx31353-0071382",
@@ -252,6 +256,11 @@ def find_dewar_history_for_locations(locations, max_entries=20):
                 "sid": 62850
             },
         }
+    """
+    if rest_api:
+        payload = {"locations": locations, "max_entries": max_entries}
+        r = requests.get(dewar_history_url, params=payload)
+        results = r.json()
         return results
 
 
@@ -311,9 +320,7 @@ def find_recent_storage_history(locations):
     else if at stores out or "removed" then show as empty
 
     Returns {'<location>': {'barcode':barcode, 'dewarLocation': dewarLocation, 'date':arrivalDate...}, }
-    """
-
-    if rest_api:
+    eg
         results = {
             "tray-1b": {
                 "barcode": "mx35324-0070644",
@@ -332,6 +339,12 @@ def find_recent_storage_history(locations):
                 "dewarLocation": "stores-out"
             },
         }
+    """
+
+    if rest_api:
+        payload = {"locations": locations}
+        r = requests.get(recent_storage_history_url, params=payload)
+        results = r.json()
         return results
 
     results = {}
