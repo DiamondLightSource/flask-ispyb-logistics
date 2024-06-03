@@ -105,7 +105,7 @@ def get_dewar_by_barcode(barcode):
     It enforces only one result and will throw an error if there is not one.
     """
     logging.getLogger('ispyb-logistics').debug("get_dewar_by_barcode {}".format(barcode))
-    result = {}
+    result = {'dewarId': '', 'barCode': barcode, 'storageLocation': '', 'facilityCode': '', 'comments': ''}
 
     if rest_api:
         return result
