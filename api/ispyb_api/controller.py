@@ -30,7 +30,8 @@ recent_storage_history_endpoint = os.environ.get("RECENT_STORAGE_HISTORY_ENDPOIN
 recent_storage_history_url = urljoin(rest_api_host, recent_storage_history_endpoint)
 dewar_history_endpoint = os.environ.get("DEWAR_HISTORY_ENDPOINT", "/api/dewars/history")
 dewar_history_url = urljoin(rest_api_host, dewar_history_endpoint)
-
+find_dewar_endpoint = os.environ.get("DEWAR_ENDPOINT", "/api/dewars/find")
+find_dewar_url = urljoin(rest_api_host, find_dewar_endpoint)
 
 def set_location(barcode, location, awb=None):
     """
@@ -105,7 +106,7 @@ def get_dewar_by_barcode(barcode):
     It enforces only one result and will throw an error if there is not one.
     """
     logging.getLogger('ispyb-logistics').debug("get_dewar_by_barcode {}".format(barcode))
-    result = {'dewarId': '', 'barCode': barcode, 'storageLocation': '', 'facilityCode': '', 'comments': ''}
+    result = {'dewarId': barcode, 'barCode': barcode, 'storageLocation': '', 'facilityCode': '', 'comments': None}
 
     if rest_api:
         return result
@@ -400,7 +401,9 @@ def find_dewar_history_for_dewar(dewarCode, max_entries=3):
     results = None
 
     if rest_api:
-        return results
+        payload = {"DEWARCODE": dewarCode, "MAX_ENTRIES": max_entries}
+        r = requests.get(find_dewar_url, params=payload)
+        return r.json()
 
     try:
         # Query for dewar transporthistory for specific dewarId
