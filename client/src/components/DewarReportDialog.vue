@@ -122,22 +122,22 @@ export default {
     methods: {
         // To conserve characters save each boolean as 1 or 0
         initialiseReport: function(comments) {
+            let json;
             try {
-                let json = JSON.parse(comments)
-
-                this.hdd = parseInt(json.hdd) === 1,
-                this.tools = parseInt(json.tools) === 1,
-                this.tBarMissing = parseInt(json.tBarMissing) === 1,
-                this.ventDamaged = parseInt(json.ventDamaged) === 1,
-                this.foamPlugMissing = parseInt(json.foamPlugMissing) === 1,
-                this.dewarWarm = parseInt(json.warm) === 1,
-                this.toppedUp = json.toppedUp || "",
-                this.checked = json.checked || "",
-                this.comments = json.comments || ""
+                json = JSON.parse(comments)
             } catch (err) {
-                console.log("Error passed comments that had data in but were null: " + comments)
-                this.comments = comments
+                json = comments
+                console.log("data already in json format.")
             }
+            this.hdd = parseInt(json.hdd) === 1,
+            this.tools = parseInt(json.tools) === 1,
+            this.tBarMissing = parseInt(json.tBarMissing) === 1,
+            this.ventDamaged = parseInt(json.ventDamaged) === 1,
+            this.foamPlugMissing = parseInt(json.foamPlugMissing) === 1,
+            this.dewarWarm = parseInt(json.warm) === 1,
+            this.toppedUp = json.toppedUp || "",
+            this.checked = json.checked || "",
+            this.comments = json.comments || ""
         },
         // User has confirmed to remove the dewar from this location
         onSave: function() {
