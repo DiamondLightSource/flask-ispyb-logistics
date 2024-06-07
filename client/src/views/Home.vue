@@ -76,12 +76,12 @@ export default {
   name: 'home',
   data() {
     return {
-    showStores: process.env.SHOW_STORES,
-    showZone4: process.env.SHOW_ZONE4,
-    showZone6: process.env.SHOW_ZONE6,
-    showLab14: process.env.SHOW_LAB14,
-    showEBIC: process.env.SHOW_EBIC,
-    showCage: process.env.SHOW_CAGE,
+    showStores: process.env.VUE_APP_SHOW_STORES,
+    showZone4: process.env.VUE_APP_SHOW_ZONE4,
+    showZone6: process.env.VUE_APP_SHOW_ZONE6,
+    showLab14: process.env.VUE_APP_SHOW_LAB14,
+    showEBIC: process.env.VUE_APP_SHOW_EBIC,
+    showCage: process.env.VUE_APP_SHOW_CAGE,
     }
   }
 }
