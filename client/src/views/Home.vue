@@ -57,6 +57,14 @@
                     </div>
                 </a>
             </div>
+            <div class="p-4">
+                <a href="/cage/" class="">
+                    <div class="text-white text-center bg-success p-4 rounded h-full">
+                        <p class="text-3xl font-bold">SLS Dewar Management</p>
+                        <p class="">To handle dewar trolleys for SLS</p>
+                    </div>
+                </a>
+            </div>
         </div>
       <!-- Footer with link to scisoft -->
       <footer class="text-center">For questions about these applications, please contact Scientific Software <a class="text-blue-500 underline" href="mailto:scientificsoftware@diamond.ac.uk?Subject=ISPyBLogistics">here</a></footer>
