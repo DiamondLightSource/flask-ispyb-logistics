@@ -24,7 +24,7 @@ CONTAINER_FILTER_DAYS_LIMIT = 30
 email_domain = os.environ.get('EMAIL_DOMAIN', '@diamond.ac.uk')
 rest_api = True if os.environ.get("REST_API", "0") == "1" else False
 rest_api_host = os.environ.get("REST_API_HOST", "http://172.23.168.164")
-dewar_location_endpoint = os.environ.get("DEWAR_LOCATION_ENDPOINT", "/api/beamlines/zone4")
+dewar_location_endpoint = os.environ.get("DEWAR_LOCATION_ENDPOINT", "/api/beamlines/cage")
 dewar_location_url = urljoin(rest_api_host, dewar_location_endpoint)
 recent_storage_history_endpoint = os.environ.get("RECENT_STORAGE_HISTORY_ENDPOINT", "/api/dewars/recent")
 recent_storage_history_url = urljoin(rest_api_host, recent_storage_history_endpoint)

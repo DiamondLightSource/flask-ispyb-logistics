@@ -1,7 +1,8 @@
 #
 # Configuration for the Zone4 Storage Area
 #
-rack_prefix = 'TRAY'
+
+rack_prefix = 'TROLLEY'
 
 # 16 normal trays with A-F
 num_trays = 16
