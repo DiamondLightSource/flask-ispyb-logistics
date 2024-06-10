@@ -37,7 +37,7 @@
     </div>
 
     <!-- Display the rack locations, six columns across If Zone 4 -->
-    <div v-else-if="zone === 'zone4'" class="flex flex-wrap">
+    <div v-else-if="zone === 'zone4' || zone === 'cage'" class="flex flex-wrap">
       <div class="w-full md:w-1/6 p-2" v-for="(dewar, rack) in rack_locations" v-bind:key="rack" >
         <DewarCard
           v-on:update-dewar="onShowDewarReport"
@@ -228,7 +228,8 @@ export default {
                 try {
                   dewarComments = JSON.parse(dewarInfo.comments)
                 } catch(err) {
-                  console.log("Error parsing JSON for dewar in "+rack)
+                  dewarComments = dewarInfo.comments
+                  console.log("already in JSON format for dewar in "+rack)
                 }
                 if ('toppedUp' in dewarComments) {
                   lastFillSeconds = Date.parse(dewarComments.toppedUp.slice(-1)[0])/1000

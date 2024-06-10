@@ -122,9 +122,14 @@ export default {
     methods: {
         // To conserve characters save each boolean as 1 or 0
         initialiseReport: function(comments) {
+            let json;
             try {
-                let json = JSON.parse(comments)
-
+                json = JSON.parse(comments)
+            } catch (err) {
+                json = comments
+                console.log("data already in json format.")
+            }
+            try {
                 this.hdd = parseInt(json.hdd) === 1,
                 this.tools = parseInt(json.tools) === 1,
                 this.tBarMissing = parseInt(json.tBarMissing) === 1,
@@ -136,7 +141,6 @@ export default {
                 this.comments = json.comments || ""
             } catch (err) {
                 console.log("Error passed comments that had data in but were null: " + comments)
-                this.comments = comments
             }
         },
         // User has confirmed to remove the dewar from this location

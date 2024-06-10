@@ -54,6 +54,9 @@ def zone6_page():
 def lab14_page():
     return send_file('client/dist/lab14.html')
 
+@app.route("/cage/")
+def cage_page():
+    return send_file('client/dist/cage.html')
 
 if __name__ == '__main__':
     app.run(debug=True)

@@ -14,7 +14,7 @@
     
         <!-- Layout for application links -->
         <div class="flex flex-col md:flex-row">
-            <div class="p-4">
+            <div class="p-4" v-if="showStores == 1">
                 <a href="/stores/" class="">
                     <div class="text-white text-center bg-success p-4 rounded h-full">
                         <p class="text-3xl font-bold">Stores Dewar Management</p>
@@ -23,7 +23,7 @@
                 </a>
             </div>
 
-            <div class="p-4">
+            <div class="p-4" v-if="showZone6 == 1">
                 <a href="/zone6/" class="">
                     <div class="text-white text-center bg-success p-4 rounded h-full">
                         <p class="text-3xl font-bold">Zone 6 Dewar Management</p>
@@ -32,7 +32,7 @@
                 </a>
             </div>
 
-            <div class="p-4">
+            <div class="p-4" v-if="showZone4 == 1">
                 <a href="/zone4/" class="">
                     <div class="text-white text-center bg-success p-4 rounded h-full">
                         <p class="text-3xl font-bold">Zone 4 Dewar Management</p>
@@ -41,7 +41,7 @@
                 </a>
             </div>
 
-            <div class="p-4">
+            <div class="p-4" v-if="showEBIC == 1">
                 <a href="/ebic/" class="">
                     <div class="text-white text-center bg-success p-4 rounded h-full">
                         <p class="text-3xl font-bold">eBIC Dewar Management</p>
@@ -49,11 +49,19 @@
                     </div>
                 </a>
             </div>
-            <div class="p-4">
+            <div class="p-4" v-if="showLab14 == 1">
                 <a href="/lab14/" class="">
                     <div class="text-white text-center bg-success p-4 rounded h-full">
                         <p class="text-3xl font-bold">Lab14 Container Management</p>
                         <p class="">To handle containers for SCM</p>
+                    </div>
+                </a>
+            </div>
+            <div class="p-4" v-if="showCage == 1">
+                <a href="/cage/" class="">
+                    <div class="text-white text-center bg-success p-4 rounded h-full">
+                        <p class="text-3xl font-bold">SLS Dewar Management</p>
+                        <p class="">To handle dewar trolleys for SLS</p>
                     </div>
                 </a>
             </div>
@@ -66,6 +74,16 @@
 <script>
 export default {
   name: 'home',
+  data() {
+    return {
+      showStores: process.env.VUE_APP_SHOW_STORES,
+      showZone4: process.env.VUE_APP_SHOW_ZONE4,
+      showZone6: process.env.VUE_APP_SHOW_ZONE6,
+      showLab14: process.env.VUE_APP_SHOW_LAB14,
+      showEBIC: process.env.VUE_APP_SHOW_EBIC,
+      showCage: process.env.VUE_APP_SHOW_CAGE,
+    }
+  }
 }
 </script>
 

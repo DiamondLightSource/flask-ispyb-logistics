@@ -93,6 +93,13 @@ module.exports = {
         // chunks to include on this page, by default includes
         // extracted common chunks and vendor chunks.
         chunks: ['chunk-vendors', 'chunk-common', 'lab14']
+      },
+      cage: {
+        entry: 'src/apps/cage/main.js',
+        template: 'public/index.html',
+        filename: 'cage.html',
+        title: 'SLS Logistics',
+        chunks: ['chunk-vendors', 'chunk-common', 'cage']
       }
     }
 }
