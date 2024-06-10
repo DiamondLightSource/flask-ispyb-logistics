@@ -4,8 +4,6 @@ import logging
 import itertools
 from datetime import datetime
 import json
-import requests
-from urllib.parse import urljoin
 
 from sqlalchemy.orm.exc import NoResultFound, MultipleResultsFound
 from sqlalchemy.exc import DBAPIError
@@ -23,15 +21,7 @@ from ..dewars import ebic
 CONTAINER_FILTER_DAYS_LIMIT = 30
 email_domain = os.environ.get('EMAIL_DOMAIN', '@diamond.ac.uk')
 rest_api = True if os.environ.get("REST_API", "0") == "1" else False
-rest_api_host = os.environ.get("REST_API_HOST", "http://172.23.168.164")
-dewar_location_endpoint = os.environ.get("DEWAR_LOCATION_ENDPOINT", "/api/beamlines/cage")
-dewar_location_url = urljoin(rest_api_host, dewar_location_endpoint)
-recent_storage_history_endpoint = os.environ.get("RECENT_STORAGE_HISTORY_ENDPOINT", "/api/dewars/recent")
-recent_storage_history_url = urljoin(rest_api_host, recent_storage_history_endpoint)
-dewar_history_endpoint = os.environ.get("DEWAR_HISTORY_ENDPOINT", "/api/dewars/history")
-dewar_history_url = urljoin(rest_api_host, dewar_history_endpoint)
-find_dewar_endpoint = os.environ.get("DEWAR_ENDPOINT", "/api/dewars/find")
-find_dewar_url = urljoin(rest_api_host, find_dewar_endpoint)
+
 
 def set_location(barcode, location, awb=None):
     """
@@ -135,9 +125,7 @@ def find_dewars_by_location(locations):
     logging.getLogger('ispyb-logistics').debug("find_dewars_by_location {}".format(','.join(locations)))
 
     if rest_api:
-        r = requests.get(dewar_location_url)
-        results = r.json()
-        return results
+        return webservice.find_dewars_by_location()
 
     results = {}
 
@@ -246,10 +234,7 @@ def find_dewar_history_for_locations(locations, max_entries=20):
         }
     """
     if rest_api:
-        payload = {"locations": locations, "max_entries": max_entries}
-        r = requests.get(dewar_history_url, params=payload)
-        results = r.json()
-        return results
+        return webservice.find_dewar_history_for_locations(locations, max_entries)
 
     results = {}
 
@@ -329,10 +314,7 @@ def find_recent_storage_history(locations):
     """
 
     if rest_api:
-        payload = {"locations": locations}
-        r = requests.get(recent_storage_history_url, params=payload)
-        results = r.json()
-        return results
+        return webservice.find_recent_storage_history(locations)
 
     results = {}
 
@@ -401,9 +383,7 @@ def find_dewar_history_for_dewar(dewarCode, max_entries=3):
     results = None
 
     if rest_api:
-        payload = {"DEWARCODE": dewarCode, "MAX_ENTRIES": max_entries}
-        r = requests.get(find_dewar_url, params=payload)
-        return r.json()
+        return webservice.find_dewar_history_for_dewar(dewarCode, max_entries)
 
     try:
         # Query for dewar transporthistory for specific dewarId
