@@ -22,7 +22,7 @@ beamlines = {'zone6': zone6.beamline_locations,
              'zone4': zone4.beamline_locations,
              'ebic': ebic.beamline_locations,
              'lab14': lab14.beamline_locations,
-             'cage': cage.beamline_locations
+             'cage': cage.beamline_locations,
              }
 
 
