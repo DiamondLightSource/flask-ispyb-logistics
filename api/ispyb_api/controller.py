@@ -151,6 +151,7 @@ def find_dewars_by_location(locations):
                    Dewar.bltimeStamp,
                    Dewar.storageLocation,
                    Dewar.comments,
+                   Dewar.shippingId,
                    DewarTransportHistory.arrivalDate,
                    DewarTransportHistory.dewarStatus,
                    Container.code,
@@ -174,6 +175,7 @@ def find_dewars_by_location(locations):
                 logging.getLogger('ispyb-logistics').debug('Found entry for this dewar {} in {} at {}'.format(dewar.barCode, dewar.storageLocation, dewar.arrivalDate))
                 results[dewar.storageLocation.upper()] = {
                     'dewarId': dewar.dewarId,
+                    'shippingId': dewar.shippingId,
                     'barcode': dewar.barCode,
                     'arrivalDate': dewar.arrivalDate.isoformat(),
                     'facilityCode': dewar.facilityCode,

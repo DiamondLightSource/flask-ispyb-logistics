@@ -42,9 +42,10 @@ Emits an event 'confirm-removal' with a boolean true/false if user confirmed act
         </section>
         <footer class="flex border-t-2 justify-between">
           <div>
-            <button class="text-white bg-success hover:bg-green-700 rounded px-2 py-1 m-2" v-on:click="onSave()">Save Report</button>
-            <button class="text-white bg-danger hover:bg-red-700 rounded px-2 py-1 m-2" v-on:click="onClose()">Cancel</button>
+            <button class="text-white bg-success hover:bg-green-700 rounded px-2 py-1 m-2" v-on:click="onSave()"><i class="fa fa-check pr-2"></i>Save Report</button>
+            <button class="text-white bg-danger hover:bg-red-700 rounded px-2 py-1 m-2" v-on:click="onClose()"><i class="fa fa-times pr-2"></i>Cancel</button>
           </div>
+          <button class="text-white bg-blue-500 hover:bg-blue-700 rounded px-2 py-1 m-2" v-on:click.prevent="viewInSynchweb(shippingId)"><i class="fa fa-link pr-2"></i>View in Synchweb</button>
           <button class="text-white bg-red-700 hover:bg-red-900 rounded px-2 py-1 m-2" v-on:click.prevent="clearLocation(dewarBarcode)"><i class="fa fa-trash pr-2"></i>Clear Dewar</button>
         </footer>
       </div>
@@ -88,6 +89,9 @@ export default {
         dewarId: {
             type: Number,
             required: true,
+        },
+        shippingId: {
+            type: Number,
         },
         dewarComments: {
             type: String,
@@ -186,6 +190,11 @@ export default {
             this.onClose()
             console.log("Clear Dewar " + barcode)
             this.$emit('clear-location', barcode)
+        },
+        viewInSynchweb: function(shippingId) {
+            console.log("Opening Synchweb link to " + shippingId)
+            let url = "https://ispyb.diamond.ac.uk/shipments/sid/" + shippingId
+            window.open(url, '_blank').focus();
         },
     }
 }

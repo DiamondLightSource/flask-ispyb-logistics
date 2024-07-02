@@ -87,6 +87,7 @@
     <DewarReportDialog
       v-bind:isActive="dewarId !== 0"
       v-bind:dewarId="dewarId"
+      v-bind:shippingId="shippingId"
       v-bind:dewarBarcode="dewarBarcode"
       v-bind:dewarComments="dewarComments"
       v-bind:dewarContainers="dewarContainers"
@@ -136,6 +137,7 @@ export default {
       refreshInterval: 60000, // refresh interval in milliseconds
       // Dewar Report id
       dewarId: 0,
+      shippingId: 0,
       dewarBarcode: '',
       dewarComments: '',
       dewarContainers: '',
@@ -245,6 +247,7 @@ export default {
 
             this_rack = {
               'dewarId': dewarInfo.dewarId,
+              'shippingId': dewarInfo.shippingId,
               'comments': dewarInfo.comments,
               'dewarContainers': dewarInfo.dewarContainers,
               'beamline': dewarInfo.beamline,
@@ -323,6 +326,7 @@ export default {
           // This location will be upper case because we control how it is rendered
           this.dewarComments = dewar.comments
           this.dewarId = dewar.dewarId
+          this.shippingId = dewar.shippingId
           this.dewarBarcode = dewar.barcode
           this.dewarContainers = dewar.dewarContainers
           this.beamline = dewar.beamline
@@ -337,6 +341,7 @@ export default {
           }
           // Reset data that will disable dialog box
           this.dewarId = 0;
+          this.shippingId = 0;
           this.dewarComments = '';
           this.dewarBarcode = '';
           this.dewarContainers = '';
