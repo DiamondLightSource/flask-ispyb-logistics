@@ -4,13 +4,13 @@ import requests
 from urllib.parse import urljoin
 
 # Build the URL for the routes (using env settings)
-synchweb_host = os.environ.get("SYNCHWEB_HOST", "https://192.168.33.10")
-set_dewar_history_url = urljoin(synchweb_host, "/api/shipment/dewars/history")
-container_history_url = urljoin(synchweb_host, "/api/shipment/containers/history")
-dewar_comments_url = urljoin(synchweb_host, "/api/shipment/dewars/comments")
+# synchweb_host = os.environ.get("SYNCHWEB_HOST", "https://192.168.33.10")
+# set_dewar_history_url = urljoin(synchweb_host, "/api/shipment/dewars/history")
+# container_history_url = urljoin(synchweb_host, "/api/shipment/containers/history")
+# dewar_comments_url = urljoin(synchweb_host, "/api/shipment/dewars/comments")
 
 # New endpoints to avoid SQLAlchemy calls
-rest_api_host = os.environ.get("REST_API_HOST", "http://172.23.168.164")
+rest_api_host = os.environ.get("REST_API_HOST", "http://x06da-cons-705:8080")
 dewar_location_endpoint = os.environ.get("DEWAR_LOCATION_ENDPOINT", "/api/beamlines/cage")
 dewar_location_url = urljoin(rest_api_host, dewar_location_endpoint)
 recent_storage_history_endpoint = os.environ.get("RECENT_STORAGE_HISTORY_ENDPOINT", "/api/dewars/recent")
@@ -19,6 +19,10 @@ dewar_history_endpoint = os.environ.get("DEWAR_HISTORY_ENDPOINT", "/api/dewars/h
 get_dewar_history_url = urljoin(rest_api_host, dewar_history_endpoint)
 find_dewar_endpoint = os.environ.get("DEWAR_ENDPOINT", "/api/dewars/find")
 find_dewar_url = urljoin(rest_api_host, find_dewar_endpoint)
+set_dewar_history_url = urljoin(rest_api_host, "/api/shipment/dewars/history")
+dewar_comments_url = urljoin(rest_api_host, "/api/shipment/dewars/comments")
+container_history_url = urljoin(rest_api_host, "/api/shipment/containers/history")
+
 
 # In production we want to use ssl and verify the certificate. 
 # Not for debug though so we can disable the ssl check via environment variable SYNCHWEB_SSL=0
