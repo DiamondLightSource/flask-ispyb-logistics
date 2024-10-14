@@ -26,7 +26,7 @@
     <MessagePanel></MessagePanel>
     
     <!-- Display the rack locations, four columns across If Zone 6 -->
-    <div v-if="zone==='zone6'" class="flex flex-wrap">
+    <div v-if="zone === 'zone6' || zone === 'i19'" class="flex flex-wrap">
       <div class="w-full md:w-1/4 p-2" v-for="(dewar, rack) in rack_locations" v-bind:key="rack">
         <DewarCard
           v-on:update-dewar="onShowDewarReport"

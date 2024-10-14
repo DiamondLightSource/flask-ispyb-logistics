@@ -18,11 +18,13 @@ from . import ebic
 from . import zone4
 from . import zone6
 from . import cage
+from . import i19
 
 locations = {'zone6': zone6.rack_locations,
              'zone4': zone4.rack_locations,
              'ebic': ebic.rack_locations,
              'cage': cage.rack_locations,
+             'i19': i19.rack_locations,
              }
 
 
