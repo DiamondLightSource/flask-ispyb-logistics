@@ -117,7 +117,7 @@ def get_dewar_by_barcode(barcode):
 
     return result
 
-def find_dewars_by_location(locations):
+def find_dewars_by_location(locations, suffixes=('',)):
     """
     This method will find the most recent dewar stored in each location.
     It matches the Dewar.storageLocation with DewarTransportHistory.storageLocation
@@ -164,33 +164,39 @@ def find_dewars_by_location(locations):
                    )
 
         for dewar in dewars:
-            # If we already have an entry, it means there is a more recent change for a dewar in this location
-            # Note we store the data in upper case - SynchWeb uses lower case while the UI requests data in upper case...
-            if dewar.storageLocation.upper() in results:
-                if dewar.code not in results[dewar.storageLocation.upper()]['dewarContainers']:
-                    results[dewar.storageLocation.upper()]['dewarContainers'].append(dewar.code)
-                if dewar.containerQueueId is not None:
-                    results[dewar.storageLocation.upper()]['UDC'] = True
-            else:
-                logging.getLogger('ispyb-logistics').debug('Found entry for this dewar {} in {} at {}'.format(dewar.barCode, dewar.storageLocation, dewar.arrivalDate))
-                results[dewar.storageLocation.upper()] = {
-                    'dewarId': dewar.dewarId,
-                    'shippingId': dewar.shippingId,
-                    'barcode': dewar.barCode,
-                    'arrivalDate': dewar.arrivalDate.isoformat(),
-                    'facilityCode': dewar.facilityCode,
-                    'status': dewar.dewarStatus,
-                    'comments': dewar.comments,
-                    'onBeamline': False,
-                    'dewarLocation': dewar.storageLocation,
-                    'dewarContainers': [dewar.code],
-                    'UDC': dewar.containerQueueId is not None,
-                }
-                if dewar.visit_number is not None:
-                    visit = f'{dewar.proposalCode}{dewar.proposalNumber}-{dewar.visit_number}'
-                    results[dewar.storageLocation.upper()]['visit'] = visit
-                    results[dewar.storageLocation.upper()]['beamline'] = dewar.beamLineName
-                    results[dewar.storageLocation.upper()]['startDate'] = dewar.startDate.isoformat()
+            for suffix in suffixes:
+                # If we already have an entry, it means there is a more recent change for a dewar in this location
+                # Note we store the data in upper case - SynchWeb uses lower case while the UI requests data in upper case...
+                loc = dewar.storageLocation.upper()+suffix
+                if loc in results and results[loc]['dewarId'] == dewar.dewarId:
+                    if dewar.code not in results[loc]['dewarContainers']:
+                        results[loc]['dewarContainers'].append(dewar.code)
+                    if dewar.containerQueueId is not None:
+                        results[loc]['UDC'] = True
+                    break
+                elif loc in results:
+                    continue
+                else:
+                    logging.getLogger('ispyb-logistics').debug('Found entry for this dewar {} in {} at {}'.format(dewar.barCode, dewar.storageLocation, dewar.arrivalDate))
+                    results[loc] = {
+                        'dewarId': dewar.dewarId,
+                        'shippingId': dewar.shippingId,
+                        'barcode': dewar.barCode,
+                        'arrivalDate': dewar.arrivalDate.isoformat(),
+                        'facilityCode': dewar.facilityCode,
+                        'status': dewar.dewarStatus,
+                        'comments': dewar.comments,
+                        'onBeamline': False,
+                        'dewarLocation': dewar.storageLocation,
+                        'dewarContainers': [dewar.code],
+                        'UDC': dewar.containerQueueId is not None,
+                    }
+                    if dewar.visit_number is not None:
+                        visit = f'{dewar.proposalCode}{dewar.proposalNumber}-{dewar.visit_number}'
+                        results[loc]['visit'] = visit
+                        results[loc]['beamline'] = dewar.beamLineName
+                        results[loc]['startDate'] = dewar.startDate.isoformat()
+                    break
 
     except NoResultFound:
         logging.getLogger('ispyb-logistics').error("Error retrieving dewars")

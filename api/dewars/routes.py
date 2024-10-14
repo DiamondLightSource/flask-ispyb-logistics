@@ -27,6 +27,7 @@ locations = {'zone6': zone6.rack_locations,
              'i19': i19.rack_locations,
              }
 
+suffixes = {'i19': i19.suffixes}
 
 api = Blueprint('zones', __name__, url_prefix='/api')
 
@@ -48,9 +49,10 @@ def get_location(zone='zone6'):
     if request.method == 'GET':
         # Get Rack Locations for this zone
         rack_locations = locations.get(zone)
+        rack_suffixes = suffixes.get(zone) or ('',)
         # Get any dewar with provided rack locations
         # There should only be one per location
-        result, status_code = common.find_dewars_by_location(rack_locations)
+        result, status_code = common.find_dewars_by_location(rack_locations, rack_suffixes)
     else:
         result = {'location': '',
                   'barcode': '',
