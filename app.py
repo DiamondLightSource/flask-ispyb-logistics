@@ -59,7 +59,7 @@ def cage_page():
     return send_file('client/dist/cage.html')
 
 @app.route("/i19/")
-def cage_page():
+def i19_page():
     return send_file('client/dist/i19.html')
 
 if __name__ == '__main__':
