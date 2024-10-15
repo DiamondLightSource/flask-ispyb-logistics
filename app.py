@@ -58,5 +58,9 @@ def lab14_page():
 def cage_page():
     return send_file('client/dist/cage.html')
 
+@app.route("/i19/")
+def i19_page():
+    return send_file('client/dist/i19.html')
+
 if __name__ == '__main__':
     app.run(debug=True)

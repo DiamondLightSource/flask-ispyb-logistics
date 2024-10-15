@@ -65,6 +65,14 @@
                     </div>
                 </a>
             </div>
+            <div class="p-4" v-if="showI19 == 1">
+                <a href="/i19/" class="">
+                    <div class="text-white text-center bg-success p-4 rounded h-full">
+                        <p class="text-3xl font-bold">I19 Dewar Management</p>
+                        <p class="">To handle dewars for I19</p>
+                    </div>
+                </a>
+            </div>
         </div>
       <!-- Footer with link to scisoft -->
       <footer class="text-center">For questions about these applications, please contact Scientific Software <a class="text-blue-500 underline" href="mailto:scientificsoftware@diamond.ac.uk?Subject=ISPyBLogistics">here</a></footer>
@@ -82,6 +90,7 @@ export default {
       showLab14: process.env.VUE_APP_SHOW_LAB14,
       showEBIC: process.env.VUE_APP_SHOW_EBIC,
       showCage: process.env.VUE_APP_SHOW_CAGE,
+      showI19: process.env.VUE_APP_SHOW_I19,
     }
   }
 }

@@ -127,16 +127,15 @@ def update_dewar_location(barcode, location, awb=None):
     return result, status_code
 
 
-def find_dewars_by_location(locations):
-    # Could use an ordered dict here but jsonify step will break it
-    results = OrderedDict([(location, {'barcode':"", 'arrivalDate':"", 'facilityCode':"", 'status':"", 'onBeamline':False}) for location in locations])
-    # Initialise here so we can preserve the order
-    # for location in locations:
-    #     results[location] = ["", "", ""]
+def find_dewars_by_location(locations, suffixes=("",)):
+    results = {}
+    for location in locations:
+        for suffix in suffixes:
+            results[location+suffix] = {'barcode':"", 'arrivalDate':"", 'facilityCode':"", 'status':"", 'onBeamline':False}
 
     status_code = 200
 
-    dewars = controller.find_dewars_by_location(locations)
+    dewars = controller.find_dewars_by_location(locations, suffixes)
 
     if dewars is None:
         results = {'location': locations,
@@ -155,7 +154,7 @@ def find_dewars_by_location(locations):
 
             # For locations showing as empty - check that the dewars are not actually on beamline...
             # Required for main zone4 use case where the case is left in the storageLocation
-            empty_locations = [location for location in locations if results[location]['barcode'] == '']
+            empty_locations = [location for location in results if results[location]['barcode'] == '']
 
             processing_dewars = controller.find_recent_storage_history(empty_locations)
             # Add dewars that are in processing to our return list
