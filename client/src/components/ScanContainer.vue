@@ -77,6 +77,9 @@ export default {
         onSetLocation: function(event) {
             event.preventDefault()
 
+            this.barcode = this.barcode.trim()
+            this.location = this.location.trim()
+
             if (this.barcode && this.location) {
                 // WE need to search for rack locations plus where the dewar might be sent (beamlines)
                 // let full_locations = beamlines.concat(Object.keys(this.rack_locations))

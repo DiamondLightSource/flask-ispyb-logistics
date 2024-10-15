@@ -212,6 +212,9 @@ export default {
             console.log("onSetLocation")
             event.preventDefault()
 
+            this.barcode = this.barcode.trim()
+            this.location = this.location.trim()
+
             let self = this
             let validLocation = this.isValidLocation(this.location)
 
