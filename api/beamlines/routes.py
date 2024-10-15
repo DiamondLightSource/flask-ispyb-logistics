@@ -16,6 +16,7 @@ from api.dewars import zone6
 from api.dewars import zone4
 from api.dewars import ebic
 from api.dewars import cage
+from api.dewars import i19
 from api.containers import lab14
 
 beamlines = {'zone6': zone6.beamline_locations,
@@ -23,6 +24,7 @@ beamlines = {'zone6': zone6.beamline_locations,
              'ebic': ebic.beamline_locations,
              'lab14': lab14.beamline_locations,
              'cage': cage.beamline_locations,
+             'i19': i19.beamline_locations,
              }
 
 

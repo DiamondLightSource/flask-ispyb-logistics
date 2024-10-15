@@ -100,6 +100,13 @@ module.exports = {
         filename: 'cage.html',
         title: 'SLS Logistics',
         chunks: ['chunk-vendors', 'chunk-common', 'cage']
+      },
+      i19: {
+        entry: 'src/apps/i19/main.js',
+        template: 'public/index.html',
+        filename: 'i19.html',
+        title: 'I19 Logistics',
+        chunks: ['chunk-vendors', 'chunk-common', 'i19']
       }
     }
 }
