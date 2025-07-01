@@ -9,7 +9,7 @@ smtp_server = os.environ.get('SMTP_SERVER', 'localhost')
 smtp_port = int(os.environ.get('SMTP_PORT', 25))
 
 def get_cc_addresses(barcode):
-	if barcode[0:2].lower() in ('in', 'sw', 'ic'):
+	if barcode[0:2].lower() in ('in', 'sw', 'ic', 'il'):
 		return ebic_industry_emails
 	else:
 		return ebic_academic_emails
