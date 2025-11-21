@@ -11,4 +11,5 @@ beamline_locations = ['I19',
                       'STORES-OUT',
                       'I19-TO-STORES',
                       'LN2TOPUP',
+                      'DEWAR-WARM',
                       ]

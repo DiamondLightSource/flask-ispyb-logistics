@@ -36,4 +36,5 @@ beamline_locations = ['I03',
                       'ZONE4-CAGE',
                       'EBIC',
                       'LN2TOPUP',
+                      'DEWAR-WARM',
                       ]
