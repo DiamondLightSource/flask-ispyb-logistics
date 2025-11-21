@@ -43,17 +43,20 @@ def set_location(barcode, location, awb=None):
     dewar_details = get_dewar_by_barcode(actual_barcode)
     previous_location = dewar_details['storageLocation']
 
-    if location.upper() == 'LN2TOPUP':
+    if location.upper() in ['LN2TOPUP', 'DEWAR-WARM']:
         dewarId = dewar_details['dewarId']
         comments = {}
         if dewar_details['comments'] is not None:
             comments = json.loads(dewar_details['comments'])
         now = datetime.now().isoformat("T", "seconds")
-        if 'toppedUp' in comments and type(comments['toppedUp']) == list:
-            comments['toppedUp'].append(now)
-            comments['toppedUp'] = comments['toppedUp'][-5:]
-        else:
-            comments['toppedUp'] = [now]
+        if location.upper() == 'LN2TOPUP':
+            if 'toppedUp' in comments and type(comments['toppedUp']) == list:
+                comments['toppedUp'].append(now)
+                comments['toppedUp'] = comments['toppedUp'][-5:]
+            else:
+                comments['toppedUp'] = [now]
+        elif location.upper() == 'DEWAR-WARM':
+            comments['warm'] = 1
         return update_comments(dewarId, json.dumps(comments))
 
     result = webservice.set_location(actual_barcode, location, awb)

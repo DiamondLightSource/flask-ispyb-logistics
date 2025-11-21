@@ -38,4 +38,5 @@ beamline_locations = ['I03',
                       'ZONE6-TO-STORES',
                       'EBIC',
                       'LN2TOPUP',
+                      'DEWAR-WARM',
                       ]
