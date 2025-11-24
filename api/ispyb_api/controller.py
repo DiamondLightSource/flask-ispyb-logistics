@@ -50,6 +50,9 @@ def set_location(barcode, location, awb=None):
             comments = json.loads(dewar_details['comments'])
         now = datetime.now().isoformat("T", "seconds")
         if location.upper() == 'LN2TOPUP':
+            # Add to history
+            result = webservice.set_status(actual_barcode, "LN2 Topped Up")
+            # Also put in comments, for now
             if 'toppedUp' in comments and type(comments['toppedUp']) == list:
                 comments['toppedUp'].append(now)
                 comments['toppedUp'] = comments['toppedUp'][-5:]

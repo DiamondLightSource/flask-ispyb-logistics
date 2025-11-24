@@ -53,6 +53,31 @@ def set_location(barcode, location, awb=None):
 
     return result
 
+
+def set_status(barcode, status):
+    """
+    This updates ISPyB dewar history with a status (eg LN2 Topped Up)
+    """
+    result = None
+
+    payload = {'BARCODE': barcode, 'STATUS': status}
+
+    try:
+        r = requests.post(set_dewar_history_url, data=payload, timeout=5, verify=verify_ssl)
+
+        if r.status_code == requests.codes.ok:
+            result = r.json()
+            logging.getLogger('ispyb-logistics').info("Set status in ISPyB via SynchWeb bc: {} loc: {} ".format(barcode, status))
+        else:
+            logging.getLogger('ispyb-logistics').error("Error setting status in ISPyB via SynchWeb {} {}".format(r.status_code, r.text))
+    except requests.ConnectionError:
+        logging.getLogger('ispyb-logistics').error("Error (connection) trying to post to {}".format(set_dewar_history_url))
+    except requests.Timeout:
+        logging.getLogger('ispyb-logistics').error("Error (timeout) trying to post to {}".format(set_dewar_history_url))
+
+    return result
+
+
 def set_container_location(code, location):
     """
     New method that calls the SynchWeb rest services
