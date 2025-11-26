@@ -159,7 +159,7 @@ def find_dewars_by_location(locations, suffixes=('',)):
                    Dewar.comments,
                    Dewar.shippingId,
                    DewarTransportHistory.arrivalDate,
-                   DewarTransportHistory.dewarStatus,
+                   Dewar.dewarStatus,
                    Container.code,
                    Proposal.proposalCode,
                    Proposal.proposalNumber,
