@@ -1,4 +1,7 @@
 <template>
+  <div v-if="zone === 'zone4'" class="w-full h-10 bg-blue-500 flex items-center justify-center text-white text-xl font-semibold sticky top-0 z-50">Zone 4 Dewars</div>
+  <div v-if="zone === 'ebic'" class="w-full h-10 bg-red-500 flex items-center justify-center text-white text-xl font-semibold sticky top-0 z-50">eBIC Dewars</div>
+  <div v-if="zone === 'i19'" class="w-full h-10 bg-green-500 flex items-center justify-center text-white text-xl font-semibold sticky top-0 z-50">I19 Dewars</div>
   <div class="">
     <div class="flex flex-col sm:flex-row">
       <div class="w-full md:w-1/3 border border-solid border-black m-2">
