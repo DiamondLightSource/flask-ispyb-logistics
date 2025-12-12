@@ -4,9 +4,14 @@ Card displaying dewar information stored in a specific rack location
 Emits an event 'clear-location' which should be handled by the parent component
 -->
 <template>
-    <div class="border rounded shadow h-full p-4 cursor-pointer"
+    <div class="border rounded shadow h-full p-4 cursor-pointer relative split"
         v-on:click.prevent="showDewarReport(dewar)"
-        v-bind:class="{'text-danger': dewar.needsLN2 && dewar.status !== 'dispatch-requested', 'bg-gray-400' : dewar.onBeamline}">
+        :class="[
+            dewar.dewarId && !dewar.onBeamline ? 'split-' + dewar.daysSinceTopup : '',
+            dewar.needsLN2 && dewar.status !== 'dispatch-requested' ? 'text-danger' : '',
+            dewar.onBeamline ? 'bg-gray-400' : ''
+        ]"
+    >
         <span class="font-bold">{{rack}}: </span>
         <span v-if="dewar.barcode" class="font-bold">{{dewar.barcode}}</span>
         <span v-else class=""></span>
@@ -43,3 +48,71 @@ export default {
     }
 }
 </script>
+
+<style>
+.split::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 4px;                     /* thickness */
+  height: 100%;
+  border-radius: inherit;
+}
+
+.split-0::before {
+  background: linear-gradient(
+    to bottom,
+    blue 0%,
+    blue 100%
+  );
+}
+
+.split-1::before {
+  background: linear-gradient(
+    to bottom,
+    red 0%,
+    red 20%,
+    blue 20%,
+    blue 100%
+  );
+}
+
+.split-2::before {
+  background: linear-gradient(
+    to bottom,
+    red 0%,
+    red 40%,
+    blue 40%,
+    blue 100%
+  );
+}
+
+.split-3::before {
+  background: linear-gradient(
+    to bottom,
+    red 0%,
+    red 60%,
+    blue 60%,
+    blue 100%
+  );
+}
+
+.split-4::before {
+  background: linear-gradient(
+    to bottom,
+    red 0%,
+    red 80%,
+    blue 80%,
+    blue 100%
+  );
+}
+
+.split-5::before {
+  background: linear-gradient(
+    to bottom,
+    red 0%,
+    red 100%
+  );
+}
+</style>

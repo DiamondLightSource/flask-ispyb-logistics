@@ -220,6 +220,7 @@ export default {
             // Marshall the data into the format we want
             let dewarInfo = json[rack]
             let needsLN2 = false
+            let daysSinceTopup = 0
             // Flag to indicate dewar is on beamline (and therefore space is taken)...
             let onBeamline = dewarInfo.onBeamline ? dewarInfo.onBeamline : false
 
@@ -243,7 +244,20 @@ export default {
 
               let deltaTime = nowSecs - lastFillSeconds
 
+              if (deltaTime > 1*24*60*60) {
+                daysSinceTopup = 1
+              }
+              if (deltaTime > 2*24*60*60) {
+                daysSinceTopup = 2
+              }
+              if (deltaTime > 3*24*60*60) {
+                daysSinceTopup = 3
+              }
+              if (deltaTime > 4*24*60*60) {
+                daysSinceTopup = 4
+              }
               if (deltaTime > 5*24*60*60) {
+                daysSinceTopup = 5
                 needsLN2 = true
               }
             }
@@ -262,6 +276,7 @@ export default {
               'facilityCode': dewarInfo.facilityCode,
               'status': dewarInfo.status,
               'needsLN2': needsLN2,
+              'daysSinceTopup': daysSinceTopup,
               'onBeamline': onBeamline,
               'UDC': dewarInfo.UDC,
             }
