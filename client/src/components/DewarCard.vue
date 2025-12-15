@@ -54,7 +54,7 @@ export default {
   content: "";
   position: absolute;
   top: 0;
-  left: 0;
+  right: 0;
   width: 4px;                     /* thickness */
   height: 100%;
   border-radius: inherit;
