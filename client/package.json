@@ -5,20 +5,20 @@
   "scripts": {
     "serve": "vue-cli-service serve",
     "build": "vue-cli-service build",
-    "lint": "vue-cli-service lint"
+    "dev": "vue-cli-service build --mode development"
   },
   "dependencies": {
     "axios": "^1.12.0",
     "font-awesome": "^4.7.0",
     "howler": "^2.2.4",
-    "tailwindcss": "^3.4.17",
     "@fontsource/cantarell": "^5.2.5",
     "vue": "^3.0.0",
     "vue-router": "^4.0.0",
-    "vuex": "^4.0.0",
-    "@vue/cli-service": "^5.0.8"
+    "vuex": "^4.0.0"
   },
-  "overrides": {
+  "devDependencies": {
+    "tailwindcss": "^3.4.17",
+    "@vue/cli-service": "^5.0.8",
     "postcss": "^8.0.0"
   }
 }
