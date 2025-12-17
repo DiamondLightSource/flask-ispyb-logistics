@@ -16,8 +16,7 @@
     "vue": "^3.0.0",
     "vue-router": "^4.0.0",
     "vuex": "^4.0.0",
-    "@vue/cli-service": "^5.0.8",
-    "vue-template-compiler": "^2.6.10"
+    "@vue/cli-service": "^5.0.8"
   },
   "overrides": {
     "postcss": "^8.0.0"
