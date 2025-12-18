@@ -68,16 +68,12 @@ function initialState() {
         toppedUp: "",
         checked: "",
         comments: "",
-        dewarContainers: "",
-        visit: "",
-        beamline: "",
-        startDate: "",
-        startDateString: "",
     }
 }
 
 export default {
     name: 'DewarReportDialog',
+    emits: ['confirm-update', 'clear-location'],
     props: {
         isActive: {
             type: Boolean,
