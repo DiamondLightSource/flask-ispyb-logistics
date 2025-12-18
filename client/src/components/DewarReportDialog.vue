@@ -93,7 +93,7 @@ export default {
             type: String,
         },
         dewarContainers: {
-            type: String,
+            type: [String, Array],
         },
         visit: {
             type: String,
