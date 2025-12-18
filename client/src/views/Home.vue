@@ -14,7 +14,7 @@
     
         <!-- Layout for application links -->
         <div class="flex flex-col md:flex-row">
-            <div class="p-4" v-if="showStores == 1">
+            <div class="p-4" v-if="showStores">
                 <a href="/stores/" class="">
                     <div class="text-white text-center bg-success p-4 rounded h-full">
                         <p class="text-3xl font-bold">Stores Dewar Management</p>
@@ -23,7 +23,7 @@
                 </a>
             </div>
 
-            <div class="p-4" v-if="showZone6 == 1">
+            <div class="p-4" v-if="showZone6">
                 <a href="/zone6/" class="">
                     <div class="text-white text-center bg-success p-4 rounded h-full">
                         <p class="text-3xl font-bold">Zone 6 Dewar Management</p>
@@ -32,7 +32,7 @@
                 </a>
             </div>
 
-            <div class="p-4" v-if="showZone4 == 1">
+            <div class="p-4" v-if="showZone4">
                 <a href="/zone4/" class="">
                     <div class="text-white text-center bg-success p-4 rounded h-full">
                         <p class="text-3xl font-bold">Zone 4 Dewar Management</p>
@@ -41,7 +41,7 @@
                 </a>
             </div>
 
-            <div class="p-4" v-if="showEBIC == 1">
+            <div class="p-4" v-if="showEBIC">
                 <a href="/ebic/" class="">
                     <div class="text-white text-center bg-success p-4 rounded h-full">
                         <p class="text-3xl font-bold">eBIC Dewar Management</p>
@@ -49,7 +49,7 @@
                     </div>
                 </a>
             </div>
-            <div class="p-4" v-if="showLab14 == 1">
+            <div class="p-4" v-if="showLab14">
                 <a href="/lab14/" class="">
                     <div class="text-white text-center bg-success p-4 rounded h-full">
                         <p class="text-3xl font-bold">Lab14 Container Management</p>
@@ -57,7 +57,7 @@
                     </div>
                 </a>
             </div>
-            <div class="p-4" v-if="showCage == 1">
+            <div class="p-4" v-if="showCage">
                 <a href="/cage/" class="">
                     <div class="text-white text-center bg-success p-4 rounded h-full">
                         <p class="text-3xl font-bold">SLS Dewar Management</p>
@@ -65,7 +65,7 @@
                     </div>
                 </a>
             </div>
-            <div class="p-4" v-if="showI19 == 1">
+            <div class="p-4" v-if="showI19">
                 <a href="/i19/" class="">
                     <div class="text-white text-center bg-success p-4 rounded h-full">
                         <p class="text-3xl font-bold">I19 Dewar Management</p>
