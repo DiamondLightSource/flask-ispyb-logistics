@@ -31,6 +31,7 @@ Emits an event 'clear-location' which should be handled by the parent component
 <script>
 export default {
     name: 'DewarCard',
+    emits: ['update-dewar'],
     props: {
         dewar: Object,
         rack: String

@@ -32,6 +32,7 @@ import axios from 'axios'
 
 export default {
     name: 'ScanDewar',
+    emits: ['dewars-updated'],
     props: {
         msg: String,
         allowed_locations: Array,

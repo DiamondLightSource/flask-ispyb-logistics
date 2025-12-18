@@ -32,6 +32,7 @@ import axios from 'axios'
 
 export default {
     name: 'ClearStorageBinDialog',
+    emits: ['confirm-removal'],
     props: {
         isActive: {
             type: Boolean,

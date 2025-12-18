@@ -44,6 +44,7 @@ import axios from 'axios'
 
 export default {
     name: 'ClearContainerDialog',
+    emits: ['confirm-removal'],
     props: {
         isActive: {
             type: Boolean,

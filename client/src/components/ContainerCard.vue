@@ -21,6 +21,7 @@ Card displaying container information stored in a specific rack location
 <script>
 export default {
     name: 'ContainerCard',
+    emits: ['clear-container-from-bin'],
     props: {
         container: Object,
     },

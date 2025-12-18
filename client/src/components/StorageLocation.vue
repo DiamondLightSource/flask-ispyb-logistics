@@ -36,6 +36,7 @@ import ClearContainerDialog from '../components/ClearContainerDialog.vue';
 
 export default {
 	name: 'storage-location',
+	emits: ['storage-location-changed'],
 	props: {
 		title: String,
 		locations: {
