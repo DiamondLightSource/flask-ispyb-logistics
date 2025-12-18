@@ -114,7 +114,7 @@ export default {
     name: 'DispatchDewars',
     props: {
         rack_locations: Object,
-        extra_rack_location: Object,
+        extra_rack_locations: Object,
     },
     data() {
       return {
