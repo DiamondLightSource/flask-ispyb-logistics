@@ -21,6 +21,7 @@ Storage Bin displaying container information stored in a specific location
 import ContainerCard from '@/components/ContainerCard.vue';
 export default {
     name: 'StorageBin',
+    emits: ['clear-containers'],
     props: {
         title: String,
 				containers: {

@@ -29,9 +29,17 @@ Emits an event 'confirm-removal' with a boolean true/false if user confirmed act
 </template>
 
 <script>
+import axios from 'axios'
+
 export default {
     name: 'ClearLocationDialog',
-    props: ['isActive', 'barcodeToRemove', 'rack_locations', 'extra_rack_locations'],
+    props: {
+        isActive: Boolean,
+        barcodeToRemove: String,
+        rack_locations: Object,
+        extra_rack_locations: Object
+    },
+    emits: ['confirm-removal'],
     methods: {
         // User has confirmed to remove the dewar from this location
         onConfirm: function() {
@@ -50,7 +58,7 @@ export default {
             }
             let url = this.$store.state.apiRoot + "dewars/locations"
 
-            this.$http.delete(url, {params: {'location': location}})
+            axios.delete(url, {params: {'location': location}})
             .then(function(response) {
                 console.log(response)
                 let message = "Removing dewar " + barcode + " from location " + location + "..."

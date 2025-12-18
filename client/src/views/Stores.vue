@@ -80,7 +80,9 @@
             <h1 class="text-3xl font-bold text-center p-4">History</h1>
             <table class="border border-solid bg-white w-full">
                 <thead class="text-left bg-white-300 font-bold border border-solid">
-                    <th class="border px-3 py-2">Date/Time</th><th class="border px-3 py-2">Barcode</th><th class="border px-3 py-2">In or Out?</th><th class="border px-3 py-2">Destination</th><th class="border px-3 py-2">Airway Bill</th>
+                    <tr>
+                        <th class="border px-3 py-2">Date/Time</th><th class="border px-3 py-2">Barcode</th><th class="border px-3 py-2">In or Out?</th><th class="border px-3 py-2">Destination</th><th class="border px-3 py-2">Airway Bill</th>
+                    </tr>
                 </thead>
                 <tbody class="">
                     <tr v-for="(dewar, index) in dewars" v-bind:key="index" class="hover:bg-blue-200">
@@ -124,6 +126,7 @@
 <script>
 // Importing axios so we can cancel requests
 import {Howl} from 'howler'
+import axios from 'axios'
 
 export default {
   name: 'stores',
@@ -187,7 +190,7 @@ export default {
 
           let url = this.$store.state.apiRoot + "stores/dewars"
 
-          this.$http.get(url)
+          axios.get(url)
           .then(function(response) {
             console.log(response.data)
             let json = response.data
@@ -239,7 +242,7 @@ export default {
 
                 let url = this.$store.state.apiRoot + "stores/dewars"
                 
-                this.$http.post(url, formData)
+                axios.post(url, formData)
                 .then(function(response) {
                     console.log(response)
                     let json = response.data
@@ -299,7 +302,7 @@ export default {
             // Set a flag on the dewar to indicate we are retrieving the courier destination
             theDewar.hover = true
 
-            this.$http.get(url, {params: {'awb':dewar.awb}})
+            axios.get(url, {params: {'awb':dewar.awb}})
             .then(function(response) {
                 // It's possible we have moved off the dewar link, in which case ignore the response
                 if (theDewar.hover) {

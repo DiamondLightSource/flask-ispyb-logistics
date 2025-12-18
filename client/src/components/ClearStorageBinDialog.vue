@@ -28,8 +28,11 @@ Emits an event 'confirm-removal' with a boolean true/false if user confirmed act
 </template>
 
 <script>
+import axios from 'axios'
+
 export default {
     name: 'ClearStorageBinDialog',
+    emits: ['confirm-removal'],
     props: {
         isActive: {
             type: Boolean,
@@ -68,7 +71,7 @@ export default {
             formData.append('containerId', containerId)
             formData.append('location', location)
 
-            this.$http.post(url, formData)
+            axios.post(url, formData)
             .then(function() {
                 let message = "Updating container " + containerId + " from location " + location + "..."
                 self.$store.dispatch("updateMessage", {text: message, isError: false})

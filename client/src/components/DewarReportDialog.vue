@@ -19,7 +19,7 @@ Emits an event 'confirm-removal' with a boolean true/false if user confirmed act
         <section class="p-4">
               <ul class="flex flex-col">
                 <li class="flex mt-2"><label class="w-1/3 px-2">Containers in dewar: </label>
-                  <span v-html="dewarContainers" class="w-2/3 leading-tight pb-2"></span>
+                  <span v-html="formattedContainers" class="w-2/3 leading-tight pb-2"></span>
                 </li>
               </ul>
           <form>
@@ -68,16 +68,12 @@ function initialState() {
         toppedUp: "",
         checked: "",
         comments: "",
-        dewarContainers: "",
-        visit: "",
-        beamline: "",
-        startDate: "",
-        startDateString: "",
     }
 }
 
 export default {
     name: 'DewarReportDialog',
+    emits: ['confirm-update', 'clear-location'],
     props: {
         isActive: {
             type: Boolean,
@@ -97,7 +93,7 @@ export default {
             type: String,
         },
         dewarContainers: {
-            type: String,
+            type: [String, Array],
         },
         visit: {
             type: String,
@@ -119,9 +115,14 @@ export default {
         dewarComments: function(newVal) {
             if (newVal) this.initialiseReport(newVal)
         },
-        dewarContainers: function(newVal) {
-            if (Array.isArray(newVal)) this.dewarContainers = newVal.join("<br />")
-        },
+    },
+    computed: {
+        formattedContainers: function() {
+            if (Array.isArray(this.dewarContainers)) {
+                return this.dewarContainers.join("<br />");
+            }
+            return this.dewarContainers || '';
+        }
     },
     methods: {
         // To conserve characters save each boolean as 1 or 0

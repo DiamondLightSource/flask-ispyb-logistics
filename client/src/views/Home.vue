@@ -84,13 +84,13 @@ export default {
   name: 'home',
   data() {
     return {
-      showStores: process.env.VUE_APP_SHOW_STORES,
-      showZone4: process.env.VUE_APP_SHOW_ZONE4,
-      showZone6: process.env.VUE_APP_SHOW_ZONE6,
-      showLab14: process.env.VUE_APP_SHOW_LAB14,
-      showEBIC: process.env.VUE_APP_SHOW_EBIC,
-      showCage: process.env.VUE_APP_SHOW_CAGE,
-      showI19: process.env.VUE_APP_SHOW_I19,
+      showStores: import.meta.env?.VITE_SHOW_STORES || process.env.VUE_APP_SHOW_STORES,
+      showZone4:  import.meta.env?.VITE_SHOW_ZONE4  || process.env.VUE_APP_SHOW_ZONE4,
+      showZone6:  import.meta.env?.VITE_SHOW_ZONE6  || process.env.VUE_APP_SHOW_ZONE6,
+      showLab14:  import.meta.env?.VITE_SHOW_LAB14  || process.env.VUE_APP_SHOW_LAB14,
+      showEBIC:   import.meta.env?.VITE_SHOW_EBIC   || process.env.VUE_APP_SHOW_EBIC,
+      showCage:   import.meta.env?.VITE_SHOW_CAGE   || process.env.VUE_APP_SHOW_CAGE,
+      showI19:    import.meta.env?.VITE_SHOW_I19    || process.env.VUE_APP_SHOW_I19,
     }
   }
 }
