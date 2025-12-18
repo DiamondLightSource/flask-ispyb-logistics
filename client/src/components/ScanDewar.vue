@@ -28,6 +28,7 @@ Also updates the error/info messages held in the stores
 
 <script>
 import {Howl} from 'howler'
+import axios from 'axios'
 
 export default {
     name: 'ScanDewar',
@@ -106,7 +107,7 @@ export default {
 
                 let url = this.$store.state.apiRoot + "dewars/locations"
 
-                this.$http.post(url, formData)
+                axios.post(url, formData)
                 .then(function(response) {
                     let json = response.data
                     let message = ""

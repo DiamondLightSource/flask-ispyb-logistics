@@ -51,6 +51,7 @@ import ScanContainer from '@/components/ScanContainer.vue';
 import FindContainer from '@/components/FindContainer.vue';
 import MessagePanel from '@/components/MessagePanel.vue';
 import StorageLocation from '@/components/StorageLocation.vue';
+import axios from 'axios';
 
 export default {
   name: 'Lab14Zone',
@@ -122,7 +123,7 @@ export default {
       let self = this
       let url = this.$store.state.apiRoot + "beamlines/" + this.zone
 
-      this.$http.get(url)
+      axios.get(url)
       .then(function(response) {
         self.beamlines = response.data.map( (bl) => bl.toLowerCase())
         self.$store.commit('setBeamlines', self.beamlines)
@@ -138,7 +139,7 @@ export default {
       let data = []
       let url = this.$store.state.apiRoot + "containers/locations/" + this.zone
   
-      this.$http.get(url).then(function(response) {
+      axios.get(url).then(function(response) {
         data = self.handleContainersOK(response.data)
       })
       .catch(function(error) {

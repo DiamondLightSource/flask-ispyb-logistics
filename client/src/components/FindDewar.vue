@@ -30,6 +30,7 @@
 </template>
 
 <script>
+import axios from 'axios'
 
 export default {
     name: 'FindDewar',
@@ -68,7 +69,7 @@ export default {
                 // Get API Root from store
                 let url = this.$store.state.apiRoot + "dewars/find"
 
-                this.$http.get(url, {params: {'fc':facilitycode}})
+                axios.get(url, {params: {'fc':facilitycode}})
                 .then(function(response) {
                     let json = response.data
 

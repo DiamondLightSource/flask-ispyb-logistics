@@ -114,6 +114,7 @@ import MessagePanel from '@/components/MessagePanel.vue';
 import ClearLocationDialog from '@/components/ClearLocationDialog.vue';
 import DewarReportDialog from '@/components/DewarReportDialog.vue';
 import DewarCard from '@/components/DewarCard.vue';
+import axios from 'axios'
 
 export default {
   name: 'DewarZone',
@@ -156,7 +157,7 @@ export default {
 
     let url = this.$store.state.apiRoot + "beamlines/" + this.zone
 
-    this.$http.get(url)
+    axios.get(url)
     .then(function(response) {
       let json = response.data
       self.beamlines = json
@@ -195,7 +196,7 @@ export default {
 
           let url = this.$store.state.apiRoot + "dewars/locations/" + this.zone
       
-          this.$http.get(url).then(function(response) {
+          axios.get(url).then(function(response) {
             // Re-assign rack_locations property to trigger reactivity
             // Otherwise Vue has a hard time running computed properties
             [self.rack_locations, self.extra_rack_locations] = self.handleUpdateBarcodesOK(response)
@@ -375,7 +376,7 @@ export default {
           let formData = new FormData();
           formData.append('comments', comments)
 
-          this.$http.patch(url, formData).then( () => {
+          axios.patch(url, formData).then( () => {
             this.$store.dispatch('updateMessage', {text: 'Comments Updated OK', isError: false})
             // Trigger a refresh so we see the new comments
             setTimeout(this.getBarcodes, 3000)

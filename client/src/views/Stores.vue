@@ -126,6 +126,7 @@
 <script>
 // Importing axios so we can cancel requests
 import {Howl} from 'howler'
+import axios from 'axios'
 
 export default {
   name: 'stores',
@@ -189,7 +190,7 @@ export default {
 
           let url = this.$store.state.apiRoot + "stores/dewars"
 
-          this.$http.get(url)
+          axios.get(url)
           .then(function(response) {
             console.log(response.data)
             let json = response.data
@@ -241,7 +242,7 @@ export default {
 
                 let url = this.$store.state.apiRoot + "stores/dewars"
                 
-                this.$http.post(url, formData)
+                axios.post(url, formData)
                 .then(function(response) {
                     console.log(response)
                     let json = response.data
@@ -301,7 +302,7 @@ export default {
             // Set a flag on the dewar to indicate we are retrieving the courier destination
             theDewar.hover = true
 
-            this.$http.get(url, {params: {'awb':dewar.awb}})
+            axios.get(url, {params: {'awb':dewar.awb}})
             .then(function(response) {
                 // It's possible we have moved off the dewar link, in which case ignore the response
                 if (theDewar.hover) {

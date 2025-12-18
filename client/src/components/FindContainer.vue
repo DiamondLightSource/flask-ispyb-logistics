@@ -24,6 +24,7 @@
 </template>
 
 <script>
+import axios from 'axios'
 
 export default {
     name: 'FindContainer',
@@ -62,7 +63,7 @@ export default {
             // Get API Root from store
             let url = this.$store.state.apiRoot + "containers/find"
 
-            this.$http.get(url, {params: {'barcode': this.barcode}})
+            axios.get(url, {params: {'barcode': this.barcode}})
             .then( this.containerFound )
             .catch( this.containerNotFound )
         },
