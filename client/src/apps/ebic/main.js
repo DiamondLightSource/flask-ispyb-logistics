@@ -1,6 +1,6 @@
 import { createApp } from 'vue'
 import Dewars from '../../views/Dewars.vue'
-import { store } from '../../store'
+import { store } from '../../store.js'
 
 import '@fontsource/cantarell'
 import '@/assets/tailwind.css'
