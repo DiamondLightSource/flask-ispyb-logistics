@@ -14,7 +14,7 @@
     
         <!-- Layout for application links -->
         <div class="flex flex-col md:flex-row">
-            <div class="p-4" v-if="showStores">
+            <div class="p-4" v-if="showStores == 1">
                 <a href="/stores/" class="">
                     <div class="text-white text-center bg-success p-4 rounded h-full">
                         <p class="text-3xl font-bold">Stores Dewar Management</p>
@@ -23,7 +23,7 @@
                 </a>
             </div>
 
-            <div class="p-4" v-if="showZone6">
+            <div class="p-4" v-if="showZone6 == 1">
                 <a href="/zone6/" class="">
                     <div class="text-white text-center bg-success p-4 rounded h-full">
                         <p class="text-3xl font-bold">Zone 6 Dewar Management</p>
@@ -32,7 +32,7 @@
                 </a>
             </div>
 
-            <div class="p-4" v-if="showZone4">
+            <div class="p-4" v-if="showZone4 == 1">
                 <a href="/zone4/" class="">
                     <div class="text-white text-center bg-success p-4 rounded h-full">
                         <p class="text-3xl font-bold">Zone 4 Dewar Management</p>
@@ -41,7 +41,7 @@
                 </a>
             </div>
 
-            <div class="p-4" v-if="showEBIC">
+            <div class="p-4" v-if="showEBIC == 1">
                 <a href="/ebic/" class="">
                     <div class="text-white text-center bg-success p-4 rounded h-full">
                         <p class="text-3xl font-bold">eBIC Dewar Management</p>
@@ -49,7 +49,7 @@
                     </div>
                 </a>
             </div>
-            <div class="p-4" v-if="showLab14">
+            <div class="p-4" v-if="showLab14 == 1">
                 <a href="/lab14/" class="">
                     <div class="text-white text-center bg-success p-4 rounded h-full">
                         <p class="text-3xl font-bold">Lab14 Container Management</p>
@@ -57,7 +57,7 @@
                     </div>
                 </a>
             </div>
-            <div class="p-4" v-if="showCage">
+            <div class="p-4" v-if="showCage == 1">
                 <a href="/cage/" class="">
                     <div class="text-white text-center bg-success p-4 rounded h-full">
                         <p class="text-3xl font-bold">SLS Dewar Management</p>
@@ -65,7 +65,7 @@
                     </div>
                 </a>
             </div>
-            <div class="p-4" v-if="showI19">
+            <div class="p-4" v-if="showI19 == 1">
                 <a href="/i19/" class="">
                     <div class="text-white text-center bg-success p-4 rounded h-full">
                         <p class="text-3xl font-bold">I19 Dewar Management</p>
@@ -86,13 +86,13 @@ export default {
   name: 'home',
   data() {
     return {
-      showStores: envFlag('SHOW_STORES'),
-      showZone4: envFlag('SHOW_ZONE4'),
-      showZone6: envFlag('SHOW_ZONE6'),
-      showLab14: envFlag('SHOW_LAB14'),
-      showEBIC: envFlag('SHOW_EBIC'),
-      showCage: envFlag('SHOW_CAGE'),
-      showI19: envFlag('SHOW_I19'),
+      showStores: import.meta.env?.VITE_SHOW_STORES || process.env.VUE_APP_SHOW_STORES,
+      showZone4:  import.meta.env?.VITE_SHOW_ZONE4  || process.env.VUE_APP_SHOW_ZONE4,
+      showZone6:  import.meta.env?.VITE_SHOW_ZONE6  || process.env.VUE_APP_SHOW_ZONE6,
+      showLab14:  import.meta.env?.VITE_SHOW_LAB14  || process.env.VUE_APP_SHOW_LAB14,
+      showEBIC:   import.meta.env?.VITE_SHOW_EBIC   || process.env.VUE_APP_SHOW_EBIC,
+      showCage:   import.meta.env?.VITE_SHOW_CAGE   || process.env.VUE_APP_SHOW_CAGE,
+      showI19:    import.meta.env?.VITE_SHOW_I19    || process.env.VUE_APP_SHOW_I19,
     }
   }
 }
