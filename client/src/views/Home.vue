@@ -80,8 +80,6 @@
 </template>
 
 <script>
-import { envFlag } from '@/env'
-
 export default {
   name: 'home',
   data() {

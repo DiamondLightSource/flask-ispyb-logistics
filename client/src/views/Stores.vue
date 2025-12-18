@@ -80,7 +80,9 @@
             <h1 class="text-3xl font-bold text-center p-4">History</h1>
             <table class="border border-solid bg-white w-full">
                 <thead class="text-left bg-white-300 font-bold border border-solid">
-                    <th class="border px-3 py-2">Date/Time</th><th class="border px-3 py-2">Barcode</th><th class="border px-3 py-2">In or Out?</th><th class="border px-3 py-2">Destination</th><th class="border px-3 py-2">Airway Bill</th>
+                    <tr>
+                        <th class="border px-3 py-2">Date/Time</th><th class="border px-3 py-2">Barcode</th><th class="border px-3 py-2">In or Out?</th><th class="border px-3 py-2">Destination</th><th class="border px-3 py-2">Airway Bill</th>
+                    </tr>
                 </thead>
                 <tbody class="">
                     <tr v-for="(dewar, index) in dewars" v-bind:key="index" class="hover:bg-blue-200">
