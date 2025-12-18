@@ -3,7 +3,7 @@ import App from './App.vue'
 import { store } from './store'
 
 import '@fontsource/cantarell'
-import 'tailwindcss/tailwind.css'
+import '@/assets/tailwind.css'
 import axios from 'axios'
 
 import 'font-awesome/css/font-awesome.css'

@@ -80,17 +80,19 @@
 </template>
 
 <script>
+import { envFlag } from '@/env'
+
 export default {
   name: 'home',
   data() {
     return {
-      showStores: process.env.VUE_APP_SHOW_STORES,
-      showZone4: process.env.VUE_APP_SHOW_ZONE4,
-      showZone6: process.env.VUE_APP_SHOW_ZONE6,
-      showLab14: process.env.VUE_APP_SHOW_LAB14,
-      showEBIC: process.env.VUE_APP_SHOW_EBIC,
-      showCage: process.env.VUE_APP_SHOW_CAGE,
-      showI19: process.env.VUE_APP_SHOW_I19,
+      showStores: envFlag('SHOW_STORES'),
+      showZone4: envFlag('SHOW_ZONE4'),
+      showZone6: envFlag('SHOW_ZONE6'),
+      showLab14: envFlag('SHOW_LAB14'),
+      showEBIC: envFlag('SHOW_EBIC'),
+      showCage: envFlag('SHOW_CAGE'),
+      showI19: envFlag('SHOW_I19'),
     }
   }
 }

@@ -3,7 +3,7 @@ import Dewars from '../../views/Dewars.vue'
 import { store } from '../../store'
 
 import '@fontsource/cantarell'
-import 'tailwindcss/tailwind.css'
+import '@/assets/tailwind.css'
 import axios from 'axios'
 
 // Initialise the store with our zone
