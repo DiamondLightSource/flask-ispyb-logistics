@@ -19,7 +19,7 @@ handler.setFormatter(logging.Formatter("[%(asctime)s] [%(levelname)s] [%(message
 logger.addHandler(handler)
 logger.setLevel(logging.INFO)
 
-app = Flask(__name__, static_folder="client/dist/static", static_url_path='/static')
+app = Flask(__name__, static_folder="client/dist", static_url_path='/')
 
 app.register_blueprint(stores_api)
 app.register_blueprint(dewars_api)
@@ -36,31 +36,31 @@ def index():
 
 @app.route("/stores/")
 def stores_page():
-    return send_file('client/dist/stores.html')
+    return send_file('client/dist/stores/index.html')
 
 @app.route("/ebic/")
 def ebic_page():
-    return send_file('client/dist/ebic.html')
+    return send_file('client/dist/ebic/index.html')
 
 @app.route("/zone4/")
 def zone4_page():
-    return send_file('client/dist/zone4.html')
+    return send_file('client/dist/zone4/index.html')
 
 @app.route("/zone6/")
 def zone6_page():
-    return send_file('client/dist/zone6.html')
+    return send_file('client/dist/zone6/index.html')
 
 @app.route("/lab14/")
 def lab14_page():
-    return send_file('client/dist/lab14.html')
+    return send_file('client/dist/lab14/index.html')
 
 @app.route("/cage/")
 def cage_page():
-    return send_file('client/dist/cage.html')
+    return send_file('client/dist/cage/index.html')
 
 @app.route("/i19/")
 def i19_page():
-    return send_file('client/dist/i19.html')
+    return send_file('client/dist/i19/index.html')
 
 if __name__ == '__main__':
     app.run(debug=True)
