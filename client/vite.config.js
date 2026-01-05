@@ -13,6 +13,7 @@ export default defineConfig({
   build: {
     rollupOptions: {
       input: {
+        main: path.resolve(__dirname, 'index.html'),
         ebic: path.resolve(__dirname, 'ebic/index.html'),
         i19: path.resolve(__dirname, 'i19/index.html'),
         zone4: path.resolve(__dirname, 'zone4/index.html'),
