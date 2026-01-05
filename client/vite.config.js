@@ -17,6 +17,7 @@ export default defineConfig({
         ebic: path.resolve(__dirname, 'ebic/index.html'),
         i19: path.resolve(__dirname, 'i19/index.html'),
         zone4: path.resolve(__dirname, 'zone4/index.html'),
+        zone6: path.resolve(__dirname, 'zone6/index.html'),
         stores: path.resolve(__dirname, 'stores/index.html'),
         lab14: path.resolve(__dirname, 'lab14/index.html'),
         cage: path.resolve(__dirname, 'cage/index.html'),
