@@ -2,7 +2,7 @@
 // Colors from Bulma
 module.exports = {
     content: [
-        './public/index.html',
+        './**/*.html',
         './src/**/*.{html,js,vue}',
     ],
     theme: {
