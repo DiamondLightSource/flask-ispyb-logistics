@@ -232,6 +232,7 @@ class Dewar(Base):
     facilityCode = Column(String(20))
     weight = Column(Float)
     deliveryAgent_barcode = Column(String(30))
+    source = Column(String(50))
 
     BLSession = relationship('BLSession')
     Shipping = relationship('Shipping')

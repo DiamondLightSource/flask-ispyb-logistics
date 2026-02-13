@@ -45,7 +45,8 @@ Emits an event 'confirm-removal' with a boolean true/false if user confirmed act
             <button class="text-white bg-success hover:bg-green-700 rounded px-2 py-1 m-2" v-on:click="onSave()"><i class="fa fa-check pr-2"></i>Save Report</button>
             <button class="text-white bg-danger hover:bg-red-700 rounded px-2 py-1 m-2" v-on:click="onClose()"><i class="fa fa-times pr-2"></i>Cancel</button>
           </div>
-          <button class="text-white bg-blue-500 hover:bg-blue-700 rounded px-2 py-1 m-2" v-on:click.prevent="viewInSynchweb(shippingId)"><i class="fa fa-link pr-2"></i>View in Synchweb</button>
+          <button v-if="sourceIsScaup" class="text-white bg-blue-500 hover:bg-blue-700 rounded px-2 py-1 m-2" v-on:click.prevent="viewInScaup(visit)"><i class="fa fa-link pr-2"></i>View in SCAUP</button>
+          <button v-else class="text-white bg-blue-500 hover:bg-blue-700 rounded px-2 py-1 m-2" v-on:click.prevent="viewInSynchweb(shippingId)"><i class="fa fa-link pr-2"></i>View in Synchweb</button>
           <button class="text-white bg-red-700 hover:bg-red-900 rounded px-2 py-1 m-2" v-on:click.prevent="clearLocation(dewarBarcode)"><i class="fa fa-trash pr-2"></i>Clear Dewar</button>
         </footer>
       </div>
@@ -98,6 +99,9 @@ export default {
         visit: {
             type: String,
         },
+        source: {
+            type: String,
+        },
         beamline: {
             type: String,
         },
@@ -122,7 +126,10 @@ export default {
                 return this.dewarContainers.join("<br />");
             }
             return this.dewarContainers || '';
-        }
+        },
+        sourceIsScaup() {
+            return this.source?.toLowerCase().includes('scaup')
+        },
     },
     methods: {
         // To conserve characters save each boolean as 1 or 0
@@ -195,6 +202,12 @@ export default {
         viewInSynchweb: function(shippingId) {
             console.log("Opening Synchweb link to " + shippingId)
             let url = "https://ispyb.diamond.ac.uk/shipments/sid/" + shippingId
+            window.open(url, '_blank').focus();
+        },
+        viewInScaup: function(visit) {
+            console.log("Opening Scaup link to " + visit)
+            let [proposal = '', session = ''] = (visit || '').split('-')
+            let url = "https://ebic-scaup.diamond.ac.uk/proposals/" + proposal + "/sessions/" + session
             window.open(url, '_blank').focus();
         },
     }

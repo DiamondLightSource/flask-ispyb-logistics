@@ -96,6 +96,7 @@
       v-bind:dewarContainers="dewarContainers"
       v-bind:beamline="beamline || ''"
       v-bind:visit="visit || ''"
+      v-bind:source="source"
       v-bind:startDate="startDate || ''"
       v-bind:startDateString="startDateString || ''"
       v-on:confirm-update="onConfirmUpdateDewarReport"
@@ -147,6 +148,7 @@ export default {
       dewarContainers: '',
       beamline: '',
       visit: '',
+      source: '',
       startDate: '',
       startDateString: '',
     }
@@ -270,6 +272,7 @@ export default {
               'dewarContainers': dewarInfo.dewarContainers,
               'beamline': dewarInfo.beamline,
               'visit': dewarInfo.visit,
+              'source': dewarInfo.source,
               'startDate': dewarInfo.startDate,
               'startDateString': dewarInfo.startDateString,
               'barcode': dewarInfo.barcode,
@@ -350,6 +353,7 @@ export default {
           this.dewarContainers = dewar.dewarContainers
           this.beamline = dewar.beamline
           this.visit = dewar.visit
+          this.source = dewar.source
           this.startDate = dewar.startDate
           this.startDateString = dewar.startDateString
         },
@@ -366,6 +370,7 @@ export default {
           this.dewarContainers = '';
           this.beamline = '';
           this.visit = '';
+          this.source = '';
           this.startDate = '';
           this.startDateString = '';
           this.$refs.ScanDewar.$refs.barcode.focus();
