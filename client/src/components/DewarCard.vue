@@ -8,7 +8,7 @@ Emits an event 'clear-location' which should be handled by the parent component
         v-on:click.prevent="showDewarReport(dewar)"
         :class="[
             dewar.dewarId && !dewar.onBeamline ? 'split-' + dewar.daysSinceTopup : '',
-            dewar.needsLN2 && dewar.status !== 'dispatch-requested' ? 'text-danger' : '',
+            dewar.needsLN2 && dewar.status !== 'dispatch-requested' && dewar.status !== 'dispatch-booked' ? 'text-danger' : '',
             dewar.onBeamline ? 'bg-gray-400' : ''
         ]"
     >
@@ -19,7 +19,7 @@ Emits an event 'clear-location' which should be handled by the parent component
         <div class="flex flex-wrap">
             <span v-if="dewar.arrivalDate" class="text-xs text-white bg-info py-1 px-2 ">{{dewar.arrivalDate.split(' ').slice(0,4).join(" ")}}</span>
             <span v-if="dewar.facilityCode" class="text-xs text-white bg-gray-900 py-1 px-2">{{dewar.facilityCode}}</span>
-            <span v-if="dewar.status == 'dispatch-requested'" class="text-xs bg-warning py-1 px-2 ">{{dewar.status}}</span>
+            <span v-if="dewar.status == 'dispatch-requested' || dewar.status == 'dispatch-booked'" class="text-xs bg-warning py-1 px-2 ">dispatch-requested</span>
             <span v-if="dewar.needsLN2" class="text-xs text-white bg-danger py-1 px-2 ">needs-refill</span>
             <span v-if="dewar.beamline" class="text-xs text-white bg-success py-1 px-2 ">{{dewar.beamline}}</span>
             <span v-if="dewar.UDC" class="text-xs text-white bg-primary py-1 px-2 ">UDC</span>

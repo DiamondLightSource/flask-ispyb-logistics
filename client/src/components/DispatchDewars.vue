@@ -138,7 +138,8 @@ export default {
         dispatch_dewars: function() {
             let all_locations = {...this.rack_locations, ...this.extra_rack_locations}
             let dewars = Object.keys(all_locations).filter( function(rack) {
-                return all_locations[rack].status === 'dispatch-requested'
+                return all_locations[rack].status === 'dispatch-requested' ||
+                       all_locations[rack].status === 'dispatch-booked'
             })
             return dewars
         }
