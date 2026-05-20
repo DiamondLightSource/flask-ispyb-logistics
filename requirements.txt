@@ -12,9 +12,9 @@ Jinja2==3.1.6
 MarkupSafe==3.0.3
 mysql-connector-python==9.7.0
 requests==2.34.2
-sqlacodegen==2.3.0
+sqlacodegen==4.0.3
 SQLAlchemy==2.0.49
 typing-extensions==4.15.0
 urllib3==2.7.0
 Werkzeug==3.1.8
-zipp==3.20.2
+zipp==4.1.0
