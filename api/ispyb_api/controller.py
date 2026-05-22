@@ -158,29 +158,28 @@ def find_dewars_by_location(locations, suffixes=('',)):
             filter(func.lower(Dewar.storageLocation) == func.lower(DewarTransportHistory.storageLocation)).\
             order_by(desc(DewarTransportHistory.arrivalDate))
 
-            columns_to_select = [
-                   Dewar.dewarId,
-                   Dewar.barCode,
-                   Dewar.facilityCode,
-                   Dewar.bltimeStamp,
-                   Dewar.storageLocation,
-                   Dewar.comments,
-                   Dewar.shippingId,
-                   DewarTransportHistory.arrivalDate,
-                   Dewar.dewarStatus,
-                   Dewar.source,
-                   Container.code,
-                   Proposal.proposalCode,
-                   Proposal.proposalNumber,
-                   BLSession.visit_number,
-                   BLSession.beamLineName,
-                   BLSession.startDate,
-                   ContainerQueue.containerQueueId,
-                   subq.c.last_topup_date,
-                   ]
+        columns_to_select = [
+               Dewar.dewarId,
+               Dewar.barCode,
+               Dewar.facilityCode,
+               Dewar.bltimeStamp,
+               Dewar.storageLocation,
+               Dewar.comments,
+               Dewar.shippingId,
+               DewarTransportHistory.arrivalDate,
+               Dewar.dewarStatus,
+               Dewar.source,
+               Container.code,
+               Proposal.proposalCode,
+               Proposal.proposalNumber,
+               BLSession.visit_number,
+               BLSession.beamLineName,
+               BLSession.startDate,
+               ContainerQueue.containerQueueId,
+               subq.c.last_topup_date,
+               ]
 
-            dewars = query_obj.values(*columns_to_select)
-
+        dewars = query_obj.values(*columns_to_select)
 
         for dewar in dewars:
             for suffix in suffixes:
