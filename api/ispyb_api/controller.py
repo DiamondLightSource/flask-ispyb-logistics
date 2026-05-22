@@ -17,7 +17,6 @@ from .models import Dewar, DewarTransportHistory, LabContact, Laboratory, Shippi
 
 from ..dewars import ebic
 
-# What age do we ignore container history entries
 email_domain = os.environ.get('EMAIL_DOMAIN', '@diamond.ac.uk')
 rest_api = True if os.environ.get("REST_API", "0") == "1" else False
 
