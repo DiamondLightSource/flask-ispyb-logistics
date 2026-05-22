@@ -146,7 +146,7 @@ def find_dewars_by_location(locations, suffixes=('',)):
             subquery()
 
 
-        dewars = Dewar.query.join(DewarTransportHistory).\
+        query_obj = Dewar.query.join(DewarTransportHistory).\
             join(Container, Dewar.dewarId == Container.dewarId, isouter=True).\
             join(BLSession, Dewar.firstExperimentId == BLSession.sessionId, isouter=True).\
             join(ContainerQueue, Container.containerId == ContainerQueue.containerId, isouter=True).\
