@@ -17,8 +17,6 @@ from .models import Dewar, DewarTransportHistory, LabContact, Laboratory, Shippi
 
 from ..dewars import ebic
 
-# What age do we ignore container history entries
-CONTAINER_FILTER_DAYS_LIMIT = 30
 email_domain = os.environ.get('EMAIL_DOMAIN', '@diamond.ac.uk')
 rest_api = True if os.environ.get("REST_API", "0") == "1" else False
 
@@ -43,23 +41,16 @@ def set_location(barcode, location, awb=None):
     dewar_details = get_dewar_by_barcode(actual_barcode)
     previous_location = dewar_details['storageLocation']
 
-    if location.upper() in ['LN2TOPUP', 'DEWAR-WARM']:
+    if location.upper() == 'LN2TOPUP':
+        # Add to history
+        return webservice.set_status(actual_barcode, "LN2 Topped Up")
+
+    if location.upper() == 'DEWAR-WARM':
         dewarId = dewar_details['dewarId']
         comments = {}
         if dewar_details['comments'] is not None:
             comments = json.loads(dewar_details['comments'])
-        now = datetime.now().isoformat("T", "seconds")
-        if location.upper() == 'LN2TOPUP':
-            # Add to history
-            result = webservice.set_status(actual_barcode, "LN2 Topped Up")
-            # Also put in comments, for now
-            if 'toppedUp' in comments and type(comments['toppedUp']) == list:
-                comments['toppedUp'].append(now)
-                comments['toppedUp'] = comments['toppedUp'][-5:]
-            else:
-                comments['toppedUp'] = [now]
-        elif location.upper() == 'DEWAR-WARM':
-            comments['warm'] = 1
+        comments['warm'] = 1
         return update_comments(dewarId, json.dumps(comments))
 
     result = webservice.set_location(actual_barcode, location, awb)
@@ -141,34 +132,53 @@ def find_dewars_by_location(locations, suffixes=('',)):
         # Get the timestamp and location from the transport history
         # Order so we get the most recent first...
         # The Dewar storageLocation does not always match the transport history
-        dewars = Dewar.query.join(DewarTransportHistory).\
+        # Use a subquery to get the last topup date from the transport history table
+
+        subq = Dewar.query.with_entities(
+                DewarTransportHistory.dewarId,
+                func.max(DewarTransportHistory.arrivalDate).label('last_topup_date')
+            ).\
+            select_from(Dewar).\
+            join(DewarTransportHistory, Dewar.dewarId == DewarTransportHistory.dewarId).\
+            filter(DewarTransportHistory.dewarStatus == "ln2 topped up").\
+            group_by(DewarTransportHistory.dewarId).\
+            subquery()
+
+
+        query_obj = Dewar.query.join(DewarTransportHistory).\
             join(Container, Dewar.dewarId == Container.dewarId, isouter=True).\
             join(BLSession, Dewar.firstExperimentId == BLSession.sessionId, isouter=True).\
             join(ContainerQueue, Container.containerId == ContainerQueue.containerId, isouter=True).\
             join(Shipping, Dewar.shippingId == Shipping.shippingId).\
             join(Proposal, Shipping.proposalId == Proposal.proposalId).\
+            join(subq, Dewar.dewarId == subq.c.dewarId, isouter=True).\
             filter(func.lower(Dewar.storageLocation).in_(locations)).\
             filter(Dewar.dewarId == DewarTransportHistory.dewarId).\
             filter(func.lower(Dewar.storageLocation) == func.lower(DewarTransportHistory.storageLocation)).\
-            order_by(desc(DewarTransportHistory.arrivalDate)).\
-            values(Dewar.dewarId,
-                   Dewar.barCode,
-                   Dewar.facilityCode,
-                   Dewar.bltimeStamp,
-                   Dewar.storageLocation,
-                   Dewar.comments,
-                   Dewar.shippingId,
-                   DewarTransportHistory.arrivalDate,
-                   Dewar.dewarStatus,
-                   Dewar.source,
-                   Container.code,
-                   Proposal.proposalCode,
-                   Proposal.proposalNumber,
-                   BLSession.visit_number,
-                   BLSession.beamLineName,
-                   BLSession.startDate,
-                   ContainerQueue.containerQueueId,
-                   )
+            order_by(desc(DewarTransportHistory.arrivalDate))
+
+        columns_to_select = [
+               Dewar.dewarId,
+               Dewar.barCode,
+               Dewar.facilityCode,
+               Dewar.bltimeStamp,
+               Dewar.storageLocation,
+               Dewar.comments,
+               Dewar.shippingId,
+               DewarTransportHistory.arrivalDate,
+               Dewar.dewarStatus,
+               Dewar.source,
+               Container.code,
+               Proposal.proposalCode,
+               Proposal.proposalNumber,
+               BLSession.visit_number,
+               BLSession.beamLineName,
+               BLSession.startDate,
+               ContainerQueue.containerQueueId,
+               subq.c.last_topup_date,
+               ]
+
+        dewars = query_obj.values(*columns_to_select)
 
         for dewar in dewars:
             for suffix in suffixes:
@@ -198,6 +208,7 @@ def find_dewars_by_location(locations, suffixes=('',)):
                         'dewarLocation': dewar.storageLocation,
                         'dewarContainers': [dewar.code],
                         'UDC': dewar.containerQueueId is not None,
+                        'lastTopup': dewar.last_topup_date.isoformat(),
                     }
                     if dewar.visit_number is not None:
                         visit = f'{dewar.proposalCode}{dewar.proposalNumber}-{dewar.visit_number}'

@@ -231,18 +231,9 @@ export default {
             if (dewarInfo.arrivalDate !== "" && !onBeamline) {
               let nowSecs = new Date().getTime()/1000;
               let lastFillSeconds = 0;
-              // Topups are now recorded in the comments field
-              if ('comments' in dewarInfo && dewarInfo.comments != null) {
-                let dewarComments = {}
-                try {
-                  dewarComments = JSON.parse(dewarInfo.comments)
-                } catch(err) {
-                  dewarComments = dewarInfo.comments
-                  console.log("already in JSON format for dewar in "+rack)
-                }
-                if ('toppedUp' in dewarComments) {
-                  lastFillSeconds = Date.parse(dewarComments.toppedUp.slice(-1)[0])/1000
-                }
+              // Topups are now recorded in the DewarTransportHistory table
+              if ('lastTopup' in dewarInfo && dewarInfo.lastTopup != null) {
+                lastFillSeconds = Date.parse(dewarInfo.lastTopup)/1000
               }
 
               let deltaTime = nowSecs - lastFillSeconds
