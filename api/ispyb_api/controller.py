@@ -208,7 +208,7 @@ def find_dewars_by_location(locations, suffixes=('',)):
                         'dewarLocation': dewar.storageLocation,
                         'dewarContainers': [dewar.code],
                         'UDC': dewar.containerQueueId is not None,
-                        'lastTopup': dewar.last_topup_date.isoformat(),
+                        'lastTopup': dewar.last_topup_date.isoformat() if dewar.last_topup_date else None,
                     }
                     if dewar.visit_number is not None:
                         visit = f'{dewar.proposalCode}{dewar.proposalNumber}-{dewar.visit_number}'
