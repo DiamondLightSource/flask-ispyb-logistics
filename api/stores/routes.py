@@ -27,7 +27,8 @@ def location():
 
     if request.method == 'GET':
         try:
-            result = controller.find_dewar_history_for_locations(['STORES-IN', 'STORES-OUT'], max_entries=50)
+            page = request.args.get('page', default=1, type=int)
+            result = controller.find_dewar_history_for_locations(['STORES-IN', 'STORES-OUT'], per_page=50, page=page)
             # Append the destination to the results
             # It's not stored in the database so we determine it here based on barcode or lab contact address
             for key in result.keys():

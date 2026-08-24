@@ -225,7 +225,7 @@ def find_dewars_by_location(locations, suffixes=('',)):
 
     return results
 
-def find_dewar_history_for_locations(locations, max_entries=20):
+def find_dewar_history_for_locations(locations, per_page=20, page=1):
     """
     This method will find 'n' entries from the dewar transport history table filtered by location.
     Returns {'1', {'barcode':barcode, 'awb':awb, 'date':arrivalDate...}, }
@@ -260,8 +260,10 @@ def find_dewar_history_for_locations(locations, max_entries=20):
             },
         }
     """
+    offset = (page - 1) * per_page
+
     if rest_api:
-        return webservice.find_dewar_history_for_locations(locations, max_entries)
+        return webservice.find_dewar_history_for_locations(locations, per_page)
 
     results = {}
 
@@ -278,16 +280,17 @@ def find_dewar_history_for_locations(locations, max_entries=20):
             filter(Dewar.dewarId == DewarTransportHistory.dewarId).\
             filter(Dewar.shippingId == Shipping.shippingId).\
             order_by(desc(DewarTransportHistory.arrivalDate)).\
-            limit(max_entries).\
-            values(Dewar.barCode,
-                   Dewar.facilityCode,
-                   Dewar.bltimeStamp,
-                   Dewar.trackingNumberFromSynchrotron,
-                   DewarTransportHistory.storageLocation,
-                   DewarTransportHistory.arrivalDate,
-                   DewarTransportHistory.dewarStatus,
-                   Shipping.shippingId,
-                   )
+            offset(offset).\
+            limit(per_page).\
+            with_entities(Dewar.barCode,
+                Dewar.facilityCode,
+                Dewar.bltimeStamp,
+                Dewar.trackingNumberFromSynchrotron,
+                DewarTransportHistory.storageLocation,
+                DewarTransportHistory.arrivalDate,
+                DewarTransportHistory.dewarStatus,
+                Shipping.shippingId,
+            ).all()
 
         for index, dewar in enumerate(dewars):
             logging.getLogger('ispyb-logistics').debug('Found entry {} for this dewar {} in {} at {}'.format(index, dewar.barCode, dewar.storageLocation, dewar.arrivalDate))
