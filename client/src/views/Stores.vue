@@ -22,8 +22,8 @@
 
                         <!-- If location is STORES-IN do not show AWB field...-->
                         <div v-show="location.toUpperCase() != 'STORES-IN'" class="mb-3 px-2">
-                            <label class="block text-gray-700">Airway Bill</label>
-                            <input ref="awb" type="text" class="shadow appearance-none border rounded w-full py-1 px-3 text-gray-700 leading-tight focus:outline-none focus:ring" v-model="awb" v-on:keydown.enter="onAwbEnter" placeholder="Scan the DHL / FedEx Airway Bill">
+                            <label class="block text-gray-700">Air Waybill</label>
+                            <input ref="awb" type="text" class="shadow appearance-none border rounded w-full py-1 px-3 text-gray-700 leading-tight focus:outline-none focus:ring" v-model="awb" v-on:keydown.enter="onAwbEnter" placeholder="Scan the DHL / FedEx Air Waybill">
                         </div>
                     
                         <div class="flex">
@@ -81,7 +81,7 @@
             <table class="border border-solid bg-white w-full">
                 <thead class="text-left bg-white-300 font-bold border border-solid">
                     <tr>
-                        <th class="border px-3 py-2">Date/Time</th><th class="border px-3 py-2">Barcode</th><th class="border px-3 py-2">In or Out?</th><th class="border px-3 py-2">Destination</th><th class="border px-3 py-2">Airway Bill</th>
+                        <th class="border px-3 py-2">Date/Time</th><th class="border px-3 py-2">Barcode</th><th class="border px-3 py-2">In or Out?</th><th class="border px-3 py-2">Destination</th><th class="border px-3 py-2">Scanned AWB</th><th class="border px-3 py-2">Expected AWB</th>
                     </tr>
                 </thead>
                 <tbody class="">
@@ -93,13 +93,13 @@
 
                         <!-- If STORES OUT show links and/or plain AWB-->
 
-                        <td v-if="dewar.storageLocation.toUpperCase() === 'STORES-OUT'">
-                            <a class="text-blue-500"
+                        <td v-if="dewar.storageLocation.toUpperCase() === 'STORES-OUT'" :class="[hasAwbMismatch(dewar) ? 'bg-red-600 text-white' : '']">
+                            <a :class="[hasAwbMismatch(dewar) ? 'text-white' : 'text-blue-500']"
                                 v-if="isDHL(dewar.awb)"
                                 v-on:mouseover="onGetCourierDestination(dewar)"
                                 v-on:mouseleave="onResetCourierDestination(dewar)"
                                 v-bind:href="'https://www.dhl.com/en/express/tracking.html?AWB=' + dewar.awb">{{dewar.awb}} (DHL)</a>
-                            <a class="text-blue-500"
+                            <a :class="[hasAwbMismatch(dewar) ? 'text-white font-semibold underline' : 'text-blue-500']"
                                 v-else-if="isFedexDatabaseRecord(dewar.awb)"
                                 v-bind:href="'http://www.fedex.com/apps/fedextrack/?trackingnumber=' + dewar.awb">{{dewar.awb}} (FedEx)</a>
                             <span v-else>{{dewar.awb}}</span>
@@ -108,10 +108,17 @@
                                 <p class="text-sm">{{dewar.courierDestination}}</p>
                             </div>
                         </td>
-
-                        <!-- Else No value displayed if STORES-IN -->
-                        <td v-else>
+                        <td v-else></td>
+                        <td v-if="dewar.shippingServiceAWB" :class="[hasAwbMismatch(dewar) ? 'bg-red-600 text-white' : '']">
+                            <a :class="[hasAwbMismatch(dewar) ? 'text-white' : 'text-blue-500']"
+                                :href="'https://sample-shipping.diamond.ac.uk/shipment-requests/'+dewar.externalShippingIdFromSynchrotron+'/outgoing'"
+                                target="shippingservice"
+                                title="View details in shipping service"
+                            >
+                            {{dewar.shippingServiceAWB}}
+                            </a>
                         </td>
+                        <td v-else></td>
                     </tr>
                 </tbody>
             </table>
@@ -246,6 +253,14 @@ export default {
             this.getDewars()
         },
 
+        hasAwbMismatch(dewar) {
+            return Boolean(
+                dewar.awb &&
+                dewar.shippingServiceAWB &&
+                dewar.awb.trim() !== dewar.shippingServiceAWB.trim()
+            )
+        },
+
         // Method to update dewar location in database
         onSetLocation: function(event) {
             console.log("onSetLocation")
@@ -261,7 +276,7 @@ export default {
                 let barcode = this.barcode
                 let location = this.location
                 let awb = ''
-                // Only set Airway bill for Stores out
+                // Only set Air waybill for Stores out
                 if (location.toUpperCase() === "STORES-OUT") {
                     awb = this.awb // Field is optional
 
@@ -363,7 +378,7 @@ export default {
           this.message = ""
           this.isError = false
         },
-        // Internal validation method - check for DHL Airway Bill
+        // Internal validation method - check for DHL Air Waybill
         isDHL: function(awb) {
             let pattern1 = /^[0-9]{10}$/
             let pattern2 = /^JJ?D[0-9]{18}$/
@@ -374,7 +389,7 @@ export default {
                 return false
             }
         },
-        // Internal validation method - check for FedEx Airway Bill
+        // Internal validation method - check for FedEx Air Waybill
         isFedex: function(awb) {
             // In future Fedex will only be 34 characters...
             // For now we need to accommodate 16 digits too
