@@ -191,7 +191,8 @@ export default {
           let self = this
           self.dewars = []
 
-          let page = this.$route.params.page || 1
+          const urlParams = new URLSearchParams(window.location.search)
+          let page = urlParams.get('page') || 1
           let url = this.$store.state.apiRoot + "stores/dewars"
 
           axios.get(url, { params: { page: page } })
