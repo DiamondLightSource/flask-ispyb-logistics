@@ -93,13 +93,13 @@
 
                         <!-- If STORES OUT show links and/or plain AWB-->
 
-                        <td v-if="dewar.storageLocation.toUpperCase() === 'STORES-OUT'" :class="{ 'bg-red-100': hasAwbMismatch(dewar) }">
-                            <a class="text-blue-500"
+                        <td v-if="dewar.storageLocation.toUpperCase() === 'STORES-OUT'" :class="[hasAwbMismatch(dewar) ? 'bg-red-600 text-white' : '']">
+                            <a :class="[hasAwbMismatch(dewar) ? 'text-white font-semibold underline' : 'text-blue-500']"
                                 v-if="isDHL(dewar.awb)"
                                 v-on:mouseover="onGetCourierDestination(dewar)"
                                 v-on:mouseleave="onResetCourierDestination(dewar)"
                                 v-bind:href="'https://www.dhl.com/en/express/tracking.html?AWB=' + dewar.awb">{{dewar.awb}} (DHL)</a>
-                            <a class="text-blue-500"
+                            <a :class="[hasAwbMismatch(dewar) ? 'text-white font-semibold underline' : 'text-blue-500']"
                                 v-else-if="isFedexDatabaseRecord(dewar.awb)"
                                 v-bind:href="'http://www.fedex.com/apps/fedextrack/?trackingnumber=' + dewar.awb">{{dewar.awb}} (FedEx)</a>
                             <span v-else>{{dewar.awb}}</span>
@@ -108,8 +108,8 @@
                                 <p class="text-sm">{{dewar.courierDestination}}</p>
                             </div>
                         </td>
-                        <td v-if="dewar.shippingServiceAWB" :class="{ 'bg-red-100': hasAwbMismatch(dewar) }">
-                            <a class="text-blue-500"
+                        <td v-if="dewar.shippingServiceAWB" :class="[hasAwbMismatch(dewar) ? 'bg-red-600 text-white' : '']">
+                            <a class="[hasAwbMismatch(dewar) ? 'text-white font-semibold underline' : 'text-blue-500']"
                                 :href="'https://sample-shipping.diamond.ac.uk/shipment-requests/'+dewar.externalShippingIdFromSynchrotron+'/outgoing'"
                                 target="shippingservice"
                                 title="View details in shipping service"
