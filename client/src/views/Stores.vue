@@ -244,7 +244,7 @@ export default {
             window.history.pushState({}, '', `?page=${newPage}`)
             // Fetch dewars for the new page
             this.getDewars()
-        }
+        },
 
         // Method to update dewar location in database
         onSetLocation: function(event) {
