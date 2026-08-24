@@ -16,7 +16,6 @@ from . import send_email
 from .models import Dewar, DewarTransportHistory, LabContact, Laboratory, Shipping, Proposal, Person, BLSession, Container, ContainerQueue
 
 from ..dewars import ebic
-from ..stores import shipping_service
 
 email_domain = os.environ.get('EMAIL_DOMAIN', '@diamond.ac.uk')
 rest_api = True if os.environ.get("REST_API", "0") == "1" else False
