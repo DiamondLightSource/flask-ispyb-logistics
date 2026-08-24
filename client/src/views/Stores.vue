@@ -117,6 +117,27 @@
             </table>
         </div>
 
+        <div class="pagination-container flex items-center justify-between my-4">
+            <button
+                @click="changePage(page - 1)"
+                :disabled="page <= 1"
+                class="btn btn-secondary"
+            >
+                Previous
+            </button>
+
+            <span>Page {{ page }}</span>
+
+            <button
+                @click="changePage(page + 1)"
+                :disabled="dewars.length === 0"
+                class="btn btn-secondary"
+            >
+                Next
+            </button>
+        </div>
+
+
         <footer class="py-4">
             <!-- Only here to provide some padding -->
         </footer>
@@ -134,6 +155,7 @@ export default {
       return {
         // Array for dewar history
         dewars: [],
+        page: 1,
         // Data elements for form input
         barcode: '',
         location: '',
@@ -192,10 +214,10 @@ export default {
           self.dewars = []
 
           const urlParams = new URLSearchParams(window.location.search)
-          let page = urlParams.get('page') || 1
+          self.page = urlParams.get('page') || 1
           let url = this.$store.state.apiRoot + "stores/dewars"
 
-          axios.get(url, { params: { page: page } })
+          axios.get(url, { params: { page: self.page } })
           .then(function(response) {
             console.log(response.data)
             let json = response.data
@@ -215,6 +237,15 @@ export default {
             self.isError = true
           })
         },
+
+        changePage: function(newPage) {
+            if (newPage < 1) return
+            // Update browser address bar without a full page reload
+            window.history.pushState({}, '', `?page=${newPage}`)
+            // Fetch dewars for the new page
+            this.getDewars()
+        }
+
         // Method to update dewar location in database
         onSetLocation: function(event) {
             console.log("onSetLocation")
