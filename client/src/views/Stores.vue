@@ -94,7 +94,7 @@
                         <!-- If STORES OUT show links and/or plain AWB-->
 
                         <td v-if="dewar.storageLocation.toUpperCase() === 'STORES-OUT'" :class="[hasAwbMismatch(dewar) ? 'bg-red-600 text-white' : '']">
-                            <a :class="[hasAwbMismatch(dewar) ? 'text-white font-semibold underline' : 'text-blue-500']"
+                            <a :class="[hasAwbMismatch(dewar) ? 'text-white' : 'text-blue-500']"
                                 v-if="isDHL(dewar.awb)"
                                 v-on:mouseover="onGetCourierDestination(dewar)"
                                 v-on:mouseleave="onResetCourierDestination(dewar)"
@@ -108,8 +108,9 @@
                                 <p class="text-sm">{{dewar.courierDestination}}</p>
                             </div>
                         </td>
+                        <td v-else></td>
                         <td v-if="dewar.shippingServiceAWB" :class="[hasAwbMismatch(dewar) ? 'bg-red-600 text-white' : '']">
-                            <a class="[hasAwbMismatch(dewar) ? 'text-white font-semibold underline' : 'text-blue-500']"
+                            <a :class="[hasAwbMismatch(dewar) ? 'text-white' : 'text-blue-500']"
                                 :href="'https://sample-shipping.diamond.ac.uk/shipment-requests/'+dewar.externalShippingIdFromSynchrotron+'/outgoing'"
                                 target="shippingservice"
                                 title="View details in shipping service"
@@ -117,10 +118,7 @@
                             {{dewar.shippingServiceAWB}}
                             </a>
                         </td>
-
-                        <!-- Else No value displayed if STORES-IN -->
-                        <td v-else>
-                        </td>
+                        <td v-else></td>
                     </tr>
                 </tbody>
             </table>
