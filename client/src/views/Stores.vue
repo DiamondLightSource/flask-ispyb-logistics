@@ -93,7 +93,7 @@
 
                         <!-- If STORES OUT show links and/or plain AWB-->
 
-                        <td v-if="dewar.storageLocation.toUpperCase() === 'STORES-OUT'">
+                        <td v-if="dewar.storageLocation.toUpperCase() === 'STORES-OUT'" :class="{ 'bg-red-100': hasAwbMismatch(dewar) }">
                             <a class="text-blue-500"
                                 v-if="isDHL(dewar.awb)"
                                 v-on:mouseover="onGetCourierDestination(dewar)"
@@ -108,7 +108,7 @@
                                 <p class="text-sm">{{dewar.courierDestination}}</p>
                             </div>
                         </td>
-                        <td v-if="dewar.shippingServiceAWB">
+                        <td v-if="dewar.shippingServiceAWB" :class="{ 'bg-red-100': hasAwbMismatch(dewar) }">
                             <a class="text-blue-500"
                                 :href="'https://sample-shipping.diamond.ac.uk/shipment-requests/'+dewar.externalShippingIdFromSynchrotron+'/outgoing'"
                                 target="shippingservice"
@@ -254,6 +254,14 @@ export default {
             // Fetch dewars for the new page
             this.getDewars()
         },
+
+        hasAwbMismatch(dewar) {
+            return Boolean(
+                dewar.awb &&
+                dewar.shippingServiceAWB &&
+                dewar.awb.trim() !== dewar.shippingServiceAWB.trim()
+            )
+        }
 
         // Method to update dewar location in database
         onSetLocation: function(event) {
