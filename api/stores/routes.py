@@ -68,7 +68,8 @@ def location():
                 if dewar['storageLocation'].upper() == 'STORES-IN':
                     dewar['destination'] = get_destination_from_barcode(dewar['barcode'])
                 elif dewar['storageLocation'].upper() == 'STORES-OUT':
-                    dewar['shippingServiceAWB'] = get_awb_from_shipping_service(dewar['externalShippingIdFromSynchrotron'])
+                    if dewar['externalShippingIdFromSynchrotron']:
+                        dewar['shippingServiceAWB'] = get_awb_from_shipping_service(dewar['externalShippingIdFromSynchrotron'])
                     shipping = controller.get_shipping_return_address(dewar['barcode'])
                     # Depending on how the address is filled out we may not have a city field
                     # Should have a country but checking just in case
