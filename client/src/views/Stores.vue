@@ -261,7 +261,7 @@ export default {
                 dewar.shippingServiceAWB &&
                 dewar.awb.trim() !== dewar.shippingServiceAWB.trim()
             )
-        }
+        },
 
         // Method to update dewar location in database
         onSetLocation: function(event) {
