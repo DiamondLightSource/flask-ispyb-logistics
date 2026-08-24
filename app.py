@@ -34,7 +34,8 @@ ispyb_api.init_app(app)
 def index():
     return send_file('client/dist/index.html')
 
-@app.route("/stores/")
+@app.route("/stores/", defaults={'path': ''})
+@app.route("/stores/<path:path>")
 def stores_page():
     return send_file('client/dist/stores/index.html')
 

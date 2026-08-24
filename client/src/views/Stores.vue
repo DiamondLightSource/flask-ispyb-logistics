@@ -174,6 +174,9 @@ export default {
                 console.log("Clear message after " + this.clearMessageInterval + " s ")
                 setTimeout(this.clearMessages, this.clearMessageInterval*1000)
             }
+        },
+        '$route.params.page': function() {
+            this.getDewars()
         }
     },
     methods: {
@@ -188,9 +191,10 @@ export default {
           let self = this
           self.dewars = []
 
+          let page = this.$route.params.page || 1
           let url = this.$store.state.apiRoot + "stores/dewars"
 
-          axios.get(url)
+          axios.get(url, { params: { page: page } })
           .then(function(response) {
             console.log(response.data)
             let json = response.data
