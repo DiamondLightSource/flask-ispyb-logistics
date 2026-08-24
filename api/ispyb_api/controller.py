@@ -299,12 +299,13 @@ def find_dewar_history_for_locations(locations, per_page=20, page=1):
             results[str(index)] = {
                 'barcode':dewar.barCode,
                 'date': dewar.arrivalDate.isoformat(),
-                'storageLocation': dewar.storageLocation, # should really change 'inout' to location
+                'storageLocation': dewar.storageLocation,
                 'facilitycode': dewar.facilityCode,
                 'status': dewar.dewarStatus,
                 'awb': dewar.trackingNumberFromSynchrotron,
                 'sid': dewar.shippingId,
-                 }
+                'externalShippingIdFromSynchrotron': dewar.externalShippingIdFromSynchrotron,
+            }
 
     except NoResultFound:
         logging.getLogger('ispyb-logistics').error("Error retrieving dewars")
