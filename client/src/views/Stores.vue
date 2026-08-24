@@ -121,7 +121,7 @@
             <button
                 @click="changePage(page - 1)"
                 :disabled="page <= 1"
-                class="btn btn-secondary"
+                class="text-white bg-link hover:bg-blue-800 rounded p-1 m-2 w-32 disabled:opacity-50 disabled:cursor-not-allowed"
             >
                 Previous
             </button>
@@ -131,7 +131,7 @@
             <button
                 @click="changePage(page + 1)"
                 :disabled="dewars.length === 0"
-                class="btn btn-secondary"
+                class="text-white bg-link hover:bg-blue-800 rounded p-1 m-2 w-32 disabled:opacity-50 disabled:cursor-not-allowed"
             >
                 Next
             </button>
@@ -214,7 +214,7 @@ export default {
           self.dewars = []
 
           const urlParams = new URLSearchParams(window.location.search)
-          self.page = urlParams.get('page') || 1
+          self.page = parseInt(urlParams.get('page')) || 1
           let url = this.$store.state.apiRoot + "stores/dewars"
 
           axios.get(url, { params: { page: self.page } })
