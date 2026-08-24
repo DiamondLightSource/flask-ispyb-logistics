@@ -36,7 +36,7 @@ def index():
 
 @app.route("/stores/", defaults={'path': ''})
 @app.route("/stores/<path:path>")
-def stores_page():
+def stores_page(path):
     return send_file('client/dist/stores/index.html')
 
 @app.route("/ebic/")
