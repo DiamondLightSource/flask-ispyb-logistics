@@ -233,6 +233,7 @@ class Dewar(Base):
     weight = Column(Float)
     deliveryAgent_barcode = Column(String(30))
     source = Column(String(50))
+    externalShippingIdFromSynchrotron = Column(Integer)
 
     BLSession = relationship('BLSession')
     Shipping = relationship('Shipping')

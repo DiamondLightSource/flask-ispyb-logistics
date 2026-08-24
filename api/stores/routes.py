@@ -8,11 +8,42 @@ from flask import jsonify
 from flask import request
 
 import requests
+from requests.auth import HTTPBasicAuth
+from pathlib import Path
 
 from api.ispyb_api import controller
 from . import destinations
 
 api = Blueprint('stores', __name__, url_prefix='/api/stores')
+
+def _read_secret(path):
+    p = Path(path)
+    if p.is_file():
+        try:
+            return p.read_text(encoding='utf-8').strip()
+        except OSError as e:
+            logging.getLogger('ispyb-logistics').error(f'Error reading secret file {path}: {e}')
+            return default
+    return default
+
+SHIPPING_SERVICE_HOST = _read_secret('/secrets/shipping-service/host')
+SHIPPING_SERVICE_USERNAME = _read_secret('/secrets/shipping-service/username')
+SHIPPING_SERVICE_PASSWORD = _read_secret('/secrets/shipping-service/password')
+
+
+def get_awb_from_shipping_service(shipmentRequestId):
+    if not SHIPPING_SERVICE_HOST or not SHIPPING_SERVICE_USERNAME or not SHIPPING_SERVICE_PASSWORD:
+        return ''
+    try:
+        basic = HTTPBasicAuth(SHIPPING_SERVICE_USERNAME, SHIPPING_SERVICE_PASSWORD)
+        url = f'{SHIPPING_SERVICE_HOST}/api/shipment_requests/{shipmentRequestId}/shipments/FROM_FACILITY'
+        r = requests.get(url, auth=basic, timeout=5)
+        r.raise_for_status()
+        j = r.json()
+        return j.get('tracking_number', '')
+    except Exception as e:
+        logging.getLogger('ispyb-logistics').error(f'Failed to fetch AWB for request {shipmentRequestId}: {e}')
+        return ''
 
 
 @api.route('/dewars', methods=['GET', 'POST'])
@@ -33,9 +64,11 @@ def location():
             # It's not stored in the database so we determine it here based on barcode or lab contact address
             for key in result.keys():
                 dewar = result[key]
+                dewar['shippingServiceAWB'] = ''
                 if dewar['storageLocation'].upper() == 'STORES-IN':
                     dewar['destination'] = get_destination_from_barcode(dewar['barcode'])
                 elif dewar['storageLocation'].upper() == 'STORES-OUT':
+                    dewar['shippingServiceAWB'] = get_awb_from_shipping_service(dewar['externalShippingIdFromSynchrotron'])
                     shipping = controller.get_shipping_return_address(dewar['barcode'])
                     # Depending on how the address is filled out we may not have a city field
                     # Should have a country but checking just in case

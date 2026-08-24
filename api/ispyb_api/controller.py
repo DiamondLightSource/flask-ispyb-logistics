@@ -16,6 +16,7 @@ from . import send_email
 from .models import Dewar, DewarTransportHistory, LabContact, Laboratory, Shipping, Proposal, Person, BLSession, Container, ContainerQueue
 
 from ..dewars import ebic
+from ..stores import shipping_service
 
 email_domain = os.environ.get('EMAIL_DOMAIN', '@diamond.ac.uk')
 rest_api = True if os.environ.get("REST_API", "0") == "1" else False
@@ -286,6 +287,7 @@ def find_dewar_history_for_locations(locations, per_page=20, page=1):
                 Dewar.facilityCode,
                 Dewar.bltimeStamp,
                 Dewar.trackingNumberFromSynchrotron,
+                Dewar.externalShippingIdFromSynchrotron,
                 DewarTransportHistory.storageLocation,
                 DewarTransportHistory.arrivalDate,
                 DewarTransportHistory.dewarStatus,
