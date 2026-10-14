@@ -4,11 +4,11 @@
         <form>
           <div class="mb-3 px-2">
             <label class="block text-gray-700">BarCode or FacilityCode</label>
-            <input type="text" class="shadow appearance-none border rounded w-full py-1 px-3 text-gray-700 leading-tight focus:outline-none focus:ring" v-model="facilitycode" placeholder="e.g. DLS-MX-####">
+            <input type="text" class="shadow-sm appearance-none border rounded-sm w-full py-1 px-3 text-gray-700 leading-tight focus:outline-hidden focus:ring-3 focus:ring-blue-500" v-model="facilitycode" placeholder="e.g. DLS-MX-####">
           </div>
           <div class="flex">
-            <button type="submit" class="text-white bg-link hover:bg-blue-800 rounded p-1 m-2 w-1/2" v-on:click="onFindDewar">Search</button>            
-            <button type="submit" class="text-white bg-info hover:bg-blue-600 rounded p-1 m-2 w-1/2" v-on:click="onClearFindForm">Cancel</button>            
+            <button type="submit" class="text-white bg-link hover:bg-blue-800 rounded-sm p-1 m-2 w-1/2" v-on:click="onFindDewar">Search</button>            
+            <button type="submit" class="text-white bg-info hover:bg-blue-600 rounded-sm p-1 m-2 w-1/2" v-on:click="onClearFindForm">Cancel</button>            
           </div>
           <div v-if="searchResult" class="flex flex-col text-left">
               <p class="text-xl p-4">Location History</p>

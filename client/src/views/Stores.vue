@@ -12,24 +12,24 @@
                     <form>
                         <div class="mb-3 px-2">
                             <label class="block text-gray-700">Location</label>
-                            <input ref="location" type="text" class="shadow appearance-none border rounded w-full py-1 px-3 text-gray-700 leading-tight focus:outline-none focus:ring" v-model="location" v-on:keydown.enter="onLocationEnter" placeholder="Scan the location e.g. STORES-IN or STORES-OUT">
+                            <input ref="location" type="text" class="shadow-sm appearance-none border rounded-sm w-full py-1 px-3 text-gray-700 leading-tight focus:outline-hidden focus:ring-3 focus:ring-blue-500" v-model="location" v-on:keydown.enter="onLocationEnter" placeholder="Scan the location e.g. STORES-IN or STORES-OUT">
                         </div>
 
                         <div class="mb-3 px-2">
                             <label class="block text-gray-700">Barcode</label>
-                            <input ref="barcode" type="text" class="shadow appearance-none border rounded w-full py-1 px-3 text-gray-700 leading-tight focus:outline-none focus:ring" v-model="barcode" v-on:keydown.enter="onBarcodeEnter" placeholder="Scan the QR code / barcode from the dewar case">
+                            <input ref="barcode" type="text" class="shadow-sm appearance-none border rounded-sm w-full py-1 px-3 text-gray-700 leading-tight focus:outline-hidden focus:ring-3 focus:ring-blue-500" v-model="barcode" v-on:keydown.enter="onBarcodeEnter" placeholder="Scan the QR code / barcode from the dewar case">
                         </div>
 
                         <!-- If location is STORES-IN do not show AWB field...-->
                         <div v-show="location.toUpperCase() != 'STORES-IN'" class="mb-3 px-2">
                             <label class="block text-gray-700">Air Waybill</label>
-                            <input ref="awb" type="text" class="shadow appearance-none border rounded w-full py-1 px-3 text-gray-700 leading-tight focus:outline-none focus:ring" v-model="awb" v-on:keydown.enter="onAwbEnter" placeholder="Scan the DHL / FedEx Air Waybill">
+                            <input ref="awb" type="text" class="shadow-sm appearance-none border rounded-sm w-full py-1 px-3 text-gray-700 leading-tight focus:outline-hidden focus:ring-3 focus:ring-blue-500" v-model="awb" v-on:keydown.enter="onAwbEnter" placeholder="Scan the DHL / FedEx Air Waybill">
                         </div>
-                    
+
                         <div class="flex">
-                            <button type="submit" class="text-white bg-link hover:bg-blue-800 rounded p-1 m-2 w-1/2" v-on:click="onSetLocation">Submit</button>              
-                            <button type="cancel" class="text-white bg-info hover:bg-blue-600 rounded p-1 m-2 w-1/2"  v-on:click="onClearLocationForm">Cancel</button>
-                        </div>        
+                            <button type="submit" class="text-white bg-link hover:bg-blue-800 rounded-sm p-1 m-2 w-1/2" v-on:click="onSetLocation">Submit</button>
+                            <button type="cancel" class="text-white bg-info hover:bg-blue-600 rounded-sm p-1 m-2 w-1/2"  v-on:click="onClearLocationForm">Cancel</button>
+                        </div>
                     </form>
 
                 </div>
@@ -44,7 +44,7 @@
                                 <div class="">
                                     <img class="inline-block" width=96 src='../assets/img/stores-in.gif'>
                                 </div>
-                               <p class="">STORES-IN</p>  
+                               <p class="">STORES-IN</p>
                             </div>
                         </div>
                         <div class="w-1/2 mt-4">
@@ -55,14 +55,14 @@
                                 <p class="">STORES-OUT</p>
                             </div>
                         </div>
-                    </div>   
+                    </div>
                 </div> <!-- END STORES LOCATIONS -->
 
 
             </div> <!-- End of columns -->
 
-            <!-- 
-                Area for messages from back end 
+            <!--
+                Area for messages from back end
                 Currently conditional render based on error or warning
             -->
             <div v-if="message" class="flex">
@@ -128,7 +128,7 @@
             <button
                 @click="changePage(page - 1)"
                 :disabled="page <= 1"
-                class="text-white bg-link hover:bg-blue-800 rounded p-1 m-2 w-32 disabled:opacity-50 disabled:cursor-not-allowed"
+                class="text-white bg-link hover:bg-blue-800 rounded-sm p-1 m-2 w-32 disabled:opacity-50 disabled:cursor-not-allowed"
             >
                 Previous
             </button>
@@ -138,7 +138,7 @@
             <button
                 @click="changePage(page + 1)"
                 :disabled="dewars.length === 0"
-                class="text-white bg-link hover:bg-blue-800 rounded p-1 m-2 w-32 disabled:opacity-50 disabled:cursor-not-allowed"
+                class="text-white bg-link hover:bg-blue-800 rounded-sm p-1 m-2 w-32 disabled:opacity-50 disabled:cursor-not-allowed"
             >
                 Next
             </button>
@@ -229,7 +229,7 @@ export default {
             console.log(response.data)
             let json = response.data
             let dewars = Object.keys(json);
-            
+
             dewars.forEach(function(index) {
               let dewar = json[index]
               // Set a default courier destination so we can use it as popup later
@@ -292,7 +292,7 @@ export default {
                 formData.append('awb', awb)
 
                 let url = this.$store.state.apiRoot + "stores/dewars"
-                
+
                 axios.post(url, formData)
                 .then(function(response) {
                     console.log(response)
@@ -308,7 +308,7 @@ export default {
                         self.isError = true
                         self.playFail();
                     }
-                    // Request updated locations from DB                  
+                    // Request updated locations from DB
                     self.getDewars()
                 })
                 .catch(function(error) {
@@ -321,7 +321,7 @@ export default {
                 this.$refs.barcode.focus()
                 // Rest form values (Keep location element as is)
                 this.barcode = ''
-                this.awb = ''    
+                this.awb = ''
             } else {
                 this.message = "Issue with form: "
                 this.isError = true
@@ -331,14 +331,14 @@ export default {
                 if (this.location === "") {
                     this.message += ' no location provided...'
                 } else if (!validLocation) {
-                    this.message += ' location not valid for this application...'                            
+                    this.message += ' location not valid for this application...'
                 }
-            }                 
+            }
         },
 
         // Reset Form fields
         onClearLocationForm: function(event) {
-            event.preventDefault()          
+            event.preventDefault()
             this.barcode = ''
             this.location = ''
             this.awb = ''
@@ -373,7 +373,7 @@ export default {
             // Reset the "hover" tag
             dewar.hover = false
         },
-        // Clear error/info messages in one go 
+        // Clear error/info messages in one go
         clearMessages: function() {
           this.message = ""
           this.isError = false
@@ -397,7 +397,7 @@ export default {
             let pattern2 = /^[0-9]{34}$/
 
             if (pattern1.test(awb) || pattern2.test(awb)) {
-                return true                        
+                return true
             } else {
                 return false
             }
@@ -492,6 +492,8 @@ export default {
 
 <!-- Small style changes to override default table colours -->
 <style>
+@reference "../assets/tailwind.css";
+
 tr:nth-child(even) {
   @apply bg-blue-100;
 }

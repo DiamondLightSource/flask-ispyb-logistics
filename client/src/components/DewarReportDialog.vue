@@ -36,18 +36,18 @@ Emits an event 'confirm-removal' with a boolean true/false if user confirmed act
                 <li class="flex"><label class="w-1/3 px-2">Dewar warm?</label><input v-model="dewarWarm" type="checkbox" /></li>
 
                 <li class="flex"><label class="w-1/3 px-2">Dewar checked?</label><input v-model="checked" type="text" class="w-2/3 leading-tight py-2" readonly/></li>
-                <li class="flex mt-2"><label class="w-1/3 px-2">Comments: </label><textarea v-model="comments" class="w-2/3 border border-gray-500 rounded leading-tight p-2" /></li>
+                <li class="flex mt-2"><label class="w-1/3 px-2">Comments: </label><textarea v-model="comments" class="w-2/3 border border-gray-500 rounded-sm leading-tight p-2" /></li>
               </ul>
           </form>
         </section>
         <footer class="flex border-t-2 justify-between">
           <div>
-            <button class="text-white bg-success hover:bg-green-700 rounded px-2 py-1 m-2" v-on:click="onSave()"><i class="fa fa-check pr-2"></i>Save Report</button>
-            <button class="text-white bg-danger hover:bg-red-700 rounded px-2 py-1 m-2" v-on:click="onClose()"><i class="fa fa-times pr-2"></i>Cancel</button>
+            <button class="text-white bg-success hover:bg-green-700 rounded-sm px-2 py-1 m-2" v-on:click="onSave()"><i class="fa fa-check pr-2"></i>Save Report</button>
+            <button class="text-white bg-danger hover:bg-red-700 rounded-sm px-2 py-1 m-2" v-on:click="onClose()"><i class="fa fa-times pr-2"></i>Cancel</button>
           </div>
-          <button v-if="sourceIsScaup" class="text-white bg-blue-500 hover:bg-blue-700 rounded px-2 py-1 m-2" v-on:click.prevent="viewInScaup(visit)"><i class="fa fa-link pr-2"></i>View in SCAUP</button>
-          <button v-else class="text-white bg-blue-500 hover:bg-blue-700 rounded px-2 py-1 m-2" v-on:click.prevent="viewInSynchweb(shippingId)"><i class="fa fa-link pr-2"></i>View in Synchweb</button>
-          <button class="text-white bg-red-700 hover:bg-red-900 rounded px-2 py-1 m-2" v-on:click.prevent="clearLocation(dewarBarcode)"><i class="fa fa-trash pr-2"></i>Clear Dewar</button>
+          <button v-if="sourceIsScaup" class="text-white bg-blue-500 hover:bg-blue-700 rounded-sm px-2 py-1 m-2" v-on:click.prevent="viewInScaup(visit)"><i class="fa fa-link pr-2"></i>View in SCAUP</button>
+          <button v-else class="text-white bg-blue-500 hover:bg-blue-700 rounded-sm px-2 py-1 m-2" v-on:click.prevent="viewInSynchweb(shippingId)"><i class="fa fa-link pr-2"></i>View in Synchweb</button>
+          <button class="text-white bg-red-700 hover:bg-red-900 rounded-sm px-2 py-1 m-2" v-on:click.prevent="clearLocation(dewarBarcode)"><i class="fa fa-trash pr-2"></i>Clear Dewar</button>
         </footer>
       </div>
     </div>

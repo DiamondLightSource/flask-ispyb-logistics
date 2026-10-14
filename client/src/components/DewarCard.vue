@@ -4,7 +4,7 @@ Card displaying dewar information stored in a specific rack location
 Emits an event 'clear-location' which should be handled by the parent component
 -->
 <template>
-    <div class="border rounded shadow h-full p-4 cursor-pointer relative split"
+    <div class="border rounded-sm shadow-sm h-full p-4 cursor-pointer relative split"
         v-on:click.prevent="showDewarReport(dewar)"
         :class="[
             dewar.dewarId && !dewar.onBeamline ? 'split-' + dewar.daysSinceTopup : '',
