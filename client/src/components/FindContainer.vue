@@ -4,7 +4,7 @@
         <form>
           <div class="mb-3 px-2">
             <label class="block text-gray-700">BarCode</label>
-            <input type="text" class="shadow-sm appearance-none border rounded-sm w-full py-1 px-3 text-gray-700 leading-tight focus:outline-hidden focus:ring-3" v-model="barcode" placeholder="e.g. cm1234-b21-1234">
+            <input type="text" class="shadow-sm appearance-none border rounded-sm w-full py-1 px-3 text-gray-700 leading-tight focus:outline-hidden focus:ring-3 focus:ring-blue-500" v-model="barcode" placeholder="e.g. cm1234-b21-1234">
           </div>
           <div class="flex">
             <button type="submit" class="text-white bg-link hover:bg-blue-800 rounded-sm p-1 m-2 w-1/2" v-on:click.prevent="onFindContainer">Search</button>
