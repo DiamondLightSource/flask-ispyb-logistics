@@ -492,6 +492,8 @@ export default {
 
 <!-- Small style changes to override default table colours -->
 <style>
+@reference "../assets/tailwind.css";
+
 tr:nth-child(even) {
   @apply bg-blue-100;
 }
