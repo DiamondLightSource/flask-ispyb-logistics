@@ -20,8 +20,8 @@ Emits an event 'confirm-removal' with a boolean true/false if user confirmed act
                 <p class="mb-2">Confirm removal of all containers from {{storageBin}}?</p>
             </section>
             <footer class="flex border-t-2">
-                <button class="w-1/2 text-white bg-success hover:bg-green-700 rounded p-1 m-2" v-on:click="onConfirm()">Confirm</button>
-                <button class="w-1/2 text-white bg-danger hover:bg-red-700 rounded p-1 m-2" v-on:click="onClose()">Cancel</button>
+                <button class="w-1/2 text-white bg-success hover:bg-green-700 rounded-sm p-1 m-2" v-on:click="onConfirm()">Confirm</button>
+                <button class="w-1/2 text-white bg-danger hover:bg-red-700 rounded-sm p-1 m-2" v-on:click="onClose()">Cancel</button>
             </footer>
         </div>
     </div>

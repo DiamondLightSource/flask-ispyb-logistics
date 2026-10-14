@@ -2,10 +2,10 @@
 Card displaying container information stored in a specific rack location
 -->
 <template>
-    <div class="border rounded shadow h-full p-2 cursor-pointer bg-blue-100 mb-2">
+    <div class="border rounded-sm shadow-sm h-full p-2 cursor-pointer bg-blue-100 mb-2">
         <div v-if="container.code" class="flex justify-between">
             <span class="font-bold">{{container.code}}</span>
-            <button class="text-xs mx-2 rounded p-2 items-end bg-red-500 hover:bg-red-600 text-white" @click="onRemoveFromBin(container.id)">Remove Container</button>
+            <button class="text-xs mx-2 rounded-sm p-2 items-end bg-red-500 hover:bg-red-600 text-white" @click="onRemoveFromBin(container.id)">Remove Container</button>
         </div>
         <span v-else class=""></span>
         <!-- Tags -->
